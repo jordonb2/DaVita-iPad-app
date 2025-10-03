@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F76E42A72E908ADE0056439C /* PeopleListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42A62E908ADE0056439C /* PeopleListViewController.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		F76E42662E9071DD0056439C /* DaVita-iPad-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DaVita-iPad-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F76E42A62E908ADE0056439C /* PeopleListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +50,10 @@
 		F76E425D2E9071DD0056439C = {
 			isa = PBXGroup;
 			children = (
+				F76E42A52E90860B0056439C /* Services */,
+				F76E42A42E9086030056439C /* Models */,
+				F76E42A32E9085FA0056439C /* ViewModels */,
+				F76E42A22E9085CE0056439C /* Views */,
 				F76E42682E9071DD0056439C /* DaVita-iPad-app */,
 				F76E42672E9071DD0056439C /* Products */,
 			);
@@ -56,6 +65,35 @@
 				F76E42662E9071DD0056439C /* DaVita-iPad-app.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F76E42A22E9085CE0056439C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F76E42A62E908ADE0056439C /* PeopleListViewController.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F76E42A32E9085FA0056439C /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		F76E42A42E9086030056439C /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F76E42A52E90860B0056439C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -132,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F76E42A72E908ADE0056439C /* PeopleListViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
