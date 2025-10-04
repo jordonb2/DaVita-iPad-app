@@ -6,53 +6,87 @@
 //
 
 import UIKit
+import Combine
 
-class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-
-    // Temporary test data
-    var people = ["Alice", "Bob", "Charlie"]
+final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    
+    // If your table view is the ROOT view, we can grab it like this:
+    private var tableViewRef: UITableView { self.view as! UITableView }
+    
+    private let viewModel = PeopleListViewModel()
+    private var cancellables = Set<AnyCancellable>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "People List"
         view.backgroundColor = .systemBackground
-
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add,
-                                        target: self,
-                                        action: #selector(didTapAdd))
-        navigationItem.rightBarButtonItem = addButton
-
-        // If your table is the root view:
-        let tableView = self.view as! UITableView
+        
+        // + button programmatically (no storyboard dragging headaches)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(didTapAdd)
+        )
+        
+        let tableView = tableViewRef
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        
+        // Subscribe to Combine publisher to auto-reload on DB changes
+        viewModel.$people
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.tableViewRef.reloadData()
+            }
+            .store(in: &cancellables)
     }
-
+    
     @objc private func didTapAdd() {
-        print("Add tapped")
+        // For now, add a quick sample record to prove live updates.
+        // We’ll replace this with navigation to the Add/Edit form later.
+        viewModel.add(name: "New Person \(Int.random(in: 1...999))")
+        print("Add tapped -> sample record inserted")
     }
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return people.count
+        viewModel.count
     }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let person = viewModel.person(at: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = people[indexPath.row]
+        var config = cell.defaultContentConfiguration()
+        config.text = person.name
+        if let dob = person.dob {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            config.secondaryText = "DOB: " + formatter.string(from: dob)
+        } else {
+            config.secondaryText = nil
+        }
+        cell.contentConfiguration = config
         return cell
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // MARK: - UITableViewDelegate (swipe to delete)
+    func tableView(_ tableView: UITableView,
+                   trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
+    -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_,done in
+            guard let self else { return }
+            let person = self.viewModel.person(at: indexPath)
+            self.viewModel.delete(person)
+            done(true)
+        }
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
-    */
-
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        // TODO: navigate to Add/Edit form pre-populated with this person
+        // let person = viewModel.person(at: indexPath)
+    }
 }
