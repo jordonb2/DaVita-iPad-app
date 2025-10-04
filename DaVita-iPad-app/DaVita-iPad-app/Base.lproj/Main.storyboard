@@ -3,6 +3,7 @@
     <device id="ipad10_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -22,6 +23,80 @@
             </objects>
             <point key="canvasLocation" x="797.56097560975604" y="-2.0338983050847457"/>
         </scene>
+        <!--Add/Edit Person -->
+        <scene sceneID="2lo-YK-7JV">
+            <objects>
+                <viewController storyboardIdentifier="AddEditPersonViewController" id="w6C-sb-ZBK" userLabel="Add/Edit Person " customClass="AddEditPersonViewController" customModule="DaVita_iPad_app" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="DQV-dD-VpA">
+                        <rect key="frame" x="0.0" y="0.0" width="820" height="1180"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="7rd-nY-Njz">
+                                <rect key="frame" x="20" y="94" width="780" height="1016"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Full Name" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="8qB-1C-2Xn">
+                                        <rect key="frame" x="0.0" y="0.0" width="780" height="44"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="44" id="Ig6-dw-62w"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" returnKeyType="done" textContentType="name"/>
+                                    </textField>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date of Birth" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tzV-Hl-ley">
+                                        <rect key="frame" x="0.0" y="56" width="780" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="wheels" translatesAutoresizingMaskIntoConstraints="NO" id="c4L-Wl-O2F">
+                                        <rect key="frame" x="0.0" y="89" width="780" height="216"/>
+                                    </datePicker>
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="x4m-3t-sM7">
+                                        <rect key="frame" x="0.0" y="316.5" width="780" height="700.5"/>
+                                        <segments>
+                                            <segment title="Male"/>
+                                            <segment title="Female"/>
+                                            <segment title="Other"/>
+                                        </segments>
+                                    </segmentedControl>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="YBa-o0-5WP"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="bottom" secondItem="7rd-nY-Njz" secondAttribute="bottom" constant="20" id="3bH-tu-dNp"/>
+                            <constraint firstItem="7rd-nY-Njz" firstAttribute="top" secondItem="YBa-o0-5WP" secondAttribute="top" constant="20" id="8re-hm-dHX"/>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="trailing" secondItem="7rd-nY-Njz" secondAttribute="trailing" constant="20" id="FmJ-Hx-Nzd"/>
+                            <constraint firstItem="7rd-nY-Njz" firstAttribute="leading" secondItem="YBa-o0-5WP" secondAttribute="leading" constant="20" id="Ix7-GU-rFu"/>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="bottom" secondItem="7rd-nY-Njz" secondAttribute="bottom" constant="20" id="Tji-IA-whV"/>
+                            <constraint firstItem="7rd-nY-Njz" firstAttribute="top" secondItem="YBa-o0-5WP" secondAttribute="top" constant="20" id="gUD-JK-zCf"/>
+                            <constraint firstItem="7rd-nY-Njz" firstAttribute="leading" secondItem="YBa-o0-5WP" secondAttribute="leading" constant="20" id="jdP-FG-g87"/>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="trailing" secondItem="7rd-nY-Njz" secondAttribute="trailing" constant="20" id="vXk-6a-zaA"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Add/Edit Person" id="r4p-yI-7jy">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="tS0-rg-xPx">
+                            <connections>
+                                <action selector="cancelTapped:" destination="w6C-sb-ZBK" id="5xb-Gk-xXe"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="k3J-0R-sFv">
+                            <connections>
+                                <action selector="saveTapped:" destination="w6C-sb-ZBK" id="b1c-Ss-dAG"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="datePicker" destination="c4L-Wl-O2F" id="8hP-BV-1IC"/>
+                        <outlet property="fullNameTextField" destination="8qB-1C-2Xn" id="GL9-WE-OeA"/>
+                        <outlet property="genderSegmentedControl" destination="x4m-3t-sM7" id="KdA-Ps-54Q"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1gG-co-WZy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2997.8048780487802" y="4.5762711864406782"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="jAm-bs-AdN">
             <objects>
@@ -39,6 +114,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0S9-Xn-MaL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="40.975609756097562" y="-2.0338983050847457"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ppD-YK-Zz1">
+            <objects>
+                <navigationController storyboardIdentifier="AddEditNav" automaticallyAdjustsScrollViewInsets="NO" id="NAE-Vd-exd" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="kM4-KB-b74">
+                        <rect key="frame" x="0.0" y="24" width="820" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="w6C-sb-ZBK" kind="relationship" relationship="rootViewController" id="jXU-fB-YtK"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CQx-Rt-oTH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2241.2195121951218" y="4.5762711864406782"/>
         </scene>
     </scenes>
     <resources>

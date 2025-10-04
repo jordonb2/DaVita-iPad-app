@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		F76E42A72E908ADE0056439C /* PeopleListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42A62E908ADE0056439C /* PeopleListViewController.swift */; };
 		F76E42A92E91857A0056439C /* PeopleListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42A82E9182360056439C /* PeopleListViewModel.swift */; };
+		F76E42AB2E919D1A0056439C /* AddEditPersonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F76E42662E9071DD0056439C /* DaVita-iPad-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DaVita-iPad-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F76E42A62E908ADE0056439C /* PeopleListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewController.swift; sourceTree = "<group>"; };
 		F76E42A82E9182360056439C /* PeopleListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewModel.swift; sourceTree = "<group>"; };
+		F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -73,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				F76E42A62E908ADE0056439C /* PeopleListViewController.swift */,
+				F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -174,6 +177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F76E42A92E91857A0056439C /* PeopleListViewModel.swift in Sources */,
+				F76E42AB2E919D1A0056439C /* AddEditPersonViewController.swift in Sources */,
 				F76E42A72E908ADE0056439C /* PeopleListViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -43,10 +43,12 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
     }
     
     @objc private func didTapAdd() {
-        // For now, add a quick sample record to prove live updates.
-        // We’ll replace this with navigation to the Add/Edit form later.
-        viewModel.add(name: "New Person \(Int.random(in: 1...999))")
-        print("Add tapped -> sample record inserted")
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let addEditVC = storyboard.instantiateViewController(
+            withIdentifier: "AddEditPersonViewController"
+        ) as? AddEditPersonViewController {
+            navigationController?.pushViewController(addEditVC, animated: true)
+        }
     }
     
     // MARK: - UITableViewDataSource
