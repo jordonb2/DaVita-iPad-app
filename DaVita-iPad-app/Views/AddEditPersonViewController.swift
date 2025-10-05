@@ -13,6 +13,10 @@ final class AddEditPersonViewController: UIViewController {
     @IBOutlet weak var fullNameTextField: UITextField!
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var genderSegmentedControl: UISegmentedControl!
+    
+    // MARK: - Callback to send data back
+    /// Caller sets this to receive the new/edited person and update the list.
+    var onSave: ((String, Date, String) -> Void)?
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -33,11 +37,18 @@ final class AddEditPersonViewController: UIViewController {
     }
 
     @IBAction func saveTapped(_ sender: UIBarButtonItem) {
-        // Grab user-entered data
-        let name = fullNameTextField.text ?? ""
+        // validate & collect
+        let name = (fullNameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else {
+            fullNameTextField.becomeFirstResponder()
+            return
+        }
         let dob = datePicker.date
         let genderIndex = genderSegmentedControl.selectedSegmentIndex
         let gender = genderSegmentedControl.titleForSegment(at: genderIndex) ?? ""
+        
+        // send back to the list VC
+        onSave?(name, dob, gender)
 
         print("Saving person: \(name), \(dob), \(gender)")
 

@@ -43,12 +43,27 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
     }
     
     @objc private func didTapAdd() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let addEditVC = storyboard.instantiateViewController(
-            withIdentifier: "AddEditPersonViewController"
-        ) as? AddEditPersonViewController {
-            navigationController?.pushViewController(addEditVC, animated: true)
+        // 1) Instantiate the Add/Edit screen from Main.storyboard
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        guard let addVC = sb.instantiateViewController(
+            withIdentifier: "AddEditPersonVC"
+        ) as? AddEditPersonViewController else {
+            return
         }
+        
+        // 2) Handle Save -> push into your view model
+        addVC.onSave = { [weak self] name, dob, gender in
+            // TODO: adjust this to match your VM’s API
+            // Example options:
+            // self?.viewModel.add(name: name, dob: dob, gender: gender)
+            self?.viewModel.add(name: name) // if your VM currently only takes name
+        }
+        
+        // 3) Present inside a nav so the Cancel/Save live in a bar
+        let nav = UINavigationController(rootViewController: addVC)
+        nav.modalPresentationStyle = .fullScreen
+        nav.modalTransitionStyle = .coverVertical
+        present(nav, animated: true)
     }
     
     // MARK: - UITableViewDataSource

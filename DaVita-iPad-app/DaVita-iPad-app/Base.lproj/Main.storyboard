@@ -26,7 +26,7 @@
         <!--Add/Edit Person -->
         <scene sceneID="2lo-YK-7JV">
             <objects>
-                <viewController storyboardIdentifier="AddEditPersonViewController" id="w6C-sb-ZBK" userLabel="Add/Edit Person " customClass="AddEditPersonViewController" customModule="DaVita_iPad_app" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AddEditPersonVC" id="w6C-sb-ZBK" userLabel="Add/Edit Person " customClass="AddEditPersonViewController" customModule="DaVita_iPad_app" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="DQV-dD-VpA">
                         <rect key="frame" x="0.0" y="0.0" width="820" height="1180"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -49,7 +49,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="wheels" translatesAutoresizingMaskIntoConstraints="NO" id="c4L-Wl-O2F">
-                                        <rect key="frame" x="0.0" y="89" width="780" height="216"/>
+                                        <rect key="frame" x="0.0" y="88.5" width="780" height="216"/>
                                     </datePicker>
                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="x4m-3t-sM7">
                                         <rect key="frame" x="0.0" y="316.5" width="780" height="700.5"/>
