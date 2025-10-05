@@ -49,10 +49,16 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="wheels" translatesAutoresizingMaskIntoConstraints="NO" id="c4L-Wl-O2F">
-                                        <rect key="frame" x="0.0" y="88.5" width="780" height="216"/>
+                                        <rect key="frame" x="0.0" y="89" width="780" height="216"/>
                                     </datePicker>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Age: -" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VYC-Jt-39C">
+                                        <rect key="frame" x="0.0" y="316.5" width="780" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="x4m-3t-sM7">
-                                        <rect key="frame" x="0.0" y="316.5" width="780" height="700.5"/>
+                                        <rect key="frame" x="0.0" y="349" width="780" height="668"/>
                                         <segments>
                                             <segment title="Male"/>
                                             <segment title="Female"/>
@@ -88,6 +94,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="ageLabel" destination="VYC-Jt-39C" id="HfN-FW-TJ4"/>
                         <outlet property="datePicker" destination="c4L-Wl-O2F" id="8hP-BV-1IC"/>
                         <outlet property="fullNameTextField" destination="8qB-1C-2Xn" id="GL9-WE-OeA"/>
                         <outlet property="genderSegmentedControl" destination="x4m-3t-sM7" id="KdA-Ps-54Q"/>

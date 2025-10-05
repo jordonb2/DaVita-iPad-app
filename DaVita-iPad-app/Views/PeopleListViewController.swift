@@ -51,12 +51,9 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
             return
         }
         
-        // 2) Handle Save -> push into your view model
+        // 2) Handle Save → push into your view model
         addVC.onSave = { [weak self] name, dob, gender in
-            // TODO: adjust this to match your VM’s API
-            // Example options:
-            // self?.viewModel.add(name: name, dob: dob, gender: gender)
-            self?.viewModel.add(name: name) // if your VM currently only takes name
+            self?.viewModel.add(name: name, gender: gender, dob: dob)
         }
         
         // 3) Present inside a nav so the Cancel/Save live in a bar
@@ -71,19 +68,26 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
         viewModel.count
     }
     
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let person = viewModel.person(at: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         var config = cell.defaultContentConfiguration()
         config.text = person.name
+        
+        // Secondary text = DOB and Age if available
         if let dob = person.dob {
             let formatter = DateFormatter()
             formatter.dateStyle = .medium
-            config.secondaryText = "DOB: " + formatter.string(from: dob)
+            let dobString = formatter.string(from: dob)
+            let calendar = Calendar.current
+            let ageComponents = calendar.dateComponents([.year], from: dob, to: Date())
+            let age = ageComponents.year ?? 0
+            
+            config.secondaryText = "DOB: \(dobString) — Age: \(age)"
         } else {
-            config.secondaryText = nil
+            config.secondaryText = "DOB: —"
         }
+        
         cell.contentConfiguration = config
         return cell
     }
@@ -103,7 +107,26 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // TODO: navigate to Add/Edit form pre-populated with this person
-        // let person = viewModel.person(at: indexPath)
+        let person = viewModel.person(at: indexPath)
+
+        // Instantiate Add/Edit screen
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        guard let addVC = sb.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
+
+        // Pass existing record data
+        addVC.initialName = person.name ?? ""
+        addVC.initialGender = person.gender
+        addVC.initialDOB = person.dob
+
+        // When Save is tapped, update the existing record
+        addVC.onSave = { [weak self] name, dob, gender in
+            self?.viewModel.update(person, name: name, gender: gender, dob: dob)
+            self?.dismiss(animated: true)
+        }
+
+        // Present it modally in a nav controller
+        let nav = UINavigationController(rootViewController: addVC)
+        nav.modalPresentationStyle = .formSheet
+        present(nav, animated: true)
     }
 }

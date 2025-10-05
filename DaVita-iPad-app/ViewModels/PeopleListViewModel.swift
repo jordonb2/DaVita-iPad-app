@@ -58,6 +58,13 @@ final class PeopleListViewModel: NSObject {
         context.delete(person)
         save()
     }
+    
+    func update(_ person: Person, name: String, gender: String?, dob: Date?) {
+        person.name   = name
+        person.gender = gender
+        person.dob    = dob
+        save()
+    }
 
     private func save() {
         do {
