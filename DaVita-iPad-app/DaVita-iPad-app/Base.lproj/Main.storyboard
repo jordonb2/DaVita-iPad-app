@@ -31,54 +31,79 @@
                         <rect key="frame" x="0.0" y="0.0" width="820" height="1180"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="7rd-nY-Njz">
-                                <rect key="frame" x="20" y="94" width="780" height="1016"/>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uoF-eA-w9l">
+                                <rect key="frame" x="0.0" y="74" width="820" height="1056"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" alignment="top" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="Wny-KG-l7e" userLabel="Split Stack">
+                                <rect key="frame" x="24" y="94" width="772" height="1016"/>
                                 <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Full Name" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="8qB-1C-2Xn">
-                                        <rect key="frame" x="0.0" y="0.0" width="780" height="44"/>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jQj-Yb-MIq">
+                                        <rect key="frame" x="0.0" y="0.0" width="374" height="380"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Personal Details" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X9S-J4-Lcq">
+                                                <rect key="frame" x="96" y="54" width="182" height="272"/>
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="44" id="Ig6-dw-62w"/>
+                                            <constraint firstItem="X9S-J4-Lcq" firstAttribute="centerY" secondItem="jQj-Yb-MIq" secondAttribute="centerY" id="2lS-2d-KGc"/>
+                                            <constraint firstItem="X9S-J4-Lcq" firstAttribute="centerY" secondItem="jQj-Yb-MIq" secondAttribute="centerY" id="HXE-sJ-ULE"/>
+                                            <constraint firstItem="X9S-J4-Lcq" firstAttribute="centerX" secondItem="jQj-Yb-MIq" secondAttribute="centerX" id="NWo-nx-My8"/>
+                                            <constraint firstItem="X9S-J4-Lcq" firstAttribute="leading" secondItem="jQj-Yb-MIq" secondAttribute="leading" constant="96" id="Pvc-UM-irG"/>
+                                            <constraint firstItem="X9S-J4-Lcq" firstAttribute="top" secondItem="jQj-Yb-MIq" secondAttribute="top" constant="54" id="s50-uf-zhp"/>
                                         </constraints>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits" returnKeyType="done" textContentType="name"/>
-                                    </textField>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date of Birth" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tzV-Hl-ley">
-                                        <rect key="frame" x="0.0" y="56" width="780" height="20.5"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="wheels" translatesAutoresizingMaskIntoConstraints="NO" id="c4L-Wl-O2F">
-                                        <rect key="frame" x="0.0" y="89" width="780" height="216"/>
-                                    </datePicker>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Age: -" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VYC-Jt-39C">
-                                        <rect key="frame" x="0.0" y="316.5" width="780" height="20.5"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="x4m-3t-sM7">
-                                        <rect key="frame" x="0.0" y="349" width="780" height="668"/>
-                                        <segments>
-                                            <segment title="Male"/>
-                                            <segment title="Female"/>
-                                            <segment title="Other"/>
-                                        </segments>
-                                    </segmentedControl>
+                                    </view>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="7rd-nY-Njz" userLabel="Form Stack">
+                                        <rect key="frame" x="398" y="0.0" width="374" height="380"/>
+                                        <subviews>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Full Name" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="8qB-1C-2Xn">
+                                                <rect key="frame" x="0.0" y="0.0" width="374" height="44"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="44" id="Ig6-dw-62w"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" returnKeyType="done" textContentType="name"/>
+                                            </textField>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date of Birth" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tzV-Hl-ley">
+                                                <rect key="frame" x="0.0" y="56" width="374" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" style="wheels" translatesAutoresizingMaskIntoConstraints="NO" id="c4L-Wl-O2F">
+                                                <rect key="frame" x="0.0" y="88.5" width="374" height="216"/>
+                                            </datePicker>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Age: -" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VYC-Jt-39C">
+                                                <rect key="frame" x="0.0" y="316.5" width="374" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="x4m-3t-sM7">
+                                                <rect key="frame" x="0.0" y="349" width="374" height="32"/>
+                                                <segments>
+                                                    <segment title="Male"/>
+                                                    <segment title="Female"/>
+                                                    <segment title="Other"/>
+                                                </segments>
+                                            </segmentedControl>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
                             </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="YBa-o0-5WP"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="YBa-o0-5WP" firstAttribute="bottom" secondItem="7rd-nY-Njz" secondAttribute="bottom" constant="20" id="3bH-tu-dNp"/>
-                            <constraint firstItem="7rd-nY-Njz" firstAttribute="top" secondItem="YBa-o0-5WP" secondAttribute="top" constant="20" id="8re-hm-dHX"/>
-                            <constraint firstItem="YBa-o0-5WP" firstAttribute="trailing" secondItem="7rd-nY-Njz" secondAttribute="trailing" constant="20" id="FmJ-Hx-Nzd"/>
-                            <constraint firstItem="7rd-nY-Njz" firstAttribute="leading" secondItem="YBa-o0-5WP" secondAttribute="leading" constant="20" id="Ix7-GU-rFu"/>
-                            <constraint firstItem="YBa-o0-5WP" firstAttribute="bottom" secondItem="7rd-nY-Njz" secondAttribute="bottom" constant="20" id="Tji-IA-whV"/>
-                            <constraint firstItem="7rd-nY-Njz" firstAttribute="top" secondItem="YBa-o0-5WP" secondAttribute="top" constant="20" id="gUD-JK-zCf"/>
-                            <constraint firstItem="7rd-nY-Njz" firstAttribute="leading" secondItem="YBa-o0-5WP" secondAttribute="leading" constant="20" id="jdP-FG-g87"/>
-                            <constraint firstItem="YBa-o0-5WP" firstAttribute="trailing" secondItem="7rd-nY-Njz" secondAttribute="trailing" constant="20" id="vXk-6a-zaA"/>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="trailing" secondItem="Wny-KG-l7e" secondAttribute="trailing" constant="24" id="1eb-2E-IFF"/>
+                            <constraint firstItem="YBa-o0-5WP" firstAttribute="bottom" secondItem="Wny-KG-l7e" secondAttribute="bottom" constant="20" id="C3y-4U-nPe"/>
+                            <constraint firstItem="Wny-KG-l7e" firstAttribute="top" secondItem="YBa-o0-5WP" secondAttribute="top" constant="20" id="C7g-Pk-QZp"/>
+                            <constraint firstItem="Wny-KG-l7e" firstAttribute="leading" secondItem="YBa-o0-5WP" secondAttribute="leading" constant="24" id="RWr-nA-2aO"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Add/Edit Person" id="r4p-yI-7jy">

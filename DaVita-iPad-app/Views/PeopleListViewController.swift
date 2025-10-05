@@ -54,6 +54,7 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
         // 2) Handle Save → push into your view model
         addVC.onSave = { [weak self] name, dob, gender in
             self?.viewModel.add(name: name, gender: gender, dob: dob)
+            self?.dismiss(animated: true)
         }
         
         // 3) Present inside a nav so the Cancel/Save live in a bar
