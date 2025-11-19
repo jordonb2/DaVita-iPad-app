@@ -1,0 +1,309 @@
+//
+//  LandingHeroHeaderView.swift
+//  DaVita-iPad-app
+//
+//  Created by GPT-5.1 Codex on 11/19/25.
+//
+
+import UIKit
+
+/// A lightweight hero view that gives the landing experience a more premium feel
+/// without relying on storyboard elements. It is fully self-contained so it can
+/// be dropped into any table/scroll view header.
+final class LandingHeroHeaderView: UIView {
+
+    struct Metric {
+        let title: String
+        let value: String
+        let footnote: String
+    }
+
+    struct Model {
+        let greeting: String
+        let headline: String
+        let subtitle: String
+        let primaryButtonTitle: String
+        let secondaryButtonTitle: String
+        let metrics: [Metric]
+    }
+
+    // MARK: - Callbacks
+
+    var onPrimaryTap: (() -> Void)?
+    var onSecondaryTap: (() -> Void)?
+
+    // MARK: - Layers & Views
+
+    private let gradientLayer: CAGradientLayer = {
+        let layer = CAGradientLayer()
+        layer.colors = [
+            UIColor.systemTeal.withAlphaComponent(0.9).cgColor,
+            UIColor.systemIndigo.withAlphaComponent(0.9).cgColor
+        ]
+        layer.startPoint = CGPoint(x: 0, y: 0)
+        layer.endPoint = CGPoint(x: 1, y: 1)
+        return layer
+    }()
+
+    private let blurView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: .systemMaterialLight)
+        let view = UIVisualEffectView(effect: blur)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.layer.cornerRadius = 24
+        view.clipsToBounds = true
+        return view
+    }()
+
+    private let contentStack: UIStackView = {
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 16
+        return stack
+    }()
+
+    private let badgeLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .white
+        label.backgroundColor = UIColor.white.withAlphaComponent(0.18)
+        label.textAlignment = .center
+        label.layer.cornerRadius = 12
+        label.clipsToBounds = true
+        label.text = "CLIENT SUCCESS"
+        label.setContentCompressionResistancePriority(.required, for: .vertical)
+        return label
+    }()
+
+    private let greetingLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.textColor = UIColor.white.withAlphaComponent(0.9)
+        label.text = "Welcome back"
+        return label
+    }()
+
+    private let headlineLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.textColor = .white
+        label.numberOfLines = 0
+        label.text = "Care Hub"
+        return label
+    }()
+
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = UIColor.white.withAlphaComponent(0.9)
+        label.numberOfLines = 0
+        label.text = "Keep every client conversation warm and every record current."
+        return label
+    }()
+
+    private let ctaStack: UIStackView = {
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.spacing = 12
+        stack.distribution = .fillEqually
+        return stack
+    }()
+
+    private let primaryButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Add Client", for: .normal)
+        button.backgroundColor = UIColor.white
+        button.setTitleColor(.systemIndigo, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        button.layer.cornerRadius = 14
+        button.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        return button
+    }()
+
+    private let secondaryButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("View Records", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
+        button.layer.cornerRadius = 14
+        button.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        return button
+    }()
+
+    private let metricsStack: UIStackView = {
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.spacing = 12
+        stack.distribution = .fillEqually
+        return stack
+    }()
+
+    // MARK: - Init
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 32
+        clipsToBounds = true
+        layer.insertSublayer(gradientLayer, at: 0)
+
+        addSubview(contentStack)
+        contentStack.addArrangedSubview(badgeLabel)
+        contentStack.setCustomSpacing(4, after: badgeLabel)
+        contentStack.addArrangedSubview(greetingLabel)
+        contentStack.addArrangedSubview(headlineLabel)
+        contentStack.addArrangedSubview(subtitleLabel)
+        contentStack.addArrangedSubview(ctaStack)
+        contentStack.addArrangedSubview(blurView)
+        blurView.contentView.addSubview(metricsStack)
+
+        ctaStack.addArrangedSubview(primaryButton)
+        ctaStack.addArrangedSubview(secondaryButton)
+
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: topAnchor, constant: 24),
+            contentStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            contentStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            contentStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24),
+
+            metricsStack.topAnchor.constraint(equalTo: blurView.contentView.topAnchor, constant: 20),
+            metricsStack.leadingAnchor.constraint(equalTo: blurView.contentView.leadingAnchor, constant: 20),
+            metricsStack.trailingAnchor.constraint(equalTo: blurView.contentView.trailingAnchor, constant: -20),
+            metricsStack.bottomAnchor.constraint(equalTo: blurView.contentView.bottomAnchor, constant: -20)
+        ])
+
+        primaryButton.addTarget(self, action: #selector(primaryTapped), for: .touchUpInside)
+        secondaryButton.addTarget(self, action: #selector(secondaryTapped), for: .touchUpInside)
+
+        // Seed placeholder metrics
+        apply(defaultModel())
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer.frame = bounds
+    }
+
+    // MARK: - Configuration
+
+    func apply(_ model: Model) {
+        greetingLabel.text = model.greeting.uppercased()
+        headlineLabel.text = model.headline
+        subtitleLabel.text = model.subtitle
+        primaryButton.setTitle(model.primaryButtonTitle, for: .normal)
+        secondaryButton.setTitle(model.secondaryButtonTitle, for: .normal)
+        setMetrics(model.metrics)
+    }
+
+    private func setMetrics(_ metrics: [Metric]) {
+        metricsStack.arrangedSubviews.forEach { view in
+            metricsStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        metrics.forEach { metric in
+            let metricView = MetricCardView()
+            metricView.configure(with: metric)
+            metricsStack.addArrangedSubview(metricView)
+        }
+    }
+
+    private func defaultModel() -> Model {
+        let metric = Metric(title: "Active Clients", value: "—", footnote: "Add your first record")
+        return Model(
+            greeting: "Welcome",
+            headline: "DaVita Care Hub",
+            subtitle: "Launch every visit prepared. Keep client journeys personal.",
+            primaryButtonTitle: "Add Client",
+            secondaryButtonTitle: "View Records",
+            metrics: [metric]
+        )
+    }
+
+    // MARK: - Actions
+
+    @objc private func primaryTapped() {
+        onPrimaryTap?()
+    }
+
+    @objc private func secondaryTapped() {
+        onSecondaryTap?()
+    }
+}
+
+// MARK: - Metric Card
+
+private final class MetricCardView: UIView {
+    private let titleLabel = UILabel()
+    private let valueLabel = UILabel()
+    private let footnoteLabel = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 18
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
+        backgroundColor = UIColor.white.withAlphaComponent(0.08)
+
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+        titleLabel.textColor = UIColor.white.withAlphaComponent(0.85)
+
+        valueLabel.translatesAutoresizingMaskIntoConstraints = false
+        valueLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        valueLabel.textColor = .white
+
+        footnoteLabel.translatesAutoresizingMaskIntoConstraints = false
+        footnoteLabel.font = .systemFont(ofSize: 13, weight: .regular)
+        footnoteLabel.textColor = UIColor.white.withAlphaComponent(0.8)
+        footnoteLabel.numberOfLines = 2
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel, footnoteLabel])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 6
+
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
+        ])
+    }
+
+    func configure(with metric: LandingHeroHeaderView.Metric) {
+        titleLabel.text = metric.title.uppercased()
+        valueLabel.text = metric.value
+        footnoteLabel.text = metric.footnote
+    }
+}
