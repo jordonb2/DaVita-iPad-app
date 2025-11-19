@@ -8,13 +8,25 @@
 import UIKit
 import Combine
 
-final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+ final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     // If your table view is the ROOT view, we can grab it like this:
     private var tableViewRef: UITableView { self.view as! UITableView }
     
     private let viewModel = PeopleListViewModel()
     private var cancellables = Set<AnyCancellable>()
+    private let calendar = Calendar.current
+
+    private lazy var landingHeaderView: LandingHeroHeaderView = {
+        let header = LandingHeroHeaderView()
+        header.onPrimaryTap = { [weak self] in
+            self?.didTapAdd()
+        }
+        header.onSecondaryTap = { [weak self] in
+            self?.scrollToLatestRecord()
+        }
+        return header
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,14 +44,27 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
+        tableView.separatorColor = UIColor.secondarySystemBackground
+        tableView.backgroundColor = UIColor.systemGroupedBackground
+        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 36, right: 0)
         
         // Subscribe to Combine publisher to auto-reload on DB changes
         viewModel.$people
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.tableViewRef.reloadData()
+                guard let self else { return }
+                self.tableViewRef.reloadData()
+                self.updateHeaderContent()
             }
             .store(in: &cancellables)
+
+        configureLandingHeader()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateHeaderHeightIfNeeded()
     }
     
     @objc private func didTapAdd() {
@@ -129,5 +154,81 @@ final class PeopleListViewController: UIViewController, UITableViewDataSource, U
         let nav = UINavigationController(rootViewController: addVC)
         nav.modalPresentationStyle = .formSheet
         present(nav, animated: true)
+    }
+
+    // MARK: - Landing Header
+
+    private func configureLandingHeader() {
+        landingHeaderView.translatesAutoresizingMaskIntoConstraints = false
+        tableViewRef.tableHeaderView = landingHeaderView
+        updateHeaderContent()
+    }
+
+    private func updateHeaderContent() {
+        landingHeaderView.apply(makeHeaderModel())
+        updateHeaderHeightIfNeeded()
+    }
+
+    private func makeHeaderModel() -> LandingHeroHeaderView.Model {
+        let total = viewModel.count
+        let now = Date()
+        let newThisWeek = viewModel.people.filter { person in
+            guard let createdAt = person.createdAt else { return false }
+            return calendar.isDate(createdAt, equalTo: now, toGranularity: .weekOfYear)
+        }.count
+        let returningClients = max(total - newThisWeek, 0)
+
+        let metrics: [LandingHeroHeaderView.Metric] = [
+            .init(title: "Active Clients", value: "\(total)", footnote: "managed in your hub"),
+            .init(title: "New this week", value: "\(newThisWeek)", footnote: "freshly onboarded"),
+            .init(title: "Follow ups", value: "\(returningClients)", footnote: "needing attention")
+        ]
+
+        let greeting = greetingText(for: now)
+
+        return LandingHeroHeaderView.Model(
+            greeting: greeting,
+            headline: "Human-centered kidney care",
+            subtitle: "Pick up right where you left off with a clean view of every client journey.",
+            primaryButtonTitle: "Add Client",
+            secondaryButtonTitle: total == 0 ? "Browse Empty List" : "Jump to Latest",
+            metrics: metrics
+        )
+    }
+
+    private func updateHeaderHeightIfNeeded() {
+        guard let header = tableViewRef.tableHeaderView else { return }
+        let targetSize = CGSize(width: tableViewRef.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let height = header.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        ).height
+
+        var frame = header.frame
+        let needsHeightUpdate = frame.height != height
+        let needsWidthUpdate = frame.width != tableViewRef.bounds.width
+        if needsHeightUpdate || needsWidthUpdate {
+            frame.size.height = height
+            frame.size.width = tableViewRef.bounds.width
+            header.frame = frame
+            tableViewRef.tableHeaderView = header
+        }
+    }
+
+    private func greetingText(for date: Date) -> String {
+        let hour = calendar.component(.hour, from: date)
+        switch hour {
+        case 5..<12: return "Good morning"
+        case 12..<17: return "Good afternoon"
+        case 17..<22: return "Good evening"
+        default: return "Welcome back"
+        }
+    }
+
+    private func scrollToLatestRecord() {
+        guard viewModel.count > 0 else { return }
+        let topIndex = IndexPath(row: 0, section: 0)
+        tableViewRef.scrollToRow(at: topIndex, at: .top, animated: true)
     }
 }
