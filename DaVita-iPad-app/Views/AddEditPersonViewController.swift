@@ -78,22 +78,45 @@ final class AddEditPersonViewController: UIViewController {
     }
 
     @IBAction func saveTapped(_ sender: UIBarButtonItem) {
-        // validate & collect
-        let name = (fullNameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        // Validate & collect
+        let rawName = fullNameTextField.text ?? ""
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Require a non-empty name
         guard !name.isEmpty else {
-            fullNameTextField.becomeFirstResponder()
+            let alert = UIAlertController(
+                title: "Name required",
+                message: "Please enter the patient's full name before saving.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                self?.fullNameTextField.becomeFirstResponder()
+            })
+            present(alert, animated: true)
             return
         }
+        
         let dob = datePicker.date
+        
+        // Optional: prevent future dates of birth
+        if dob > Date() {
+            let alert = UIAlertController(
+                title: "Invalid date",
+                message: "Date of birth cannot be in the future.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alert, animated: true)
+            return
+        }
+        
         let genderIndex = genderSegmentedControl.selectedSegmentIndex
         let gender = genderSegmentedControl.titleForSegment(at: genderIndex) ?? ""
         
-        // send back to the list VC
+        // Send back to the list VC
         onSave?(name, dob, gender)
-
-        print("Saving person: \(name), \(dob), \(gender)")
-
-        // For now just dismiss (later we’ll save to Core Data)
+        
+        // Dismiss once saved
         dismiss(animated: true, completion: nil)
     }
 }
