@@ -121,15 +121,30 @@ import Combine
     // MARK: - UITableViewDelegate (swipe to delete)
     func tableView(_ tableView: UITableView,
                    trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath)
-    -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _,_,done in
-            guard let self else { return }
-            let person = self.viewModel.person(at: indexPath)
-            self.viewModel.delete(person)
-            done(true)
-        }
-        return UISwipeActionsConfiguration(actions: [deleteAction])
-    }
+     -> UISwipeActionsConfiguration? {
+         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, done in
+             guard let self else { return }
+             let person = self.viewModel.person(at: indexPath)
+             let name = person.name ?? "this client"
+             
+             let alert = UIAlertController(
+                title: "Delete client?",
+                message: "This will permanently remove \(name) from your records.",
+                preferredStyle: .alert
+             )
+             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                 done(false)
+             })
+             alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
+                 self.viewModel.delete(person)
+                 done(true)
+             })
+             
+             self.present(alert, animated: true)
+         }
+         
+         return UISwipeActionsConfiguration(actions: [deleteAction])
+     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)

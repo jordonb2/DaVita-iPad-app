@@ -45,9 +45,15 @@ final class PeopleListViewModel: NSObject {
     // MARK: - CRUD
 
     func add(name: String, gender: String? = nil, dob: Date? = nil) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            print("Refusing to add Person with empty name")
+            return
+        }
+        
         let p = Person(context: context)
         p.id = UUID()
-        p.name = name
+        p.name = trimmed
         p.gender = gender
         p.dob = dob
         p.createdAt = Date()
@@ -60,7 +66,13 @@ final class PeopleListViewModel: NSObject {
     }
     
     func update(_ person: Person, name: String, gender: String?, dob: Date?) {
-        person.name   = name
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            print("Refusing to update Person with empty name")
+            return
+        }
+        
+        person.name   = trimmed
         person.gender = gender
         person.dob    = dob
         save()
