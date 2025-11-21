@@ -44,7 +44,7 @@ final class PeopleListViewModel: NSObject {
 
     // MARK: - CRUD
 
-    func add(name: String, gender: String? = nil, dob: Date? = nil) {
+    func add(name: String, gender: String? = nil, dob: Date? = nil, checkInData: PersonCheckInData? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             print("Refusing to add Person with empty name")
@@ -57,7 +57,16 @@ final class PeopleListViewModel: NSObject {
         p.gender = gender
         p.dob = dob
         p.createdAt = Date()
+        if let checkInData {
+            p.checkInPain = checkInData.painLevel ?? 0
+            p.checkInEnergy = checkInData.energyLevel
+            p.checkInMood = checkInData.mood
+            p.checkInSymptoms = checkInData.symptoms
+            p.checkInConcerns = checkInData.concerns
+            p.checkInTeamNote = checkInData.teamNote
+        }
         save()
+        logPerson(p, context: "ADD")
     }
 
     func delete(_ person: Person) {
@@ -65,7 +74,7 @@ final class PeopleListViewModel: NSObject {
         save()
     }
     
-    func update(_ person: Person, name: String, gender: String?, dob: Date?) {
+    func update(_ person: Person, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             print("Refusing to update Person with empty name")
@@ -75,7 +84,16 @@ final class PeopleListViewModel: NSObject {
         person.name   = trimmed
         person.gender = gender
         person.dob    = dob
+        if let checkInData {
+            person.checkInPain = checkInData.painLevel ?? 0
+            person.checkInEnergy = checkInData.energyLevel
+            person.checkInMood = checkInData.mood
+            person.checkInSymptoms = checkInData.symptoms
+            person.checkInConcerns = checkInData.concerns
+            person.checkInTeamNote = checkInData.teamNote
+        }
         save()
+        logPerson(person, context: "UPDATE")
     }
 
     private func save() {
@@ -84,6 +102,30 @@ final class PeopleListViewModel: NSObject {
         } catch {
             print("Core Data save error: \(error)")
         }
+    }
+
+    private func logPerson(_ person: Person, context: String) {
+#if DEBUG
+        let name = person.name ?? ""
+        let dobText: String
+        if let dob = person.dob {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            dobText = formatter.string(from: dob)
+        } else {
+            dobText = "—"
+        }
+
+        let gender = person.gender ?? "—"
+        let pain = person.checkInPain
+        let energy = person.checkInEnergy ?? "—"
+        let mood = person.checkInMood ?? "—"
+        let symptoms = person.checkInSymptoms ?? "—"
+        let concerns = person.checkInConcerns ?? "—"
+        let teamNote = person.checkInTeamNote ?? "—"
+
+        print("[\(context)] Person saved → Name: \(name), DOB: \(dobText), Gender: \(gender), CheckIn(pain: \(pain), energy: \(energy), mood: \(mood), symptoms: \(symptoms), concerns: \(concerns), teamNote: \(teamNote))")
+#endif
     }
 
     // Convenience

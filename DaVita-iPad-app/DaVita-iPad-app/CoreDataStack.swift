@@ -14,6 +14,10 @@ final class CoreDataStack {
 
     lazy var persistentContainer: NSPersistentContainer = {
         let c = NSPersistentContainer(name: "RecordsModel")
+        if let storeDescription = c.persistentStoreDescriptions.first {
+            storeDescription.shouldMigrateStoreAutomatically = true
+            storeDescription.shouldInferMappingModelAutomatically = true
+        }
         c.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Core Data load error: \(error)")

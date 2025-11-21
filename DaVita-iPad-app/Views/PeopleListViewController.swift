@@ -77,9 +77,8 @@ import Combine
         }
         
         // 2) Handle Save → push into your view model
-        addVC.onSave = { [weak self] name, dob, gender in
-            self?.viewModel.add(name: name, gender: gender, dob: dob)
-            self?.dismiss(animated: true)
+        addVC.onSave = { [weak self] name, dob, gender, checkInData in
+            self?.viewModel.add(name: name, gender: gender, dob: dob, checkInData: checkInData)
         }
         
         // 3) Present inside a nav so the Cancel/Save live in a bar
@@ -160,9 +159,8 @@ import Combine
         addVC.initialDOB = person.dob
 
         // When Save is tapped, update the existing record
-        addVC.onSave = { [weak self] name, dob, gender in
-            self?.viewModel.update(person, name: name, gender: gender, dob: dob)
-            self?.dismiss(animated: true)
+        addVC.onSave = { [weak self] name, dob, gender, checkInData in
+            self?.viewModel.update(person, name: name, gender: gender, dob: dob, checkInData: checkInData)
         }
 
         // Present it modally in a nav controller

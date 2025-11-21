@@ -17,7 +17,7 @@ final class AddEditPersonViewController: UIViewController {
     
     // MARK: - Callback to send data back
     /// Caller sets this to receive the new/edited person and update the list.
-    var onSave: ((String, Date, String) -> Void)?
+    var onSave: ((String, Date, String, PersonCheckInData) -> Void)?
     
     // MARK: - Prefill (for editing)
     var initialName: String?
@@ -112,11 +112,18 @@ final class AddEditPersonViewController: UIViewController {
         
         let genderIndex = genderSegmentedControl.selectedSegmentIndex
         let gender = genderSegmentedControl.titleForSegment(at: genderIndex) ?? ""
-        
-        // Send back to the list VC
-        onSave?(name, dob, gender)
-        
-        // Dismiss once saved
-        dismiss(animated: true, completion: nil)
+
+        let checkInVC = CheckInJourneyViewController()
+        checkInVC.onComplete = { [weak self] checkInData in
+            guard let self else { return }
+            self.onSave?(name, dob, gender, checkInData)
+            self.dismiss(animated: true) { [weak self] in
+                self?.dismiss(animated: true, completion: nil)
+            }
+        }
+
+        let nav = UINavigationController(rootViewController: checkInVC)
+        nav.modalPresentationStyle = .formSheet
+        present(nav, animated: true)
     }
 }

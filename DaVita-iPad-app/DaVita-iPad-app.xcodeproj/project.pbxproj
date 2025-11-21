@@ -11,6 +11,8 @@
 		F76E42A92E91857A0056439C /* PeopleListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42A82E9182360056439C /* PeopleListViewModel.swift */; };
 		F76E42AB2E919D1A0056439C /* AddEditPersonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */; };
 		F76E42C12E91A4F70056439C /* LandingHeroHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */; };
+		F76E42D22E93C0010056439C /* CheckInJourneyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */; };
+		F76E42D42E93C0010056439C /* PersonCheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D32E93C0010056439C /* PersonCheckInData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +21,8 @@
 		F76E42A82E9182360056439C /* PeopleListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewModel.swift; sourceTree = "<group>"; };
 		F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewController.swift; sourceTree = "<group>"; };
 		F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingHeroHeaderView.swift; sourceTree = "<group>"; };
+		F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInJourneyViewController.swift; sourceTree = "<group>"; };
+		F76E42D32E93C0010056439C /* PersonCheckInData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonCheckInData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -79,6 +83,7 @@
 				F76E42A62E908ADE0056439C /* PeopleListViewController.swift */,
 				F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */,
 				F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */,
+				F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -94,6 +99,7 @@
 		F76E42A42E9086030056439C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F76E42D32E93C0010056439C /* PersonCheckInData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -183,6 +189,8 @@
 				F76E42AB2E919D1A0056439C /* AddEditPersonViewController.swift in Sources */,
 				F76E42A72E908ADE0056439C /* PeopleListViewController.swift in Sources */,
 				F76E42C12E91A4F70056439C /* LandingHeroHeaderView.swift in Sources */,
+				F76E42D22E93C0010056439C /* CheckInJourneyViewController.swift in Sources */,
+				F76E42D42E93C0010056439C /* PersonCheckInData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
