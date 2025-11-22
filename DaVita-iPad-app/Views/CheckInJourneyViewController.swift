@@ -20,7 +20,7 @@ final class CheckInJourneyViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Check-In"
+        title = "Optional Check-In Survey"
         view.backgroundColor = .systemBackground
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
