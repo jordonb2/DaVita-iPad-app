@@ -13,6 +13,10 @@
 		F76E42C12E91A4F70056439C /* LandingHeroHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */; };
 		F76E42D22E93C0010056439C /* CheckInJourneyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */; };
 		F76E42D42E93C0010056439C /* PersonCheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D32E93C0010056439C /* PersonCheckInData.swift */; };
+		F76E42E22E93C9010056439C /* CheckInAnalyticsLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */; };
+		F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E32E93C9010056439C /* TextCategorizer.swift */; };
+		F76E42E62E93C9010056439C /* Daypart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E52E93C9010056439C /* Daypart.swift */; };
+		F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +27,10 @@
 		F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingHeroHeaderView.swift; sourceTree = "<group>"; };
 		F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInJourneyViewController.swift; sourceTree = "<group>"; };
 		F76E42D32E93C0010056439C /* PersonCheckInData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonCheckInData.swift; sourceTree = "<group>"; };
+		F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsLogger.swift; sourceTree = "<group>"; };
+		F76E42E32E93C9010056439C /* TextCategorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCategorizer.swift; sourceTree = "<group>"; };
+		F76E42E52E93C9010056439C /* Daypart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daypart.swift; sourceTree = "<group>"; };
+		F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsSummaryProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -100,6 +108,8 @@
 			isa = PBXGroup;
 			children = (
 				F76E42D32E93C0010056439C /* PersonCheckInData.swift */,
+				F76E42E32E93C9010056439C /* TextCategorizer.swift */,
+				F76E42E52E93C9010056439C /* Daypart.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -107,6 +117,8 @@
 		F76E42A52E90860B0056439C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */,
+				F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -191,6 +203,10 @@
 				F76E42C12E91A4F70056439C /* LandingHeroHeaderView.swift in Sources */,
 				F76E42D22E93C0010056439C /* CheckInJourneyViewController.swift in Sources */,
 				F76E42D42E93C0010056439C /* PersonCheckInData.swift in Sources */,
+				F76E42E22E93C9010056439C /* CheckInAnalyticsLogger.swift in Sources */,
+				F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */,
+				F76E42E62E93C9010056439C /* Daypart.swift in Sources */,
+				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

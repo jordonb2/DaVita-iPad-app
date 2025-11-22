@@ -1,9 +1,19 @@
 import UIKit
 
-final class CheckInJourneyViewController: UIViewController {
+final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, UIAdaptivePresentationControllerDelegate {
 
     var onComplete: ((PersonCheckInData) -> Void)?
     var onSkip: (() -> Void)?
+
+    private let analyticsLogger = CheckInAnalyticsLogger.shared
+    private var surveyStartDate: Date?
+    private var hasInteractedWithPain = false
+    private var hasInteractedWithEnergy = false
+    private var hasInteractedWithMood = false
+    private var hasInteractedWithSymptoms = false
+    private var hasInteractedWithConcerns = false
+    private var hasInteractedWithTeamNote = false
+    private var lastInteractedStep: CheckInAnalyticsLogger.Step?
 
     private let scrollView = UIScrollView()
     private let contentStackView = UIStackView()
@@ -28,6 +38,13 @@ final class CheckInJourneyViewController: UIViewController {
 
         configureLayout()
         configureSurveyControls()
+
+        presentationController?.delegate = self
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        surveyStartDate = Date()
     }
 
     private func configureLayout() {
@@ -80,6 +97,9 @@ final class CheckInJourneyViewController: UIViewController {
         painSlider.value = 0
         painSlider.addTarget(self, action: #selector(painSliderChanged(_:)), for: .valueChanged)
 
+        energySegmentedControl.addTarget(self, action: #selector(energyChanged(_:)), for: .valueChanged)
+        moodSegmentedControl.addTarget(self, action: #selector(moodChanged(_:)), for: .valueChanged)
+
         painValueLabel.text = "0"
         painValueLabel.font = UIFont.preferredFont(forTextStyle: .body)
         painValueLabel.textAlignment = .right
@@ -99,6 +119,8 @@ final class CheckInJourneyViewController: UIViewController {
         textView.layer.cornerRadius = 8
         textView.isScrollEnabled = false
         textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
+
+        textView.delegate = self
     }
 
     private func makePainSection() -> UIView {
@@ -185,9 +207,49 @@ final class CheckInJourneyViewController: UIViewController {
         let roundedValue = Int(sender.value.rounded())
         sender.value = Float(roundedValue)
         painValueLabel.text = "\(roundedValue)"
+
+        if !hasInteractedWithPain {
+            hasInteractedWithPain = true
+            lastInteractedStep = .pain
+            analyticsLogger.logStepFirstInteracted(step: .pain)
+        }
+    }
+
+    @objc private func energyChanged(_ sender: UISegmentedControl) {
+        if !hasInteractedWithEnergy {
+            hasInteractedWithEnergy = true
+            lastInteractedStep = .energy
+            analyticsLogger.logStepFirstInteracted(step: .energy)
+        }
+    }
+
+    @objc private func moodChanged(_ sender: UISegmentedControl) {
+        if !hasInteractedWithMood {
+            hasInteractedWithMood = true
+            lastInteractedStep = .mood
+            analyticsLogger.logStepFirstInteracted(step: .mood)
+        }
+    }
+
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView === symptomsTextView, !hasInteractedWithSymptoms {
+            hasInteractedWithSymptoms = true
+            lastInteractedStep = .symptoms
+            analyticsLogger.logStepFirstInteracted(step: .symptoms)
+        } else if textView === concernsTextView, !hasInteractedWithConcerns {
+            hasInteractedWithConcerns = true
+            lastInteractedStep = .concerns
+            analyticsLogger.logStepFirstInteracted(step: .concerns)
+        } else if textView === teamNoteTextView, !hasInteractedWithTeamNote {
+            hasInteractedWithTeamNote = true
+            lastInteractedStep = .teamNote
+            analyticsLogger.logStepFirstInteracted(step: .teamNote)
+        }
     }
 
     @objc private func cancelTapped() {
+        let durationSeconds = surveyDurationSeconds
+        analyticsLogger.logSkipped(durationSeconds: durationSeconds, lastStep: lastInteractedStep)
         onSkip?()
     }
 
@@ -205,6 +267,19 @@ final class CheckInJourneyViewController: UIViewController {
             teamNote: teamNoteTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)
         )
 
+        let durationSeconds = surveyDurationSeconds ?? 0
+        analyticsLogger.logSubmitted(checkInData: data, durationSeconds: durationSeconds)
+
         onComplete?(data)
+    }
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        let durationSeconds = surveyDurationSeconds
+        analyticsLogger.logDismissed(durationSeconds: durationSeconds, lastStep: lastInteractedStep)
+    }
+
+    private var surveyDurationSeconds: Double? {
+        guard let surveyStartDate else { return nil }
+        return Date().timeIntervalSince(surveyStartDate)
     }
 }
