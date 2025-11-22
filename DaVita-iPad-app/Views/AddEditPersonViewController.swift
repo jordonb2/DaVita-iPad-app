@@ -121,6 +121,14 @@ final class AddEditPersonViewController: UIViewController {
                 self?.dismiss(animated: true, completion: nil)
             }
         }
+        checkInVC.onSkip = { [weak self] in
+            guard let self else { return }
+            let emptyCheckIn = PersonCheckInData(painLevel: nil, energyLevel: nil, mood: nil, symptoms: nil, concerns: nil, teamNote: nil)
+            self.onSave?(name, dob, gender, emptyCheckIn)
+            self.dismiss(animated: true) { [weak self] in
+                self?.dismiss(animated: true, completion: nil)
+            }
+        }
 
         let nav = UINavigationController(rootViewController: checkInVC)
         nav.modalPresentationStyle = .formSheet

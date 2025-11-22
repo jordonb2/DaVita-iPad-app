@@ -3,6 +3,7 @@ import UIKit
 final class CheckInJourneyViewController: UIViewController {
 
     var onComplete: ((PersonCheckInData) -> Void)?
+    var onSkip: (() -> Void)?
 
     private let scrollView = UIScrollView()
     private let contentStackView = UIStackView()
@@ -187,7 +188,7 @@ final class CheckInJourneyViewController: UIViewController {
     }
 
     @objc private func cancelTapped() {
-        dismiss(animated: true)
+        onSkip?()
     }
 
     @objc private func submitTapped() {
