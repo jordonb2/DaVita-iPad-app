@@ -17,6 +17,8 @@
 		F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E32E93C9010056439C /* TextCategorizer.swift */; };
 		F76E42E62E93C9010056439C /* Daypart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E52E93C9010056439C /* Daypart.swift */; };
 		F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */; };
+		F76E42F22E93D200056439C /* AdminSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F12E93D200056439C /* AdminSession.swift */; };
+		F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F32E93D200056439C /* AnalyticsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		F76E42E32E93C9010056439C /* TextCategorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCategorizer.swift; sourceTree = "<group>"; };
 		F76E42E52E93C9010056439C /* Daypart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daypart.swift; sourceTree = "<group>"; };
 		F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsSummaryProvider.swift; sourceTree = "<group>"; };
+		F76E42F12E93D200056439C /* AdminSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminSession.swift; sourceTree = "<group>"; };
+		F76E42F32E93D200056439C /* AnalyticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -92,6 +96,7 @@
 				F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */,
 				F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */,
 				F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */,
+				F76E42F32E93D200056439C /* AnalyticsViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -119,6 +124,7 @@
 			children = (
 				F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */,
 				F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */,
+				F76E42F12E93D200056439C /* AdminSession.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -207,6 +213,8 @@
 				F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */,
 				F76E42E62E93C9010056439C /* Daypart.swift in Sources */,
 				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
+				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
+				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

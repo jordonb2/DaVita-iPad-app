@@ -27,6 +27,23 @@ import Combine
         }
         return header
     }()
+
+    private let analyticsButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let image = UIImage(systemName: "ellipsis")
+        button.setImage(image, for: .normal)
+        button.tintColor = .secondaryLabel
+        button.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+        button.layer.cornerRadius = 24
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.12
+        button.layer.shadowRadius = 8
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.widthAnchor.constraint(equalToConstant: 48).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +56,8 @@ import Combine
             target: self,
             action: #selector(didTapAdd)
         )
+
+        configureAnalyticsButton()
         
         let tableView = tableViewRef
         tableView.dataSource = self
@@ -243,5 +262,57 @@ import Combine
         guard viewModel.count > 0 else { return }
         let topIndex = IndexPath(row: 0, section: 0)
         tableViewRef.scrollToRow(at: topIndex, at: .top, animated: true)
+    }
+
+    private func configureAnalyticsButton() {
+        view.addSubview(analyticsButton)
+        NSLayoutConstraint.activate([
+            analyticsButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            analyticsButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+        ])
+        analyticsButton.addTarget(self, action: #selector(analyticsTapped), for: .touchUpInside)
+    }
+
+    @objc private func analyticsTapped() {
+        if AdminSession.shared.isLoggedIn {
+            presentAnalyticsView()
+            return
+        }
+
+        let alert = UIAlertController(title: "Admin Login", message: "Enter credentials to view analytics.", preferredStyle: .alert)
+        alert.addTextField { field in
+            field.placeholder = "Username"
+            field.autocapitalizationType = .none
+        }
+        alert.addTextField { field in
+            field.placeholder = "Password"
+            field.isSecureTextEntry = true
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Login", style: .default) { [weak self] _ in
+            guard let self else { return }
+            let username = alert.textFields?.first?.text ?? ""
+            let password = alert.textFields?.last?.text ?? ""
+            if username == "admin" && password == "analytics" {
+                AdminSession.shared.logIn()
+                self.presentAnalyticsView()
+            } else {
+                let errorAlert = UIAlertController(title: "Login failed", message: "Incorrect username or password.", preferredStyle: .alert)
+                errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(errorAlert, animated: true)
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    private func presentAnalyticsView() {
+        let analyticsVC = AnalyticsViewController()
+        analyticsVC.onLogoutConfirmed = { [weak self] in
+            AdminSession.shared.logOut()
+            self?.dismiss(animated: true, completion: nil)
+        }
+        let nav = UINavigationController(rootViewController: analyticsVC)
+        nav.modalPresentationStyle = .formSheet
+        present(nav, animated: true)
     }
 }
