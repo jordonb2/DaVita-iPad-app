@@ -15,6 +15,9 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
     private var hasInteractedWithTeamNote = false
     private var lastInteractedStep: CheckInAnalyticsLogger.Step?
 
+    private let surveyHeaderLabel = UILabel()
+    private let closeLabel = UILabel()
+
     private let scrollView = UIScrollView()
     private let contentStackView = UIStackView()
 
@@ -69,8 +72,11 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
             contentStackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -48)
         ])
 
-        let headerLabel = makeSectionHeader(text: "How are you today?")
-        contentStackView.addArrangedSubview(headerLabel)
+        surveyHeaderLabel.text = "How are you today?"
+        surveyHeaderLabel.font = UIFont.preferredFont(forTextStyle: .title2)
+        surveyHeaderLabel.numberOfLines = 0
+        surveyHeaderLabel.accessibilityTraits.insert(.header)
+        contentStackView.addArrangedSubview(surveyHeaderLabel)
 
         contentStackView.addArrangedSubview(makePainSection())
         contentStackView.addArrangedSubview(makeEnergySection())
@@ -79,15 +85,17 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         contentStackView.addArrangedSubview(makeTextSection(title: "Concerns", textView: concernsTextView, placeholder: "Any concerns you want to share?") )
 
         let teamNoteHeader = makeSectionHeader(text: "Anything you want the team to know?")
+        teamNoteHeader.accessibilityTraits.insert(.header)
         contentStackView.addArrangedSubview(teamNoteHeader)
         contentStackView.addArrangedSubview(makeTextSection(title: nil, textView: teamNoteTextView, placeholder: "Write a quick note...") )
 
-        let closeLabel = UILabel()
         closeLabel.numberOfLines = 0
         closeLabel.textAlignment = .center
         closeLabel.font = UIFont.preferredFont(forTextStyle: .headline)
         closeLabel.textColor = .secondaryLabel
         closeLabel.text = "Thanks for your response, your care team will review this before your session."
+        closeLabel.isAccessibilityElement = true
+        closeLabel.accessibilityLabel = closeLabel.text
         contentStackView.addArrangedSubview(closeLabel)
     }
 
@@ -103,6 +111,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         painValueLabel.text = "0"
         painValueLabel.font = UIFont.preferredFont(forTextStyle: .body)
         painValueLabel.textAlignment = .right
+        painValueLabel.isAccessibilityElement = false
 
         energySegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
         moodSegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
@@ -110,6 +119,20 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         configureTextView(symptomsTextView)
         configureTextView(concernsTextView)
         configureTextView(teamNoteTextView)
+
+        painSlider.isAccessibilityElement = true
+        painSlider.accessibilityLabel = "Pain level"
+        painSlider.accessibilityTraits.insert(.adjustable)
+        painSlider.accessibilityHint = "Swipe up or down to adjust pain from 0 to 10."
+        updatePainAccessibilityValue()
+
+        energySegmentedControl.isAccessibilityElement = true
+        energySegmentedControl.accessibilityLabel = "Energy level"
+        energySegmentedControl.accessibilityHint = "Select your energy today."
+
+        moodSegmentedControl.isAccessibilityElement = true
+        moodSegmentedControl.accessibilityLabel = "Mood"
+        moodSegmentedControl.accessibilityHint = "Select your mood today."
     }
 
     private func configureTextView(_ textView: UITextView) {
@@ -121,6 +144,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
 
         textView.delegate = self
+        textView.isAccessibilityElement = true
     }
 
     private func makePainSection() -> UIView {
@@ -135,6 +159,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         let titleLabel = UILabel()
         titleLabel.text = "Pain"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.isAccessibilityElement = false
 
         titleRow.addArrangedSubview(titleLabel)
         titleRow.addArrangedSubview(painValueLabel)
@@ -153,6 +178,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         let titleLabel = UILabel()
         titleLabel.text = "Energy"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.isAccessibilityElement = false
 
         container.addArrangedSubview(titleLabel)
         container.addArrangedSubview(energySegmentedControl)
@@ -167,6 +193,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         let titleLabel = UILabel()
         titleLabel.text = "Mood"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.isAccessibilityElement = false
 
         container.addArrangedSubview(titleLabel)
         container.addArrangedSubview(moodSegmentedControl)
@@ -182,13 +209,16 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
             let titleLabel = UILabel()
             titleLabel.text = title
             titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+            titleLabel.accessibilityTraits.insert(.header)
             container.addArrangedSubview(titleLabel)
+            textView.accessibilityLabel = title
         }
 
         let placeholderLabel = UILabel()
         placeholderLabel.text = placeholder
         placeholderLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
         placeholderLabel.textColor = .secondaryLabel
+        placeholderLabel.isAccessibilityElement = false
         container.addArrangedSubview(placeholderLabel)
         container.addArrangedSubview(textView)
 
@@ -207,6 +237,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         let roundedValue = Int(sender.value.rounded())
         sender.value = Float(roundedValue)
         painValueLabel.text = "\(roundedValue)"
+        updatePainAccessibilityValue()
 
         if !hasInteractedWithPain {
             hasInteractedWithPain = true
@@ -215,11 +246,20 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         }
     }
 
+    private func updatePainAccessibilityValue() {
+        let value = Int(painSlider.value)
+        painSlider.accessibilityValue = "\(value) out of 10"
+    }
+
     @objc private func energyChanged(_ sender: UISegmentedControl) {
         if !hasInteractedWithEnergy {
             hasInteractedWithEnergy = true
             lastInteractedStep = .energy
             analyticsLogger.logStepFirstInteracted(step: .energy)
+        }
+        if sender.selectedSegmentIndex != UISegmentedControl.noSegment {
+            let selectedTitle = sender.titleForSegment(at: sender.selectedSegmentIndex) ?? ""
+            sender.accessibilityValue = selectedTitle
         }
     }
 
@@ -228,6 +268,10 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
             hasInteractedWithMood = true
             lastInteractedStep = .mood
             analyticsLogger.logStepFirstInteracted(step: .mood)
+        }
+        if sender.selectedSegmentIndex != UISegmentedControl.noSegment {
+            let selectedTitle = sender.titleForSegment(at: sender.selectedSegmentIndex) ?? ""
+            sender.accessibilityValue = selectedTitle
         }
     }
 

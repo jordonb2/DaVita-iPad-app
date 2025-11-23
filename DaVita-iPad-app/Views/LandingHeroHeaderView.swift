@@ -73,6 +73,7 @@ final class LandingHeroHeaderView: UIView {
         label.clipsToBounds = true
         label.text = "CLIENT SUCCESS"
         label.setContentCompressionResistancePriority(.required, for: .vertical)
+        label.isAccessibilityElement = false
         return label
     }()
 
@@ -91,6 +92,7 @@ final class LandingHeroHeaderView: UIView {
         label.font = .systemFont(ofSize: 34, weight: .bold)
         label.textColor = .white
         label.numberOfLines = 0
+        label.accessibilityTraits.insert(.header)
         label.text = "Care Hub"
         return label
     }()
@@ -212,6 +214,15 @@ final class LandingHeroHeaderView: UIView {
         primaryButton.setTitle(model.primaryButtonTitle, for: .normal)
         secondaryButton.setTitle(model.secondaryButtonTitle, for: .normal)
         setMetrics(model.metrics)
+
+        primaryButton.accessibilityLabel = model.primaryButtonTitle
+        primaryButton.accessibilityHint = "Opens the add client screen."
+        secondaryButton.accessibilityLabel = model.secondaryButtonTitle
+        secondaryButton.accessibilityHint = "Jumps to your latest record."
+
+        var orderedElements: [Any] = [greetingLabel, headlineLabel, subtitleLabel, primaryButton, secondaryButton]
+        orderedElements.append(contentsOf: metricsStack.arrangedSubviews)
+        accessibilityElements = orderedElements
     }
 
     private func setMetrics(_ metrics: [Metric]) {
@@ -274,18 +285,24 @@ private final class MetricCardView: UIView {
         layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
         backgroundColor = UIColor.white.withAlphaComponent(0.08)
 
+        isAccessibilityElement = true
+        accessibilityTraits.insert(.staticText)
+
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         titleLabel.textColor = UIColor.white.withAlphaComponent(0.85)
+        titleLabel.isAccessibilityElement = false
 
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.font = .systemFont(ofSize: 28, weight: .bold)
         valueLabel.textColor = .white
+        valueLabel.isAccessibilityElement = false
 
         footnoteLabel.translatesAutoresizingMaskIntoConstraints = false
         footnoteLabel.font = .systemFont(ofSize: 13, weight: .regular)
         footnoteLabel.textColor = UIColor.white.withAlphaComponent(0.8)
         footnoteLabel.numberOfLines = 2
+        footnoteLabel.isAccessibilityElement = false
 
         let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel, footnoteLabel])
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -305,5 +322,8 @@ private final class MetricCardView: UIView {
         titleLabel.text = metric.title.uppercased()
         valueLabel.text = metric.value
         footnoteLabel.text = metric.footnote
+
+        let footnotePart = metric.footnote.isEmpty ? "" : ", \(metric.footnote)"
+        accessibilityLabel = "\(metric.title), \(metric.value)\(footnotePart)"
     }
 }
