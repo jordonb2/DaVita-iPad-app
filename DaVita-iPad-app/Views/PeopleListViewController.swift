@@ -42,6 +42,9 @@ import Combine
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
         button.widthAnchor.constraint(equalToConstant: 48).isActive = true
         button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        button.isAccessibilityElement = true
+        button.accessibilityLabel = "Analytics"
+        button.accessibilityHint = "Admin login to view check-in analytics."
         return button
     }()
     
@@ -128,8 +131,16 @@ import Combine
             let age = ageComponents.year ?? 0
             
             config.secondaryText = "DOB: \(dobString) — Age: \(age)"
+
+            let nameText = person.name ?? ""
+            cell.isAccessibilityElement = true
+            cell.accessibilityLabel = "\(nameText). Date of birth \(dobString). Age \(age)."
         } else {
             config.secondaryText = "DOB: —"
+
+            let nameText = person.name ?? ""
+            cell.isAccessibilityElement = true
+            cell.accessibilityLabel = "\(nameText). Date of birth not available."
         }
         
         cell.contentConfiguration = config

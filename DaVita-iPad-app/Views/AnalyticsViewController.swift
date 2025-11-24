@@ -87,6 +87,7 @@ final class AnalyticsViewController: UIViewController {
         label.text = text
         label.font = UIFont.preferredFont(forTextStyle: .title2)
         label.numberOfLines = 0
+        label.accessibilityTraits.insert(.header)
         return label
     }
 
@@ -96,15 +97,20 @@ final class AnalyticsViewController: UIViewController {
         container.alignment = .center
         container.distribution = .fill
 
+        container.isAccessibilityElement = true
+        container.accessibilityLabel = "\(title), \(value)"
+
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        titleLabel.isAccessibilityElement = false
 
         let valueLabel = UILabel()
         valueLabel.text = value
         valueLabel.font = UIFont.preferredFont(forTextStyle: .body)
         valueLabel.textAlignment = .right
         valueLabel.setContentHuggingPriority(.required, for: .horizontal)
+        valueLabel.isAccessibilityElement = false
 
         container.addArrangedSubview(titleLabel)
         container.addArrangedSubview(valueLabel)
@@ -121,6 +127,8 @@ final class AnalyticsViewController: UIViewController {
             let emptyLabel = UILabel()
             emptyLabel.text = "—"
             emptyLabel.textColor = .secondaryLabel
+            emptyLabel.isAccessibilityElement = true
+            emptyLabel.accessibilityLabel = "No data yet"
             container.addArrangedSubview(emptyLabel)
             return container
         }

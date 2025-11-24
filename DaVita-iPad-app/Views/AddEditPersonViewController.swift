@@ -31,6 +31,42 @@ final class AddEditPersonViewController: UIViewController {
         title = isEditingRecord ? "Edit Person" : "Add/Edit Person"
         view.backgroundColor = .systemBackground
         configureUI()
+
+        fullNameTextField.font = UIFont.preferredFont(forTextStyle: .body)
+        fullNameTextField.adjustsFontForContentSizeCategory = true
+        fullNameTextField.textColor = .label
+
+        ageLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        ageLabel.adjustsFontForContentSizeCategory = true
+        ageLabel.textColor = .label
+
+        let bodyFont = UIFont.preferredFont(forTextStyle: .body)
+        let scaledBodyFont = UIFontMetrics(forTextStyle: .body).scaledFont(for: bodyFont)
+        let normalAttributes: [NSAttributedString.Key: Any] = [.font: scaledBodyFont]
+        genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .normal)
+        genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .selected)
+
+        datePicker.maximumDate = Date()
+
+        fullNameTextField.isAccessibilityElement = true
+        fullNameTextField.accessibilityLabel = "Full name"
+        fullNameTextField.accessibilityHint = "Enter the patient's full name."
+
+        datePicker.isAccessibilityElement = true
+        datePicker.accessibilityLabel = "Date of birth"
+        datePicker.accessibilityHint = "Select the patient's date of birth."
+
+        genderSegmentedControl.isAccessibilityElement = true
+        genderSegmentedControl.accessibilityLabel = "Gender"
+        genderSegmentedControl.accessibilityHint = "Select the patient's gender."
+
+        ageLabel.isAccessibilityElement = true
+        ageLabel.accessibilityTraits.insert(.staticText)
+
+        navigationItem.leftBarButtonItem?.accessibilityLabel = "Cancel"
+        navigationItem.rightBarButtonItem?.accessibilityLabel = "Save"
+
+        accessibilityElements = [fullNameTextField as Any, datePicker as Any, genderSegmentedControl as Any, ageLabel as Any]
         
         // Prefill when editing
         if let name = initialName {
@@ -67,8 +103,12 @@ final class AddEditPersonViewController: UIViewController {
         let ageComponents = calendar.dateComponents([.year], from: date, to: now)
         if let years = ageComponents.year {
             ageLabel.text = "Age: \(years)"
+            ageLabel.accessibilityLabel = "Age"
+            ageLabel.accessibilityValue = "\(years)"
         } else {
             ageLabel.text = "Age: -"
+            ageLabel.accessibilityLabel = "Age"
+            ageLabel.accessibilityValue = "Not available"
         }
     }
 
