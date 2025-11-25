@@ -20,6 +20,10 @@
 		F76E42F22E93D200056439C /* AdminSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F12E93D200056439C /* AdminSession.swift */; };
 		F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F32E93D200056439C /* AnalyticsViewController.swift */; };
 		F76E43012E95A0010056439C /* CheckInHistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */; };
+		F76E43112E95B100056439C /* PersonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43102E95B100056439C /* PersonService.swift */; };
+		F76E43132E95B120056439C /* PersonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43122E95B120056439C /* PersonRepository.swift */; };
+		F76E43152E95B121056439C /* CheckInRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43142E95B121056439C /* CheckInRepository.swift */; };
+		F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43172E95C300056439C /* AddEditPersonViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +41,10 @@
 		F76E42F12E93D200056439C /* AdminSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminSession.swift; sourceTree = "<group>"; };
 		F76E42F32E93D200056439C /* AnalyticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewController.swift; sourceTree = "<group>"; };
 		F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInHistoryViewController.swift; sourceTree = "<group>"; };
+		F76E43102E95B100056439C /* PersonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonService.swift; sourceTree = "<group>"; };
+		F76E43122E95B120056439C /* PersonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonRepository.swift; sourceTree = "<group>"; };
+		F76E43142E95B121056439C /* CheckInRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInRepository.swift; sourceTree = "<group>"; };
+		F76E43172E95C300056439C /* AddEditPersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -75,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				F76E42A52E90860B0056439C /* Services */,
+				F76E43162E95B200056439C /* Storage */,
 				F76E42A42E9086030056439C /* Models */,
 				F76E42A32E9085FA0056439C /* ViewModels */,
 				F76E42A22E9085CE0056439C /* Views */,
@@ -108,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				F76E42A82E9182360056439C /* PeopleListViewModel.swift */,
+				F76E43172E95C300056439C /* AddEditPersonViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -128,8 +138,18 @@
 				F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */,
 				F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */,
 				F76E42F12E93D200056439C /* AdminSession.swift */,
+				F76E43102E95B100056439C /* PersonService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		F76E43162E95B200056439C /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				F76E43122E95B120056439C /* PersonRepository.swift */,
+				F76E43142E95B121056439C /* CheckInRepository.swift */,
+			);
+			path = Storage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +239,10 @@
 				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
 				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
 				F76E43012E95A0010056439C /* CheckInHistoryViewController.swift in Sources */,
+				F76E43112E95B100056439C /* PersonService.swift in Sources */,
+				F76E43132E95B120056439C /* PersonRepository.swift in Sources */,
+				F76E43152E95B121056439C /* CheckInRepository.swift in Sources */,
+				F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

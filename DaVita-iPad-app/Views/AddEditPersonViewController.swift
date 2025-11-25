@@ -8,7 +8,9 @@
 import UIKit
 
 final class AddEditPersonViewController: UIViewController {
-
+    
+    private var viewModel = AddEditPersonViewModel()
+    
     // MARK: - Outlets
     @IBOutlet weak var fullNameTextField: UITextField!
     @IBOutlet weak var datePicker: UIDatePicker!
@@ -20,68 +22,63 @@ final class AddEditPersonViewController: UIViewController {
     var onSave: ((String, Date, String, PersonCheckInData) -> Void)?
     
     // MARK: - Prefill (for editing)
-    var initialName: String?
-    var initialDOB: Date?
-    var initialGender: String?   // "Male" | "Female" | "Other"
-    var isEditingRecord: Bool { initialName != nil }
-
+    var personToEdit: Person? {
+        didSet { viewModel = AddEditPersonViewModel(person: personToEdit) }
+    }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = isEditingRecord ? "Edit Person" : "Add/Edit Person"
+        title = viewModel.isEditingRecord ? "Edit Person" : "Add/Edit Person"
         view.backgroundColor = .systemBackground
         configureUI()
-
+        
         fullNameTextField.font = UIFont.preferredFont(forTextStyle: .body)
         fullNameTextField.adjustsFontForContentSizeCategory = true
         fullNameTextField.textColor = .label
-
+        
         ageLabel.font = UIFont.preferredFont(forTextStyle: .headline)
         ageLabel.adjustsFontForContentSizeCategory = true
         ageLabel.textColor = .label
-
+        
         let bodyFont = UIFont.preferredFont(forTextStyle: .body)
         let scaledBodyFont = UIFontMetrics(forTextStyle: .body).scaledFont(for: bodyFont)
         let normalAttributes: [NSAttributedString.Key: Any] = [.font: scaledBodyFont]
         genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .normal)
         genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .selected)
-
+        
         datePicker.maximumDate = Date()
-
+        
         fullNameTextField.isAccessibilityElement = true
         fullNameTextField.accessibilityLabel = "Full name"
         fullNameTextField.accessibilityHint = "Enter the patient's full name."
-
+        
         datePicker.isAccessibilityElement = true
         datePicker.accessibilityLabel = "Date of birth"
         datePicker.accessibilityHint = "Select the patient's date of birth."
-
+        
         genderSegmentedControl.isAccessibilityElement = true
         genderSegmentedControl.accessibilityLabel = "Gender"
         genderSegmentedControl.accessibilityHint = "Select the patient's gender."
-
+        
         ageLabel.isAccessibilityElement = true
         ageLabel.accessibilityTraits.insert(.staticText)
-
+        
         navigationItem.leftBarButtonItem?.accessibilityLabel = "Cancel"
         navigationItem.rightBarButtonItem?.accessibilityLabel = "Save"
-
-        accessibilityElements = [fullNameTextField as Any, datePicker as Any, genderSegmentedControl as Any, ageLabel as Any]
         
+        accessibilityElements = [fullNameTextField as Any, datePicker as Any, genderSegmentedControl as Any, ageLabel as Any]
         // Prefill when editing
-        if let name = initialName {
-            fullNameTextField.text = name
-        }
-        if let dob = initialDOB {
-            datePicker.date = dob
-            updateAgeLabel(for: dob)   // keep age label in sync
-        }
-        if let g = initialGender {
+        fullNameTextField.text = viewModel.name
+        datePicker.date = viewModel.dob
+        updateAgeLabel(for: viewModel.dob)
+        if !viewModel.gender.isEmpty {
             let map = ["Male", "Female", "Other"]
-            if let idx = map.firstIndex(of: g) {
+            if let idx = map.firstIndex(of: viewModel.gender) {
                 genderSegmentedControl.selectedSegmentIndex = idx
             }
         }
+        
     }
 
     private func configureUI() {
@@ -90,12 +87,13 @@ final class AddEditPersonViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
         updateAgeLabel(for: datePicker.date)
     }
-
+    
     // Handle picker changes
     @objc private func dateChanged(_ sender: UIDatePicker) {
+        viewModel.updateDOB(sender.date)
         updateAgeLabel(for: sender.date)
     }
-
+    
     // Calculate and update age
     private func updateAgeLabel(for date: Date) {
         let calendar = Calendar.current
@@ -111,24 +109,20 @@ final class AddEditPersonViewController: UIViewController {
             ageLabel.accessibilityValue = "Not available"
         }
     }
-
+    
     // MARK: - Actions
     @IBAction func cancelTapped(_ sender: UIBarButtonItem) {
         dismiss(animated: true, completion: nil)
     }
-
+    
     @IBAction func saveTapped(_ sender: UIBarButtonItem) {
-        // Validate & collect
-        let rawName = fullNameTextField.text ?? ""
-        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.name = fullNameTextField.text ?? ""
+        viewModel.updateDOB(datePicker.date)
+        let genderTitles = ["Male", "Female", "Other"]
+        viewModel.updateGender(from: genderSegmentedControl.selectedSegmentIndex, titles: genderTitles)
         
-        // Require a non-empty name
-        guard !name.isEmpty else {
-            let alert = UIAlertController(
-                title: "Name required",
-                message: "Please enter the patient's full name before saving.",
-                preferredStyle: .alert
-            )
+        if let errorMessage = viewModel.validate() {
+            let alert = UIAlertController(title: "Invalid input", message: errorMessage, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
                 self?.fullNameTextField.becomeFirstResponder()
             })
@@ -136,27 +130,12 @@ final class AddEditPersonViewController: UIViewController {
             return
         }
         
-        let dob = datePicker.date
+        let draft = viewModel.makeDraft()
         
-        // Optional: prevent future dates of birth
-        if dob > Date() {
-            let alert = UIAlertController(
-                title: "Invalid date",
-                message: "Date of birth cannot be in the future.",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            present(alert, animated: true)
-            return
-        }
-        
-        let genderIndex = genderSegmentedControl.selectedSegmentIndex
-        let gender = genderSegmentedControl.titleForSegment(at: genderIndex) ?? ""
-
         let checkInVC = CheckInJourneyViewController()
         checkInVC.onComplete = { [weak self] checkInData in
             guard let self else { return }
-            self.onSave?(name, dob, gender, checkInData)
+            self.onSave?(draft.name, draft.dob, draft.gender, checkInData)
             self.dismiss(animated: true) { [weak self] in
                 self?.dismiss(animated: true, completion: nil)
             }
@@ -164,12 +143,12 @@ final class AddEditPersonViewController: UIViewController {
         checkInVC.onSkip = { [weak self] in
             guard let self else { return }
             let emptyCheckIn = PersonCheckInData(painLevel: nil, energyLevel: nil, mood: nil, symptoms: nil, concerns: nil, teamNote: nil)
-            self.onSave?(name, dob, gender, emptyCheckIn)
+            self.onSave?(draft.name, draft.dob, draft.gender, emptyCheckIn)
             self.dismiss(animated: true) { [weak self] in
                 self?.dismiss(animated: true, completion: nil)
             }
         }
-
+        
         let nav = UINavigationController(rootViewController: checkInVC)
         nav.modalPresentationStyle = .formSheet
         present(nav, animated: true)

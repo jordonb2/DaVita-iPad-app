@@ -13,26 +13,19 @@ final class PeopleListViewModel: NSObject {
     // Published array the view observes
     @Published private(set) var people: [Person] = []
 
+    private let personService: PersonService
+    private let peopleRepo: PersonRepository
+
     private let context: NSManagedObjectContext
     private lazy var frc: NSFetchedResultsController<Person> = {
-        let fetch: NSFetchRequest<Person> = Person.fetchRequest()
-        // Sort newest first (by createdAt). Add secondary sort by name for stability.
-        fetch.sortDescriptors = [
-            NSSortDescriptor(key: "createdAt", ascending: false),
-            NSSortDescriptor(key: "name", ascending: true)
-        ]
-        let controller = NSFetchedResultsController(
-            fetchRequest: fetch,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        controller.delegate = self
-        return controller
+        return peopleRepo.makePeopleFRC(delegate: self)
     }()
 
     init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
         self.context = context
+        self.peopleRepo = PersonRepository(context: context)
+        let checkInRepo = CheckInRepository(context: context)
+        self.personService = PersonService(peopleRepo: peopleRepo, checkInRepo: checkInRepo)
         super.init()
         do {
             try frc.performFetch()
@@ -40,6 +33,7 @@ final class PeopleListViewModel: NSObject {
         } catch {
             print("FRC performFetch error: \(error)")
         }
+
     }
 
     // MARK: - CRUD
@@ -50,31 +44,21 @@ final class PeopleListViewModel: NSObject {
             print("Refusing to add Person with empty name")
             return
         }
-        
-        let p = Person(context: context)
-        p.id = UUID()
-        p.name = trimmed
-        p.gender = gender
-        p.dob = dob
-        p.createdAt = Date()
-        if let checkInData {
-            p.checkInPain = checkInData.painLevel ?? 0
-            p.checkInEnergy = checkInData.energyLevel
-            p.checkInMood = checkInData.mood
-            p.checkInSymptoms = checkInData.symptoms
-            p.checkInConcerns = checkInData.concerns
-            p.checkInTeamNote = checkInData.teamNote
 
-            // Create a multi-visit history record tied to this person.
-            createCheckInRecord(for: p, data: checkInData)
+        do {
+            let p = try personService.addPerson(name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+            logPerson(p, context: "ADD")
+        } catch {
+            print("Add person error: \(error)")
         }
-        save()
-        logPerson(p, context: "ADD")
     }
 
     func delete(_ person: Person) {
-        context.delete(person)
-        save()
+        do {
+            try personService.deletePerson(person)
+        } catch {
+            print("Delete person error: \(error)")
+        }
     }
     
     func update(_ person: Person, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData? = nil) {
@@ -83,44 +67,12 @@ final class PeopleListViewModel: NSObject {
             print("Refusing to update Person with empty name")
             return
         }
-        
-        person.name   = trimmed
-        person.gender = gender
-        person.dob    = dob
-        if let checkInData {
-            person.checkInPain = checkInData.painLevel ?? 0
-            person.checkInEnergy = checkInData.energyLevel
-            person.checkInMood = checkInData.mood
-            person.checkInSymptoms = checkInData.symptoms
-            person.checkInConcerns = checkInData.concerns
-            person.checkInTeamNote = checkInData.teamNote
 
-            // Append a new visit record with timestamp for history/trends.
-            createCheckInRecord(for: person, data: checkInData)
-        }
-        save()
-        logPerson(person, context: "UPDATE")
-    }
-
-    // MARK: - Check-in History
-    private func createCheckInRecord(for person: Person, data: PersonCheckInData) {
-        let record = CheckInRecord(context: context)
-        record.id = UUID()
-        record.createdAt = Date()
-        record.painLevel = data.painLevel ?? 0
-        record.energyLevel = data.energyLevel
-        record.mood = data.mood
-        record.symptoms = data.symptoms
-        record.concerns = data.concerns
-        record.teamNote = data.teamNote
-        record.person = person
-    }
-
-    private func save() {
         do {
-            try context.save()
+            try personService.updatePerson(person, name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+            logPerson(person, context: "UPDATE")
         } catch {
-            print("Core Data save error: \(error)")
+            print("Update person error: \(error)")
         }
     }
 
@@ -162,3 +114,4 @@ extension PeopleListViewModel: NSFetchedResultsControllerDelegate {
         people = frc.fetchedObjects ?? []
     }
 }
+

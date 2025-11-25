@@ -184,9 +184,7 @@ import Combine
         guard let addVC = sb.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
 
         // Pass existing record data
-        addVC.initialName = person.name ?? ""
-        addVC.initialGender = person.gender
-        addVC.initialDOB = person.dob
+        addVC.personToEdit = person
 
         // When Save is tapped, update the existing record
         addVC.onSave = { [weak self] name, dob, gender, checkInData in
