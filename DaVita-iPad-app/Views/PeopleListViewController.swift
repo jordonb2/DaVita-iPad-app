@@ -9,6 +9,8 @@ import UIKit
 import Combine
 
  final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+
+    var router: AppRouting = AppRouter.shared
     
     // If your table view is the ROOT view, we can grab it like this:
     private var tableViewRef: UITableView { self.view as! UITableView }
@@ -90,24 +92,9 @@ import Combine
     }
     
     @objc private func didTapAdd() {
-        // 1) Instantiate the Add/Edit screen from Main.storyboard
-        let sb = UIStoryboard(name: "Main", bundle: nil)
-        guard let addVC = sb.instantiateViewController(
-            withIdentifier: "AddEditPersonVC"
-        ) as? AddEditPersonViewController else {
-            return
-        }
-        
-        // 2) Handle Save → push into your view model
-        addVC.onSave = { [weak self] name, dob, gender, checkInData in
+        router.showAddPerson(from: self) { [weak self] name, dob, gender, checkInData in
             self?.viewModel.add(name: name, gender: gender, dob: dob, checkInData: checkInData)
         }
-        
-        // 3) Present inside a nav so the Cancel/Save live in a bar
-        let nav = UINavigationController(rootViewController: addVC)
-        nav.modalPresentationStyle = .fullScreen
-        nav.modalTransitionStyle = .coverVertical
-        present(nav, animated: true)
     }
     
     // MARK: - UITableViewDataSource
@@ -179,22 +166,9 @@ import Combine
         tableView.deselectRow(at: indexPath, animated: true)
         let person = viewModel.person(at: indexPath)
 
-        // Instantiate Add/Edit screen
-        let sb = UIStoryboard(name: "Main", bundle: nil)
-        guard let addVC = sb.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
-
-        // Pass existing record data
-        addVC.personToEdit = person
-
-        // When Save is tapped, update the existing record
-        addVC.onSave = { [weak self] name, dob, gender, checkInData in
+        router.showEditPerson(person, from: self) { [weak self] name, dob, gender, checkInData in
             self?.viewModel.update(person, name: name, gender: gender, dob: dob, checkInData: checkInData)
         }
-
-        // Present it modally in a nav controller
-        let nav = UINavigationController(rootViewController: addVC)
-        nav.modalPresentationStyle = .formSheet
-        present(nav, animated: true)
     }
 
     // MARK: - Landing Header
@@ -284,7 +258,7 @@ import Combine
 
     @objc private func analyticsTapped() {
         if AdminSession.shared.isLoggedIn {
-            presentAnalyticsView()
+            router.showAnalytics(from: self)
             return
         }
 
@@ -304,7 +278,7 @@ import Combine
             let password = alert.textFields?.last?.text ?? ""
             if username == "admin" && password == "analytics" {
                 AdminSession.shared.logIn()
-                self.presentAnalyticsView()
+                self.router.showAnalytics(from: self)
             } else {
                 let errorAlert = UIAlertController(title: "Login failed", message: "Incorrect username or password.", preferredStyle: .alert)
                 errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -312,16 +286,5 @@ import Combine
             }
         })
         present(alert, animated: true)
-    }
-
-    private func presentAnalyticsView() {
-        let analyticsVC = AnalyticsViewController()
-        analyticsVC.onLogoutConfirmed = { [weak self] in
-            AdminSession.shared.logOut()
-            self?.dismiss(animated: true, completion: nil)
-        }
-        let nav = UINavigationController(rootViewController: analyticsVC)
-        nav.modalPresentationStyle = .formSheet
-        present(nav, animated: true)
     }
 }

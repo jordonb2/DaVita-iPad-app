@@ -24,6 +24,8 @@
 		F76E43132E95B120056439C /* PersonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43122E95B120056439C /* PersonRepository.swift */; };
 		F76E43152E95B121056439C /* CheckInRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43142E95B121056439C /* CheckInRepository.swift */; };
 		F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43172E95C300056439C /* AddEditPersonViewModel.swift */; };
+		F76E43202E9700010056439C /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43212E9700010056439C /* AppRouter.swift */; };
+		F76E43222E9700020056439C /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43232E9700020056439C /* AppCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +47,8 @@
 		F76E43122E95B120056439C /* PersonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonRepository.swift; sourceTree = "<group>"; };
 		F76E43142E95B121056439C /* CheckInRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInRepository.swift; sourceTree = "<group>"; };
 		F76E43172E95C300056439C /* AddEditPersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewModel.swift; sourceTree = "<group>"; };
+		F76E43212E9700010056439C /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		F76E43232E9700020056439C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -83,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				F76E42A52E90860B0056439C /* Services */,
+				F76E43242E9700100056439C /* Coordinators */,
 				F76E43162E95B200056439C /* Storage */,
 				F76E42A42E9086030056439C /* Models */,
 				F76E42A32E9085FA0056439C /* ViewModels */,
@@ -90,6 +95,15 @@
 				F76E42682E9071DD0056439C /* DaVita-iPad-app */,
 				F76E42672E9071DD0056439C /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		F76E43242E9700100056439C /* Coordinators */ = {
+			isa = PBXGroup;
+			children = (
+				F76E43232E9700020056439C /* AppCoordinator.swift */,
+				F76E43212E9700010056439C /* AppRouter.swift */,
+			);
+			path = Coordinators;
 			sourceTree = "<group>";
 		};
 		F76E42672E9071DD0056439C /* Products */ = {
@@ -243,6 +257,8 @@
 				F76E43132E95B120056439C /* PersonRepository.swift in Sources */,
 				F76E43152E95B121056439C /* CheckInRepository.swift in Sources */,
 				F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */,
+				F76E43202E9700010056439C /* AppRouter.swift in Sources */,
+				F76E43222E9700020056439C /* AppCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

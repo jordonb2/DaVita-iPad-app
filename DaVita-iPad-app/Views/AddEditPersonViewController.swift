@@ -8,6 +8,8 @@
 import UIKit
 
 final class AddEditPersonViewController: UIViewController {
+
+    var router: AppRouting = AppRouter.shared
     
     private var viewModel = AddEditPersonViewModel()
     
@@ -132,25 +134,19 @@ final class AddEditPersonViewController: UIViewController {
         
         let draft = viewModel.makeDraft()
         
-        let checkInVC = CheckInJourneyViewController()
-        checkInVC.onComplete = { [weak self] checkInData in
+        router.presentCheckIn(from: self, onComplete: { [weak self] checkInData in
             guard let self else { return }
             self.onSave?(draft.name, draft.dob, draft.gender, checkInData)
             self.dismiss(animated: true) { [weak self] in
                 self?.dismiss(animated: true, completion: nil)
             }
-        }
-        checkInVC.onSkip = { [weak self] in
+        }, onSkip: { [weak self] in
             guard let self else { return }
             let emptyCheckIn = PersonCheckInData(painLevel: nil, energyLevel: nil, mood: nil, symptoms: nil, concerns: nil, teamNote: nil)
             self.onSave?(draft.name, draft.dob, draft.gender, emptyCheckIn)
             self.dismiss(animated: true) { [weak self] in
                 self?.dismiss(animated: true, completion: nil)
             }
-        }
-        
-        let nav = UINavigationController(rootViewController: checkInVC)
-        nav.modalPresentationStyle = .formSheet
-        present(nav, animated: true)
+        })
     }
 }
