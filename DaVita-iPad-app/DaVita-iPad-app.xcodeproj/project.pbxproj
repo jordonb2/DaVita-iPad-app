@@ -19,6 +19,7 @@
 		F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */; };
 		F76E42F22E93D200056439C /* AdminSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F12E93D200056439C /* AdminSession.swift */; };
 		F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F32E93D200056439C /* AnalyticsViewController.swift */; };
+		F76E43012E95A0010056439C /* CheckInHistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsSummaryProvider.swift; sourceTree = "<group>"; };
 		F76E42F12E93D200056439C /* AdminSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminSession.swift; sourceTree = "<group>"; };
 		F76E42F32E93D200056439C /* AnalyticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewController.swift; sourceTree = "<group>"; };
+		F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInHistoryViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -97,6 +99,7 @@
 				F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */,
 				F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */,
 				F76E42F32E93D200056439C /* AnalyticsViewController.swift */,
+				F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
 				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
 				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
+				F76E43012E95A0010056439C /* CheckInHistoryViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

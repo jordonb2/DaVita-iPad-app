@@ -64,6 +64,9 @@ final class PeopleListViewModel: NSObject {
             p.checkInSymptoms = checkInData.symptoms
             p.checkInConcerns = checkInData.concerns
             p.checkInTeamNote = checkInData.teamNote
+
+            // Create a multi-visit history record tied to this person.
+            createCheckInRecord(for: p, data: checkInData)
         }
         save()
         logPerson(p, context: "ADD")
@@ -91,9 +94,26 @@ final class PeopleListViewModel: NSObject {
             person.checkInSymptoms = checkInData.symptoms
             person.checkInConcerns = checkInData.concerns
             person.checkInTeamNote = checkInData.teamNote
+
+            // Append a new visit record with timestamp for history/trends.
+            createCheckInRecord(for: person, data: checkInData)
         }
         save()
         logPerson(person, context: "UPDATE")
+    }
+
+    // MARK: - Check-in History
+    private func createCheckInRecord(for person: Person, data: PersonCheckInData) {
+        let record = CheckInRecord(context: context)
+        record.id = UUID()
+        record.createdAt = Date()
+        record.painLevel = data.painLevel ?? 0
+        record.energyLevel = data.energyLevel
+        record.mood = data.mood
+        record.symptoms = data.symptoms
+        record.concerns = data.concerns
+        record.teamNote = data.teamNote
+        record.person = person
     }
 
     private func save() {

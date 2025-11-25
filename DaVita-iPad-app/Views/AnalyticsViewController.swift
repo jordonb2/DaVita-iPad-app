@@ -80,6 +80,9 @@ final class AnalyticsViewController: UIViewController {
             let count = summary.submissionsByDaypart[daypart] ?? 0
             contentStackView.addArrangedSubview(makeKeyValueRow(title: daypart.rawValue.capitalized, value: "\(count)"))
         }
+
+        contentStackView.addArrangedSubview(makeSectionHeader(text: "History"))
+        contentStackView.addArrangedSubview(makeHistoryButton())
     }
 
     private func makeSectionHeader(text: String) -> UILabel {
@@ -149,6 +152,26 @@ final class AnalyticsViewController: UIViewController {
     private func secondsText(_ value: Double) -> String {
         let roundedSeconds = Int(value.rounded())
         return "\(roundedSeconds)s"
+    }
+
+    private func makeHistoryButton() -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle("View Visit History", for: .normal)
+        button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
+        button.contentHorizontalAlignment = .leading
+        button.backgroundColor = UIColor.secondarySystemBackground
+        button.layer.cornerRadius = 12
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
+        button.addTarget(self, action: #selector(historyTapped), for: .touchUpInside)
+        button.isAccessibilityElement = true
+        button.accessibilityLabel = "View visit history"
+        button.accessibilityHint = "Shows multi-visit check-in records by person."
+        return button
+    }
+
+    @objc private func historyTapped() {
+        let vc = CheckInHistoryViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     @objc private func backTapped() {
