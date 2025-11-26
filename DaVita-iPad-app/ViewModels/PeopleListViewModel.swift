@@ -25,7 +25,8 @@ final class PeopleListViewModel: NSObject {
         self.context = context
         self.peopleRepo = PersonRepository(context: context)
         let checkInRepo = CheckInRepository(context: context)
-        self.personService = PersonService(peopleRepo: peopleRepo, checkInRepo: checkInRepo)
+        let checkInService = CheckInService(checkInRepo: checkInRepo)
+        self.personService = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
         super.init()
         do {
             try frc.performFetch()
