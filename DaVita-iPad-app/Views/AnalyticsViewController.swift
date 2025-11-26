@@ -83,11 +83,15 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     private func presentLogoutConfirmation() {
-        let alert = UIAlertController(title: "Log out?", message: "Are you sure you want to log-out?", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Yes", style: .destructive) { [weak self] _ in
+        let alert = AlertFactory.confirmAlert(
+            title: "Log out?",
+            message: "Are you sure you want to log-out?",
+            confirmTitle: "Yes",
+            cancelTitle: "No",
+            isDestructive: true
+        ) { [weak self] in
             self?.onLogoutConfirmed?()
-        })
+        }
         present(alert, animated: true)
     }
 }

@@ -3,9 +3,7 @@ import CoreData
 import Foundation
 
 /// Admin-only multi-visit check-in history.
-final class CheckInHistoryViewController: UIViewController {
-
-    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+final class CheckInHistoryViewController: StandardTableViewController {
     private let context: NSManagedObjectContext
 
     /// Each section is a person, with their check-in records sorted newest first.
@@ -20,7 +18,7 @@ final class CheckInHistoryViewController: UIViewController {
 
     init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
         self.context = context
-        super.init(nibName: nil, bundle: nil)
+        super.init(style: .insetGrouped)
     }
 
     required init?(coder: NSCoder) {
@@ -33,29 +31,17 @@ final class CheckInHistoryViewController: UIViewController {
         title = "Visit History"
         view.backgroundColor = .systemBackground
 
+        tableView.dataSource = self
+        tableView.delegate = self
+        TableStyler.applyHistoryStyle(to: tableView)
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Refresh", style: .plain, target: self, action: #selector(refreshTapped))
 
-        configureTable()
         loadSections()
     }
 
     @objc private func refreshTapped() {
         loadSections()
-    }
-
-    private func configureTable() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tableView)
-        NSLayoutConstraint.activate([
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "historyCell")
     }
 
     private func loadSections() {
@@ -157,8 +143,7 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
         let record = records[indexPath.row]
         guard let detail = detailText(for: record) else { return }
 
-        let alert = UIAlertController(title: "Check-in Details", message: detail, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        let alert = AlertFactory.okAlert(title: "Check-in Details", message: detail)
         present(alert, animated: true)
     }
 }

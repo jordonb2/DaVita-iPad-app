@@ -67,11 +67,7 @@ import Combine
         let tableView = tableViewRef
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
-        tableView.separatorColor = UIColor.secondarySystemBackground
-        tableView.backgroundColor = UIColor.systemGroupedBackground
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 36, right: 0)
+        TableStyler.applyPeopleListStyle(to: tableView)
         
         // Subscribe to Combine publisher to auto-reload on DB changes
         viewModel.$people
@@ -143,19 +139,16 @@ import Combine
              let person = self.viewModel.person(at: indexPath)
              let name = person.name ?? "this client"
              
-             let alert = UIAlertController(
+             let alert = AlertFactory.confirmAlert(
                 title: "Delete client?",
                 message: "This will permanently remove \(name) from your records.",
-                preferredStyle: .alert
-             )
-             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                 done(false)
-             })
-             alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
-                 self.viewModel.delete(person)
+                confirmTitle: "Delete",
+                cancelTitle: "Cancel",
+                isDestructive: true
+             ) { [weak self] in
+                 self?.viewModel.delete(person)
                  done(true)
-             })
-             
+             }
              self.present(alert, animated: true)
          }
          
@@ -262,29 +255,16 @@ import Combine
             return
         }
 
-        let alert = UIAlertController(title: "Admin Login", message: "Enter credentials to view analytics.", preferredStyle: .alert)
-        alert.addTextField { field in
-            field.placeholder = "Username"
-            field.autocapitalizationType = .none
-        }
-        alert.addTextField { field in
-            field.placeholder = "Password"
-            field.isSecureTextEntry = true
-        }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Login", style: .default) { [weak self] _ in
+        let alert = AlertFactory.adminLoginAlert { [weak self] username, password in
             guard let self else { return }
-            let username = alert.textFields?.first?.text ?? ""
-            let password = alert.textFields?.last?.text ?? ""
             if username == "admin" && password == "analytics" {
                 AdminSession.shared.logIn()
                 self.router.showAnalytics(from: self)
             } else {
-                let errorAlert = UIAlertController(title: "Login failed", message: "Incorrect username or password.", preferredStyle: .alert)
-                errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                let errorAlert = AlertFactory.okAlert(title: "Login failed", message: "Incorrect username or password.")
                 self.present(errorAlert, animated: true)
             }
-        })
+        }
         present(alert, animated: true)
     }
 }

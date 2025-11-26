@@ -124,10 +124,9 @@ final class AddEditPersonViewController: UIViewController {
         viewModel.updateGender(from: genderSegmentedControl.selectedSegmentIndex, titles: genderTitles)
         
         if let errorMessage = viewModel.validate() {
-            let alert = UIAlertController(title: "Invalid input", message: errorMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            let alert = AlertFactory.okAlert(title: "Invalid input", message: errorMessage) { [weak self] in
                 self?.fullNameTextField.becomeFirstResponder()
-            })
+            }
             present(alert, animated: true)
             return
         }
