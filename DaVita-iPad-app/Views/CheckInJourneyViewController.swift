@@ -81,13 +81,13 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         contentStackView.addArrangedSubview(makePainSection())
         contentStackView.addArrangedSubview(makeEnergySection())
         contentStackView.addArrangedSubview(makeMoodSection())
-        contentStackView.addArrangedSubview(makeTextSection(title: "Symptoms", textView: symptomsTextView, placeholder: "Any symptoms today?") )
-        contentStackView.addArrangedSubview(makeTextSection(title: "Concerns", textView: concernsTextView, placeholder: "Any concerns you want to share?") )
+        contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Symptoms", textView: symptomsTextView, placeholder: "Any symptoms today?") )
+        contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Concerns", textView: concernsTextView, placeholder: "Any concerns you want to share?") )
 
-        let teamNoteHeader = makeSectionHeader(text: "Anything you want the team to know?")
+        let teamNoteHeader = UIFactory.sectionHeader(text: "Anything you want the team to know?")
         teamNoteHeader.accessibilityTraits.insert(.header)
         contentStackView.addArrangedSubview(teamNoteHeader)
-        contentStackView.addArrangedSubview(makeTextSection(title: nil, textView: teamNoteTextView, placeholder: "Write a quick note...") )
+        contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: nil, textView: teamNoteTextView, placeholder: "Write a quick note...") )
 
         closeLabel.numberOfLines = 0
         closeLabel.textAlignment = .center
@@ -116,9 +116,9 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         energySegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
         moodSegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
 
-        configureTextView(symptomsTextView)
-        configureTextView(concernsTextView)
-        configureTextView(teamNoteTextView)
+        UIFactory.styleTextViewForForm(symptomsTextView)
+        UIFactory.styleTextViewForForm(concernsTextView)
+        UIFactory.styleTextViewForForm(teamNoteTextView)
 
         painSlider.isAccessibilityElement = true
         painSlider.accessibilityLabel = "Pain level"
@@ -133,18 +133,6 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         moodSegmentedControl.isAccessibilityElement = true
         moodSegmentedControl.accessibilityLabel = "Mood"
         moodSegmentedControl.accessibilityHint = "Select your mood today."
-    }
-
-    private func configureTextView(_ textView: UITextView) {
-        textView.font = UIFont.preferredFont(forTextStyle: .body)
-        textView.layer.borderWidth = 1
-        textView.layer.borderColor = UIColor.separator.cgColor
-        textView.layer.cornerRadius = 8
-        textView.isScrollEnabled = false
-        textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
-
-        textView.delegate = self
-        textView.isAccessibilityElement = true
     }
 
     private func makePainSection() -> UIView {
@@ -198,39 +186,6 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         container.addArrangedSubview(titleLabel)
         container.addArrangedSubview(moodSegmentedControl)
         return container
-    }
-
-    private func makeTextSection(title: String?, textView: UITextView, placeholder: String) -> UIView {
-        let container = UIStackView()
-        container.axis = .vertical
-        container.spacing = 8
-
-        if let title {
-            let titleLabel = UILabel()
-            titleLabel.text = title
-            titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-            titleLabel.accessibilityTraits.insert(.header)
-            container.addArrangedSubview(titleLabel)
-            textView.accessibilityLabel = title
-        }
-
-        let placeholderLabel = UILabel()
-        placeholderLabel.text = placeholder
-        placeholderLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
-        placeholderLabel.textColor = .secondaryLabel
-        placeholderLabel.isAccessibilityElement = false
-        container.addArrangedSubview(placeholderLabel)
-        container.addArrangedSubview(textView)
-
-        return container
-    }
-
-    private func makeSectionHeader(text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.font = UIFont.preferredFont(forTextStyle: .title2)
-        label.numberOfLines = 0
-        return label
     }
 
     @objc private func painSliderChanged(_ sender: UISlider) {

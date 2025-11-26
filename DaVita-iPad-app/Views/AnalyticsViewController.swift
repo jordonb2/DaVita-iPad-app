@@ -49,99 +49,45 @@ final class AnalyticsViewController: UIViewController {
     private func loadSummaryAndRender() {
         let summary = summaryProvider.makeSummary()
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "Engagement"))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Completed", value: "\(summary.totalSubmitted)"))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Skipped", value: "\(summary.totalSkipped)"))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Dismissed", value: "\(summary.totalDismissed)"))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Completion Rate", value: percentText(summary.completionRate)))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Skip Rate", value: percentText(summary.skipRate)))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Avg Completion Time", value: secondsText(summary.averageCompletionSeconds)))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Avg Skip Time", value: secondsText(summary.averageSkipSeconds)))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Engagement"))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Completed", value: "\(summary.totalSubmitted)"))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Skipped", value: "\(summary.totalSkipped)"))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Dismissed", value: "\(summary.totalDismissed)"))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Completion Rate", value: percentText(summary.completionRate)))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Skip Rate", value: percentText(summary.skipRate)))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Avg Completion Time", value: secondsText(summary.averageCompletionSeconds)))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Avg Skip Time", value: secondsText(summary.averageSkipSeconds)))
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "Responses"))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "High Pain Rate", value: percentText(summary.highPainRate)))
-        contentStackView.addArrangedSubview(makeKeyValueRow(title: "Low Energy Rate", value: percentText(summary.lowEnergyRate)))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Responses"))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "High Pain Rate", value: percentText(summary.highPainRate)))
+        contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Low Energy Rate", value: percentText(summary.lowEnergyRate)))
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "Step Drop-Off Signals"))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Step Drop-Off Signals"))
         let orderedSteps: [CheckInAnalyticsLogger.Step] = [.pain, .energy, .mood, .symptoms, .concerns, .teamNote]
         for step in orderedSteps {
             let count = summary.stepFirstInteractionCounts[step] ?? 0
-            contentStackView.addArrangedSubview(makeKeyValueRow(title: step.rawValue.capitalized, value: "\(count)"))
+            contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: step.rawValue.capitalized, value: "\(count)"))
         }
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "Top Symptoms"))
-        contentStackView.addArrangedSubview(makeCategoryList(summary.symptomCategoryCounts))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Top Symptoms"))
+        contentStackView.addArrangedSubview(UIFactory.categoryList(summary.symptomCategoryCounts))
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "Top Concerns"))
-        contentStackView.addArrangedSubview(makeCategoryList(summary.concernCategoryCounts))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Top Concerns"))
+        contentStackView.addArrangedSubview(UIFactory.categoryList(summary.concernCategoryCounts))
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "By Daypart"))
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "By Daypart"))
         for daypart in [Daypart.morning, Daypart.afternoon, Daypart.evening, Daypart.night] {
             let count = summary.submissionsByDaypart[daypart] ?? 0
-            contentStackView.addArrangedSubview(makeKeyValueRow(title: daypart.rawValue.capitalized, value: "\(count)"))
+            contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: daypart.rawValue.capitalized, value: "\(count)"))
         }
 
-        contentStackView.addArrangedSubview(makeSectionHeader(text: "History"))
-        contentStackView.addArrangedSubview(makeHistoryButton())
-    }
-
-    private func makeSectionHeader(text: String) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.font = UIFont.preferredFont(forTextStyle: .title2)
-        label.numberOfLines = 0
-        label.accessibilityTraits.insert(.header)
-        return label
-    }
-
-    private func makeKeyValueRow(title: String, value: String) -> UIView {
-        let container = UIStackView()
-        container.axis = .horizontal
-        container.alignment = .center
-        container.distribution = .fill
-
-        container.isAccessibilityElement = true
-        container.accessibilityLabel = "\(title), \(value)"
-
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.font = UIFont.preferredFont(forTextStyle: .body)
-        titleLabel.isAccessibilityElement = false
-
-        let valueLabel = UILabel()
-        valueLabel.text = value
-        valueLabel.font = UIFont.preferredFont(forTextStyle: .body)
-        valueLabel.textAlignment = .right
-        valueLabel.setContentHuggingPriority(.required, for: .horizontal)
-        valueLabel.isAccessibilityElement = false
-
-        container.addArrangedSubview(titleLabel)
-        container.addArrangedSubview(valueLabel)
-
-        return container
-    }
-
-    private func makeCategoryList(_ counts: [String: Int]) -> UIView {
-        let container = UIStackView()
-        container.axis = .vertical
-        container.spacing = 8
-
-        if counts.isEmpty {
-            let emptyLabel = UILabel()
-            emptyLabel.text = "—"
-            emptyLabel.textColor = .secondaryLabel
-            emptyLabel.isAccessibilityElement = true
-            emptyLabel.accessibilityLabel = "No data yet"
-            container.addArrangedSubview(emptyLabel)
-            return container
-        }
-
-        let sorted = counts.sorted { $0.value > $1.value }.prefix(5)
-        for (category, count) in sorted {
-            container.addArrangedSubview(makeKeyValueRow(title: category.replacingOccurrences(of: "_", with: " ").capitalized, value: "\(count)"))
-        }
-
-        return container
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "History"))
+        let historyButton = UIFactory.roundedActionButton(title: "View Visit History")
+        historyButton.addTarget(self, action: #selector(historyTapped), for: .touchUpInside)
+        historyButton.isAccessibilityElement = true
+        historyButton.accessibilityLabel = "View visit history"
+        historyButton.accessibilityHint = "Shows multi-visit check-in records by person."
+        contentStackView.addArrangedSubview(historyButton)
     }
 
     private func percentText(_ value: Double) -> String {
@@ -152,21 +98,6 @@ final class AnalyticsViewController: UIViewController {
     private func secondsText(_ value: Double) -> String {
         let roundedSeconds = Int(value.rounded())
         return "\(roundedSeconds)s"
-    }
-
-    private func makeHistoryButton() -> UIButton {
-        let button = UIButton(type: .system)
-        button.setTitle("View Visit History", for: .normal)
-        button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
-        button.contentHorizontalAlignment = .leading
-        button.backgroundColor = UIColor.secondarySystemBackground
-        button.layer.cornerRadius = 12
-        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
-        button.addTarget(self, action: #selector(historyTapped), for: .touchUpInside)
-        button.isAccessibilityElement = true
-        button.accessibilityLabel = "View visit history"
-        button.accessibilityHint = "Shows multi-visit check-in records by person."
-        return button
     }
 
     @objc private func historyTapped() {

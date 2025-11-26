@@ -97,15 +97,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		F76E43242E9700100056439C /* Coordinators */ = {
-			isa = PBXGroup;
-			children = (
-				F76E43232E9700020056439C /* AppCoordinator.swift */,
-				F76E43212E9700010056439C /* AppRouter.swift */,
-			);
-			path = Coordinators;
-			sourceTree = "<group>";
-		};
 		F76E42672E9071DD0056439C /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -164,6 +155,15 @@
 				F76E43142E95B121056439C /* CheckInRepository.swift */,
 			);
 			path = Storage;
+			sourceTree = "<group>";
+		};
+		F76E43242E9700100056439C /* Coordinators */ = {
+			isa = PBXGroup;
+			children = (
+				F76E43232E9700020056439C /* AppCoordinator.swift */,
+				F76E43212E9700010056439C /* AppRouter.swift */,
+			);
+			path = Coordinators;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
