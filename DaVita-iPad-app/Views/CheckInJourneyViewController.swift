@@ -1,6 +1,6 @@
 import UIKit
 
-final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, UIAdaptivePresentationControllerDelegate {
+final class CheckInJourneyViewController: ScrolledStackViewController, UITextViewDelegate, UIAdaptivePresentationControllerDelegate {
 
     var onComplete: ((PersonCheckInData) -> Void)?
     var onSkip: (() -> Void)?
@@ -17,9 +17,6 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
 
     private let surveyHeaderLabel = UILabel()
     private let closeLabel = UILabel()
-
-    private let scrollView = UIScrollView()
-    private let contentStackView = UIStackView()
 
     private let painSlider = UISlider()
     private let painValueLabel = UILabel()
@@ -39,7 +36,7 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Submit", style: .done, target: self, action: #selector(submitTapped))
 
-        configureLayout()
+        buildContent()
         configureSurveyControls()
 
         presentationController?.delegate = self
@@ -49,29 +46,9 @@ final class CheckInJourneyViewController: UIViewController, UITextViewDelegate, 
         super.viewDidAppear(animated)
         surveyStartDate = Date()
     }
+    override var stackSpacing: CGFloat { 20 }
 
-    private func configureLayout() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-
-        contentStackView.axis = .vertical
-        contentStackView.spacing = 20
-        contentStackView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(contentStackView)
-
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 24),
-            contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -24),
-            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 24),
-            contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -24),
-            contentStackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -48)
-        ])
-
+    private func buildContent() {
         surveyHeaderLabel.text = "How are you today?"
         surveyHeaderLabel.font = UIFont.preferredFont(forTextStyle: .title2)
         surveyHeaderLabel.numberOfLines = 0

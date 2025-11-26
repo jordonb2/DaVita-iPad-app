@@ -1,11 +1,8 @@
 import UIKit
 
-final class AnalyticsViewController: UIViewController {
+final class AnalyticsViewController: ScrolledStackViewController {
 
     var onLogoutConfirmed: (() -> Void)?
-
-    private let scrollView = UIScrollView()
-    private let contentStackView = UIStackView()
 
     private let summaryProvider = CheckInAnalyticsSummaryProvider()
 
@@ -19,31 +16,7 @@ final class AnalyticsViewController: UIViewController {
         isModalInPresentation = true
         presentationController?.delegate = self
 
-        configureLayout()
         loadSummaryAndRender()
-    }
-
-    private func configureLayout() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-
-        contentStackView.axis = .vertical
-        contentStackView.spacing = 16
-        contentStackView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(contentStackView)
-
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            contentStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 24),
-            contentStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -24),
-            contentStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 24),
-            contentStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -24),
-            contentStackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, constant: -48)
-        ])
     }
 
     private func loadSummaryAndRender() {
