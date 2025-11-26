@@ -5,6 +5,7 @@ import Foundation
 /// Admin-only multi-visit check-in history.
 final class CheckInHistoryViewController: StandardTableViewController {
     private let context: NSManagedObjectContext
+    private let personFilter: Person?
 
     /// Each section is a person, with their check-in records sorted newest first.
     private var sections: [(person: Person, records: [CheckInRecord])] = []
@@ -16,19 +17,25 @@ final class CheckInHistoryViewController: StandardTableViewController {
         return f
     }()
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
+    init(person: Person? = nil, context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
         self.context = context
+        self.personFilter = person
         super.init(style: .insetGrouped)
     }
 
     required init?(coder: NSCoder) {
         self.context = CoreDataStack.shared.viewContext
+        self.personFilter = nil
         super.init(coder: coder)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Visit History"
+        if let personFilter {
+            title = "\(personFilter.name ?? "Person") History"
+        } else {
+            title = "Visit History"
+        }
         view.backgroundColor = .systemBackground
 
         tableView.dataSource = self
@@ -45,6 +52,14 @@ final class CheckInHistoryViewController: StandardTableViewController {
     }
 
     private func loadSections() {
+        if let personFilter {
+            let recordSet = (personFilter.checkInRecords as? Set<CheckInRecord>) ?? []
+            let records = recordSet.sorted { ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast) }
+            sections = [(personFilter, records)]
+            tableView.reloadData()
+            return
+        }
+
         let fetch: NSFetchRequest<Person> = Person.fetchRequest()
         fetch.sortDescriptors = [
             NSSortDescriptor(key: "name", ascending: true),

@@ -159,7 +159,7 @@ import Combine
         tableView.deselectRow(at: indexPath, animated: true)
         let person = viewModel.person(at: indexPath)
 
-        router.showEditPerson(person, from: self) { [weak self] name, dob, gender, checkInData in
+        router.showPersonDetail(person, from: self) { [weak self] person, name, dob, gender, checkInData in
             self?.viewModel.update(person, name: name, gender: gender, dob: dob, checkInData: checkInData)
         }
     }
@@ -250,21 +250,6 @@ import Combine
     }
 
     @objc private func analyticsTapped() {
-        if AdminSession.shared.isLoggedIn {
-            router.showAnalytics(from: self)
-            return
-        }
-
-        let alert = AlertFactory.adminLoginAlert { [weak self] username, password in
-            guard let self else { return }
-            if username == "admin" && password == "analytics" {
-                AdminSession.shared.logIn()
-                self.router.showAnalytics(from: self)
-            } else {
-                let errorAlert = AlertFactory.okAlert(title: "Login failed", message: "Incorrect username or password.")
-                self.present(errorAlert, animated: true)
-            }
-        }
-        present(alert, animated: true)
+        router.showAnalytics(from: self)
     }
 }
