@@ -94,4 +94,76 @@ final class CheckInService {
         try save()
         createCheckInRecord(for: person, data: data, at: date)
     }
+
+
+    // MARK: - Derived latest check-in (from history)
+
+    /// Fetches the most recent `CheckInRecord` for a person.
+    ///
+    /// This is the source of truth for "latest check-in". `Person` also stores denormalized latest fields
+    /// for fast UI display; use `ensureLatestFieldsConsistent(for:)` to reconcile.
+    func fetchLatestCheckInRecord(for person: Person) -> CheckInRecord? {
+        guard let ctx = person.managedObjectContext else { return nil }
+        let repo = CheckInRepository(context: ctx)
+        do {
+            return try repo.fetchMostRecent(for: person)
+        } catch {
+            print("CheckInService latest fetch error: \(error)")
+            return nil
+        }
+    }
+
+    /// Converts the most recent `CheckInRecord` into a `PersonCheckInData` snapshot.
+    func latestCheckInDataDerived(for person: Person) -> PersonCheckInData? {
+        guard let record = fetchLatestCheckInRecord(for: person) else { return nil }
+
+        // Prefer buckets, fall back to legacy strings.
+        let energyBucket: EnergyBucket? = {
+            if let n = record.value(forKey: "energyBucket") as? NSNumber {
+                return EnergyBucket(rawValue: n.int16Value)
+            }
+            return EnergyBucket.from(legacyText: record.energyLevel)
+        }()
+
+        let moodBucket: MoodBucket? = {
+            if let n = record.value(forKey: "moodBucket") as? NSNumber {
+                return MoodBucket(rawValue: n.int16Value)
+            }
+            return MoodBucket.from(legacyText: record.mood)
+        }()
+
+        return PersonCheckInData(
+            painLevel: record.painLevel,
+            energyBucket: energyBucket,
+            moodBucket: moodBucket,
+            symptoms: record.symptoms,
+            concerns: record.concerns,
+            teamNote: record.teamNote
+        )
+    }
+
+    /// Keeps `Person`'s denormalized "latest check-in" fields consistent with the newest `CheckInRecord`.
+    ///
+    /// - Note: This does not save; callers control save boundaries.
+    func ensureLatestFieldsConsistent(for person: Person) {
+        guard let ctx = person.managedObjectContext else { return }
+
+        ctx.performAndWait {
+            guard let derived = latestCheckInDataDerived(for: person) else {
+                // No records: clear latest fields.
+                person.checkInPain = 0
+                person.checkInEnergy = nil
+                person.checkInMood = nil
+                person.checkInSymptoms = nil
+                person.checkInConcerns = nil
+                person.checkInTeamNote = nil
+                person.setValue(nil, forKey: "checkInEnergyBucket")
+                person.setValue(nil, forKey: "checkInMoodBucket")
+                return
+            }
+
+            // Re-apply the latest fields from derived history.
+            applyLatestCheckInFields(to: person, data: derived)
+        }
+    }
 }
