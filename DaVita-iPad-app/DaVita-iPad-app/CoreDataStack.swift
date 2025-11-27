@@ -22,6 +22,9 @@ final class CoreDataStack {
             if let error = error {
                 fatalError("Core Data load error: \(error)")
             }
+            // Fail fast if the on-disk store isn't compatible with the current model.
+            // This catches non-lightweight migration changes early (during startup) rather than later at runtime.
+            CoreDataStack.validateStoreCompatibility(container: c)
         }
         c.viewContext.automaticallyMergesChangesFromParent = true
         return c
@@ -40,3 +43,32 @@ final class CoreDataStack {
         if ctx.hasChanges { try? ctx.save() }
     }
 }
+
+private extension CoreDataStack {
+    static func validateStoreCompatibility(container: NSPersistentContainer) {
+        let coordinator = container.persistentStoreCoordinator
+        let model = container.managedObjectModel
+
+        for store in coordinator.persistentStores {
+            guard let url = store.url else { continue }
+            do {
+                let metadata = try NSPersistentStoreCoordinator.metadataForPersistentStore(
+                    ofType: store.type,
+                    at: url,
+                    options: store.options
+                )
+
+                guard model.isConfiguration(withName: nil, compatibleWithStoreMetadata: metadata) else {
+                    let storeName = url.lastPathComponent
+                    let message = "Persistent store '\(storeName)' is not compatible with the current model. " +
+                        "This likely means a model change requires a manual migration (not lightweight)."
+                    fatalError(message)
+                }
+            } catch {
+                let storeName = url.lastPathComponent
+                fatalError("Failed reading Core Data store metadata for '\(storeName)': \(error)")
+            }
+        }
+    }
+}
+
