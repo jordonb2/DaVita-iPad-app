@@ -231,13 +231,13 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
     @objc private func submitTapped() {
         let painLevel = Int16(painSlider.value)
-        let energyText = energySegmentedControl.selectedSegmentIndex == UISegmentedControl.noSegment ? nil : energySegmentedControl.titleForSegment(at: energySegmentedControl.selectedSegmentIndex)
-        let moodText = moodSegmentedControl.selectedSegmentIndex == UISegmentedControl.noSegment ? nil : moodSegmentedControl.titleForSegment(at: moodSegmentedControl.selectedSegmentIndex)
+        let energyBucket: EnergyBucket? = energySegmentedControl.selectedSegmentIndex == UISegmentedControl.noSegment ? nil : EnergyBucket(rawValue: Int16(energySegmentedControl.selectedSegmentIndex))
+        let moodBucket: MoodBucket? = moodSegmentedControl.selectedSegmentIndex == UISegmentedControl.noSegment ? nil : MoodBucket(rawValue: Int16(moodSegmentedControl.selectedSegmentIndex))
 
         let data = PersonCheckInData(
             painLevel: painLevel,
-            energyLevel: energyText,
-            mood: moodText,
+            energyBucket: energyBucket,
+            moodBucket: moodBucket,
             symptoms: symptomsTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
             concerns: concernsTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
             teamNote: teamNoteTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)

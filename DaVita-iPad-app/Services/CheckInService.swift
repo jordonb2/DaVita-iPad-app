@@ -17,8 +17,18 @@ final class CheckInService {
         guard let context = person.managedObjectContext else {
             // Shouldn't happen in normal app flow; keep it non-fatal.
             person.checkInPain = data.painLevel ?? 0
-            person.checkInEnergy = data.energyLevel
-            person.checkInMood = data.mood
+            if let b = data.energyBucket {
+                person.setValue(b.rawValue, forKey: "checkInEnergyBucket")
+            } else {
+                person.setValue(nil, forKey: "checkInEnergyBucket")
+            }
+            if let b = data.moodBucket {
+                person.setValue(b.rawValue, forKey: "checkInMoodBucket")
+            } else {
+                person.setValue(nil, forKey: "checkInMoodBucket")
+            }
+            person.checkInEnergy = data.energyLevelText
+            person.checkInMood = data.moodText
             person.checkInSymptoms = data.symptoms
             person.checkInConcerns = data.concerns
             person.checkInTeamNote = data.teamNote
@@ -27,8 +37,18 @@ final class CheckInService {
 
         context.performAndWait {
             person.checkInPain = data.painLevel ?? 0
-            person.checkInEnergy = data.energyLevel
-            person.checkInMood = data.mood
+            if let b = data.energyBucket {
+                person.setValue(b.rawValue, forKey: "checkInEnergyBucket")
+            } else {
+                person.setValue(nil, forKey: "checkInEnergyBucket")
+            }
+            if let b = data.moodBucket {
+                person.setValue(b.rawValue, forKey: "checkInMoodBucket")
+            } else {
+                person.setValue(nil, forKey: "checkInMoodBucket")
+            }
+            person.checkInEnergy = data.energyLevelText
+            person.checkInMood = data.moodText
             person.checkInSymptoms = data.symptoms
             person.checkInConcerns = data.concerns
             person.checkInTeamNote = data.teamNote

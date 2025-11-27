@@ -101,8 +101,27 @@ final class CheckInHistoryViewController: StandardTableViewController {
             painText = "Pain 0"
         }
 
-        let energyText = record.energyLevel?.isEmpty == false ? "Energy \(record.energyLevel!)" : "Energy —"
-        let moodText = record.mood?.isEmpty == false ? "Mood \(record.mood!)" : "Mood —"
+        let energyText: String = {
+            if let n = record.value(forKey: "energyBucket") as? NSNumber,
+               let b = EnergyBucket(rawValue: n.int16Value) {
+                return "Energy \(b.displayText)"
+            }
+            if let legacy = record.energyLevel, !legacy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "Energy \(legacy)"
+            }
+            return "Energy —"
+        }()
+
+        let moodText: String = {
+            if let n = record.value(forKey: "moodBucket") as? NSNumber,
+               let b = MoodBucket(rawValue: n.int16Value) {
+                return "Mood \(b.displayText)"
+            }
+            if let legacy = record.mood, !legacy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return "Mood \(legacy)"
+            }
+            return "Mood —"
+        }()
 
         return "\(painText) • \(energyText) • \(moodText)"
     }

@@ -17,8 +17,23 @@ final class CheckInRepository {
         record.id = UUID()
         record.createdAt = date
         record.painLevel = data.painLevel ?? 0
-        record.energyLevel = data.energyLevel
-        record.mood = data.mood
+
+        // Canonical buckets (preferred)
+        if let b = data.energyBucket {
+            record.setValue(b.rawValue, forKey: "energyBucket")
+        } else {
+            record.setValue(nil, forKey: "energyBucket")
+        }
+        if let b = data.moodBucket {
+            record.setValue(b.rawValue, forKey: "moodBucket")
+        } else {
+            record.setValue(nil, forKey: "moodBucket")
+        }
+
+        // Keep legacy string fields populated with canonical text to avoid drift + preserve UI.
+        record.energyLevel = data.energyLevelText
+        record.mood = data.moodText
+
         record.symptoms = data.symptoms
         record.concerns = data.concerns
         record.teamNote = data.teamNote

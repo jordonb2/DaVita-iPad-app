@@ -8,7 +8,9 @@
         <attribute name="name" attributeType="String"/>
         <attribute name="checkInPain" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="checkInEnergy" optional="YES" attributeType="String"/>
+        <attribute name="checkInEnergyBucket" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="checkInMood" optional="YES" attributeType="String"/>
+        <attribute name="checkInMoodBucket" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="checkInSymptoms" optional="YES" attributeType="String"/>
         <attribute name="checkInConcerns" optional="YES" attributeType="String"/>
         <attribute name="checkInTeamNote" optional="YES" attributeType="String"/>
@@ -19,7 +21,9 @@
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="painLevel" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="energyLevel" optional="YES" attributeType="String"/>
+        <attribute name="energyBucket" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="mood" optional="YES" attributeType="String"/>
+        <attribute name="moodBucket" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
         <attribute name="symptoms" optional="YES" attributeType="String"/>
         <attribute name="concerns" optional="YES" attributeType="String"/>
         <attribute name="teamNote" optional="YES" attributeType="String"/>

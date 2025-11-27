@@ -141,7 +141,7 @@ final class AddEditPersonViewController: UIViewController {
             }
         }, onSkip: { [weak self] in
             guard let self else { return }
-            let emptyCheckIn = PersonCheckInData(painLevel: nil, energyLevel: nil, mood: nil, symptoms: nil, concerns: nil, teamNote: nil)
+            let emptyCheckIn = PersonCheckInData(painLevel: nil, energyBucket: nil, moodBucket: nil, symptoms: nil, concerns: nil, teamNote: nil)
             self.onSave?(draft.name, draft.dob, draft.gender, emptyCheckIn)
             self.dismiss(animated: true) { [weak self] in
                 self?.dismiss(animated: true, completion: nil)

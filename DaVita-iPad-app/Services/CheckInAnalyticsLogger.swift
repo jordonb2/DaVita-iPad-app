@@ -90,8 +90,8 @@ private struct Payload {
 
     static func from(checkInData: PersonCheckInData) -> Payload {
         let painBucket = PainBucket.from(painLevel: checkInData.painLevel)?.rawValue
-        let energyBucket = EnergyBucket.from(energyLevelText: checkInData.energyLevel)?.rawValue
-        let moodBucket = MoodBucket.from(moodText: checkInData.mood)?.rawValue
+        let energyBucket = checkInData.energyBucket?.rawValue
+        let moodBucket = checkInData.moodBucket?.rawValue
 
         let symptomCategories = TextCategorizer.categorizeSymptoms(from: checkInData.symptoms)
         let concernCategories = TextCategorizer.categorizeConcerns(from: checkInData.concerns)
@@ -121,34 +121,3 @@ private enum PainBucket: Int16 {
     }
 }
 
-private enum EnergyBucket: Int16 {
-    case low = 0
-    case okay = 1
-    case high = 2
-
-    static func from(energyLevelText: String?) -> EnergyBucket? {
-        guard let energyLevelText else { return nil }
-        switch energyLevelText.lowercased() {
-        case "low": return .low
-        case "okay": return .okay
-        case "high": return .high
-        default: return nil
-        }
-    }
-}
-
-private enum MoodBucket: Int16 {
-    case sad = 0
-    case neutral = 1
-    case good = 2
-
-    static func from(moodText: String?) -> MoodBucket? {
-        guard let moodText else { return nil }
-        switch moodText.lowercased() {
-        case "sad": return .sad
-        case "neutral": return .neutral
-        case "good": return .good
-        default: return nil
-        }
-    }
-}
