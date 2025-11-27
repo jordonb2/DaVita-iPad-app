@@ -25,13 +25,20 @@ final class PersonRepository {
         return controller
     }
 
-    func createPerson(name: String, gender: String?, dob: Date?) -> Person {
+    func createPerson(
+        id: UUID = UUID(),
+        createdAt: Date = Date(),
+        name: String,
+        gender: String?,
+        dob: Date?
+    ) -> Person {
         let p = Person(context: context)
-        p.id = UUID()
+        // Enforce non-optional identity + timestamps at creation time.
+        p.id = id
+        p.createdAt = createdAt
         p.name = name
         p.gender = gender
         p.dob = dob
-        p.createdAt = Date()
         return p
     }
 

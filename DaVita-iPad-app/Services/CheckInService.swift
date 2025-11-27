@@ -71,7 +71,7 @@ final class CheckInService {
                 }
 
                 let repo = CheckInRepository(context: bgContext)
-                _ = repo.createRecord(for: bgPerson, data: data, at: date)
+                _ = repo.createRecord(createdAt: date, for: bgPerson, data: data)
 
                 if bgContext.hasChanges {
                     try bgContext.save()

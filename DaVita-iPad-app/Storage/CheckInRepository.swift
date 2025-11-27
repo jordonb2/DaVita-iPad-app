@@ -12,10 +12,16 @@ final class CheckInRepository {
     // MARK: - Creates
 
     @discardableResult
-    func createRecord(for person: Person, data: PersonCheckInData, at date: Date = Date()) -> CheckInRecord {
+    func createRecord(
+        id: UUID = UUID(),
+        createdAt: Date = Date(),
+        for person: Person,
+        data: PersonCheckInData
+    ) -> CheckInRecord {
         let record = CheckInRecord(context: context)
-        record.id = UUID()
-        record.createdAt = date
+        // Enforce non-optional identity + timestamps at creation time.
+        record.id = id
+        record.createdAt = createdAt
         record.painLevel = data.painLevel ?? 0
 
         // Canonical buckets (preferred)
