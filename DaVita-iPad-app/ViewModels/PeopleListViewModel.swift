@@ -21,11 +21,12 @@ final class PeopleListViewModel: NSObject {
         return peopleRepo.makePeopleFRC(delegate: self)
     }()
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
-        self.context = context
-        self.peopleRepo = PersonRepository(context: context)
-        let checkInRepo = CheckInRepository(context: context)
-        let checkInService = CheckInService(checkInRepo: checkInRepo)
+    init(coreDataStack: CoreDataStack = CoreDataStack.shared,
+         context: NSManagedObjectContext? = nil) {
+        let ctx = context ?? coreDataStack.viewContext
+        self.context = ctx
+        self.peopleRepo = PersonRepository(context: ctx)
+        let checkInService = CheckInService(coreDataStack: coreDataStack)
         self.personService = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
         super.init()
         do {

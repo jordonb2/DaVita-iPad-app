@@ -14,10 +14,13 @@ final class PersonService {
     @discardableResult
     func addPerson(name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws -> Person {
         let person = peopleRepo.createPerson(name: name, gender: gender, dob: dob)
+
         if let checkInData {
-            checkInService.writeCheckIn(for: person, data: checkInData)
+            try checkInService.writeCheckIn(for: person, data: checkInData, savingUsing: peopleRepo.save)
+        } else {
+            try peopleRepo.save()
         }
-        try peopleRepo.save()
+
         return person
     }
 
@@ -25,10 +28,12 @@ final class PersonService {
         person.name = name
         person.gender = gender
         person.dob = dob
+
         if let checkInData {
-            checkInService.writeCheckIn(for: person, data: checkInData)
+            try checkInService.writeCheckIn(for: person, data: checkInData, savingUsing: peopleRepo.save)
+        } else {
+            try peopleRepo.save()
         }
-        try peopleRepo.save()
     }
 
     func deletePerson(_ person: Person) throws {

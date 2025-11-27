@@ -1,39 +1,77 @@
 import Foundation
+import CoreData
 
 /// Business logic layer for writing check-ins.
 ///
 /// Centralizes:
-/// - creating a `CheckInRecord`
-/// - updating the "latest check-in" fields on `Person`
-///
-/// Note: This service does **not** save the Core Data context; callers control transaction boundaries.
+/// - updating the "latest check-in" fields on `Person` (in the person's context)
+/// - creating a `CheckInRecord` on a background context (to keep UI smooth)
 final class CheckInService {
-    private let checkInRepo: CheckInRepository
+    private let coreDataStack: CoreDataStack
 
-    init(checkInRepo: CheckInRepository) {
-        self.checkInRepo = checkInRepo
+    init(coreDataStack: CoreDataStack = .shared) {
+        self.coreDataStack = coreDataStack
     }
 
     func applyLatestCheckInFields(to person: Person, data: PersonCheckInData) {
-        person.checkInPain = data.painLevel ?? 0
-        person.checkInEnergy = data.energyLevel
-        person.checkInMood = data.mood
-        person.checkInSymptoms = data.symptoms
-        person.checkInConcerns = data.concerns
-        person.checkInTeamNote = data.teamNote
+        guard let context = person.managedObjectContext else {
+            // Shouldn't happen in normal app flow; keep it non-fatal.
+            person.checkInPain = data.painLevel ?? 0
+            person.checkInEnergy = data.energyLevel
+            person.checkInMood = data.mood
+            person.checkInSymptoms = data.symptoms
+            person.checkInConcerns = data.concerns
+            person.checkInTeamNote = data.teamNote
+            return
+        }
+
+        context.performAndWait {
+            person.checkInPain = data.painLevel ?? 0
+            person.checkInEnergy = data.energyLevel
+            person.checkInMood = data.mood
+            person.checkInSymptoms = data.symptoms
+            person.checkInConcerns = data.concerns
+            person.checkInTeamNote = data.teamNote
+        }
     }
 
-    /// Creates a new `CheckInRecord` (but does not save).
-    @discardableResult
-    func createCheckInRecord(for person: Person, data: PersonCheckInData, at date: Date = Date()) -> CheckInRecord {
-        checkInRepo.createRecord(for: person, data: data, at: date)
+    /// Creates a new `CheckInRecord` on a background context and saves that background context.
+    ///
+    /// Important: the `Person` must already be saved to the persistent store so it can be resolved
+    /// by `objectID` from the background context.
+    func createCheckInRecord(for person: Person, data: PersonCheckInData, at date: Date = Date()) {
+        let personID = person.objectID
+        let bgContext = coreDataStack.newBackgroundContext()
+
+        bgContext.perform {
+            do {
+                guard let bgPerson = try bgContext.existingObject(with: personID) as? Person else {
+                    print("CheckInService: Failed to resolve Person in background context")
+                    return
+                }
+
+                let repo = CheckInRepository(context: bgContext)
+                _ = repo.createRecord(for: bgPerson, data: data, at: date)
+
+                if bgContext.hasChanges {
+                    try bgContext.save()
+                }
+            } catch {
+                print("CheckInService background save error: \(error)")
+            }
+        }
     }
 
-    /// Convenience for the common write flow used by multiple screens:
-    /// update latest fields + create a record (but does not save).
-    @discardableResult
-    func writeCheckIn(for person: Person, data: PersonCheckInData, at date: Date = Date()) -> CheckInRecord {
+    /// Common write flow used by multiple screens:
+    /// 1) update latest fields on the `Person` (in UI context)
+    /// 2) caller saves their context (transaction boundary)
+    /// 3) create the `CheckInRecord` on a background context
+    func writeCheckIn(for person: Person,
+                      data: PersonCheckInData,
+                      at date: Date = Date(),
+                      savingUsing save: () throws -> Void) rethrows {
         applyLatestCheckInFields(to: person, data: data)
-        return createCheckInRecord(for: person, data: data, at: date)
+        try save()
+        createCheckInRecord(for: person, data: data, at: date)
     }
 }
