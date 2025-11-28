@@ -17,6 +17,9 @@ final class CoreDataStack {
         if let storeDescription = c.persistentStoreDescriptions.first {
             storeDescription.shouldMigrateStoreAutomatically = true
             storeDescription.shouldInferMappingModelAutomatically = true
+            // Encrypt-at-rest via iOS Data Protection when the device is locked.
+            // This is the lowest-friction option and requires no third-party dependencies.
+            storeDescription.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
         }
         c.loadPersistentStores { _, error in
             if let error = error {
@@ -25,6 +28,7 @@ final class CoreDataStack {
             // Fail fast if the on-disk store isn't compatible with the current model.
             // This catches non-lightweight migration changes early (during startup) rather than later at runtime.
             CoreDataStack.validateStoreCompatibility(container: c)
+            CoreDataStack.enforceStoreFileProtection(container: c)
         }
         c.viewContext.automaticallyMergesChangesFromParent = true
         return c
@@ -68,6 +72,28 @@ private extension CoreDataStack {
                 let storeName = url.lastPathComponent
                 fatalError("Failed reading Core Data store metadata for '\(storeName)': \(error)")
             }
+        }
+    }
+
+
+    static func enforceStoreFileProtection(container: NSPersistentContainer) {
+        let coordinator = container.persistentStoreCoordinator
+        for store in coordinator.persistentStores {
+            guard let url = store.url else { continue }
+            setProtectionComplete(for: url)
+            // SQLite sidecars
+            setProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-wal"))
+            setProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-shm"))
+        }
+    }
+
+    static func setProtectionComplete(for url: URL) {
+        let path = url.path
+        guard FileManager.default.fileExists(atPath: path) else { return }
+        do {
+            try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: path)
+        } catch {
+            print("Failed to set file protection for \(url.lastPathComponent): \(error)")
         }
     }
 }
