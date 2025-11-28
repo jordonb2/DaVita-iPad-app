@@ -8,10 +8,10 @@ class ScrolledStackViewController: UIViewController {
     let contentStackView = UIStackView()
 
     /// Override to customize stack spacing.
-    var stackSpacing: CGFloat { 16 }
+    var stackSpacing: CGFloat { UIFactory.Theme.Spacing.l }
 
     /// Override to customize content insets inside the scroll view.
-    var contentInsets: UIEdgeInsets { UIEdgeInsets(top: 24, left: 24, bottom: 24, right: 24) }
+    var contentInsets: UIEdgeInsets { UIEdgeInsets(top: UIFactory.Theme.Spacing.xxl, left: UIFactory.Theme.Spacing.xxl, bottom: UIFactory.Theme.Spacing.xxl, right: UIFactory.Theme.Spacing.xxl) }
 
     override func viewDidLoad() {
         super.viewDidLoad()

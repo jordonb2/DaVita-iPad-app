@@ -42,10 +42,10 @@ class StandardTableViewController: UIViewController {
 enum TableStyler {
     static func applyPeopleListStyle(to tableView: UITableView) {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
-        tableView.separatorColor = UIColor.secondarySystemBackground
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: UIFactory.Theme.Spacing.xxl, bottom: 0, right: UIFactory.Theme.Spacing.xxl)
+        tableView.separatorColor = UIFactory.Theme.Color.surfaceElevated
         tableView.backgroundColor = UIColor.systemGroupedBackground
-        tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 36, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: UIFactory.Theme.Spacing.m, left: 0, bottom: UIFactory.Theme.Spacing.huge, right: 0)
     }
 
     static func applyHistoryStyle(to tableView: UITableView) {

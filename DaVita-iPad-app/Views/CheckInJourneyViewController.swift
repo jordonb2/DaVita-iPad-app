@@ -46,7 +46,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         super.viewDidAppear(animated)
         surveyStartDate = Date()
     }
-    override var stackSpacing: CGFloat { 20 }
+    override var stackSpacing: CGFloat { UIFactory.Theme.Spacing.xl }
 
     private func buildContent() {
         surveyHeaderLabel.text = "How are you today?"
@@ -69,7 +69,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         closeLabel.numberOfLines = 0
         closeLabel.textAlignment = .center
         closeLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-        closeLabel.textColor = .secondaryLabel
+        closeLabel.textColor = UIFactory.Theme.Color.textSecondary
         closeLabel.text = "Thanks for your response, your care team will review this before your session."
         closeLabel.isAccessibilityElement = true
         closeLabel.accessibilityLabel = closeLabel.text
@@ -115,7 +115,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private func makePainSection() -> UIView {
         let container = UIStackView()
         container.axis = .vertical
-        container.spacing = 8
+        container.spacing = UIFactory.Theme.Spacing.s
 
         let titleRow = UIStackView()
         titleRow.axis = .horizontal
@@ -138,7 +138,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private func makeEnergySection() -> UIView {
         let container = UIStackView()
         container.axis = .vertical
-        container.spacing = 8
+        container.spacing = UIFactory.Theme.Spacing.s
 
         let titleLabel = UILabel()
         titleLabel.text = "Energy"
@@ -153,7 +153,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private func makeMoodSection() -> UIView {
         let container = UIStackView()
         container.axis = .vertical
-        container.spacing = 8
+        container.spacing = UIFactory.Theme.Spacing.s
 
         let titleLabel = UILabel()
         titleLabel.text = "Mood"

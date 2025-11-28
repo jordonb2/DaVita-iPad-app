@@ -37,8 +37,8 @@ final class LandingHeroHeaderView: UIView {
     private let gradientLayer: CAGradientLayer = {
         let layer = CAGradientLayer()
         layer.colors = [
-            UIColor.systemTeal.withAlphaComponent(0.9).cgColor,
-            UIColor.systemIndigo.withAlphaComponent(0.9).cgColor
+            UIFactory.Theme.Color.heroGradientStart.withAlphaComponent(0.9).cgColor,
+            UIFactory.Theme.Color.heroGradientEnd.withAlphaComponent(0.9).cgColor
         ]
         layer.startPoint = CGPoint(x: 0, y: 0)
         layer.endPoint = CGPoint(x: 1, y: 1)
@@ -49,7 +49,7 @@ final class LandingHeroHeaderView: UIView {
         let blur = UIBlurEffect(style: .systemMaterialLight)
         let view = UIVisualEffectView(effect: blur)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.layer.cornerRadius = 24
+        view.layer.cornerRadius = UIFactory.Theme.CornerRadius.xl
         view.clipsToBounds = true
         return view
     }()
@@ -58,7 +58,7 @@ final class LandingHeroHeaderView: UIView {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .vertical
-        stack.spacing = 16
+        stack.spacing = UIFactory.Theme.Spacing.l
         return stack
     }()
 
@@ -69,7 +69,7 @@ final class LandingHeroHeaderView: UIView {
         label.textColor = .white
         label.backgroundColor = UIColor.white.withAlphaComponent(0.18)
         label.textAlignment = .center
-        label.layer.cornerRadius = 12
+        label.layer.cornerRadius = UIFactory.Theme.CornerRadius.m
         label.clipsToBounds = true
         label.text = "CLIENT SUCCESS"
         label.setContentCompressionResistancePriority(.required, for: .vertical)
@@ -111,7 +111,7 @@ final class LandingHeroHeaderView: UIView {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .horizontal
-        stack.spacing = 12
+        stack.spacing = UIFactory.Theme.Spacing.m
         stack.distribution = .fillEqually
         return stack
     }()
@@ -121,9 +121,9 @@ final class LandingHeroHeaderView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Add Client", for: .normal)
         button.backgroundColor = UIColor.white
-        button.setTitleColor(.systemIndigo, for: .normal)
+        button.setTitleColor(UIFactory.Theme.Color.accent, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        button.layer.cornerRadius = 14
+        button.layer.cornerRadius = UIFactory.Theme.CornerRadius.l
         button.heightAnchor.constraint(equalToConstant: 54).isActive = true
         return button
     }()
@@ -136,7 +136,7 @@ final class LandingHeroHeaderView: UIView {
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
-        button.layer.cornerRadius = 14
+        button.layer.cornerRadius = UIFactory.Theme.CornerRadius.l
         button.heightAnchor.constraint(equalToConstant: 54).isActive = true
         return button
     }()
@@ -145,7 +145,7 @@ final class LandingHeroHeaderView: UIView {
         let stack = UIStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.axis = .horizontal
-        stack.spacing = 12
+        stack.spacing = UIFactory.Theme.Spacing.m
         stack.distribution = .fillEqually
         return stack
     }()
@@ -164,7 +164,7 @@ final class LandingHeroHeaderView: UIView {
 
     private func commonInit() {
         translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 32
+        layer.cornerRadius = UIFactory.Theme.CornerRadius.xxl
         clipsToBounds = true
         layer.insertSublayer(gradientLayer, at: 0)
 

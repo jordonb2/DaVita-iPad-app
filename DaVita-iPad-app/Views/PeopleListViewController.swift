@@ -35,15 +35,15 @@ import Combine
         button.translatesAutoresizingMaskIntoConstraints = false
         let image = UIImage(systemName: "ellipsis")
         button.setImage(image, for: .normal)
-        button.tintColor = .secondaryLabel
-        button.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
-        button.layer.cornerRadius = 24
+        button.tintColor = UIFactory.Theme.Color.textSecondary
+        button.backgroundColor = UIFactory.Theme.Color.fabBackground
+        button.layer.cornerRadius = UIFactory.Theme.CornerRadius.fab
         button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOpacity = 0.12
-        button.layer.shadowRadius = 8
-        button.layer.shadowOffset = CGSize(width: 0, height: 2)
-        button.widthAnchor.constraint(equalToConstant: 48).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        button.layer.shadowOpacity = UIFactory.Theme.Metrics.fabShadowOpacity
+        button.layer.shadowRadius = UIFactory.Theme.Metrics.fabShadowRadius
+        button.layer.shadowOffset = UIFactory.Theme.Metrics.fabShadowOffset
+        button.widthAnchor.constraint(equalToConstant: UIFactory.Theme.Metrics.fabSize).isActive = true
+        button.heightAnchor.constraint(equalToConstant: UIFactory.Theme.Metrics.fabSize).isActive = true
         button.isAccessibilityElement = true
         button.accessibilityLabel = "Analytics"
         button.accessibilityHint = "Admin login to view check-in analytics."
