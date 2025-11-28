@@ -17,6 +17,8 @@ final class AnalyticsViewController: ScrolledStackViewController {
         presentationController?.delegate = self
 
         loadSummaryAndRender()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(adminDidAutoLogout), name: .adminSessionDidAutoLogout, object: nil)
     }
 
     private func loadSummaryAndRender() {
@@ -94,7 +96,18 @@ final class AnalyticsViewController: ScrolledStackViewController {
         }
         present(alert, animated: true)
     }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func adminDidAutoLogout() {
+        // Auto-dismiss analytics when the admin session expires.
+        onLogoutConfirmed?()
+    }
+
 }
+
 
 extension AnalyticsViewController: UIAdaptivePresentationControllerDelegate {
     func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
