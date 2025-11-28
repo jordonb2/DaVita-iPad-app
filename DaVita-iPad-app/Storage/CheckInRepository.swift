@@ -1,6 +1,33 @@
 import Foundation
 import CoreData
 
+/// Typed filter for check-in history queries.
+struct CheckInHistoryFilter {
+    /// Inclusive start date (>=). Nil = no lower bound.
+    var startDate: Date?
+
+    /// Inclusive end date (<=). Nil = no upper bound.
+    var endDate: Date?
+
+    /// Symptom/concern keyword (case/diacritic-insensitive). Nil/empty = no keyword filter.
+    var keyword: String?
+
+    /// Maximum number of records (newest first). Nil = no limit.
+    var limit: Int?
+
+    init(startDate: Date? = nil, endDate: Date? = nil, keyword: String? = nil, limit: Int? = nil) {
+        self.startDate = startDate
+        self.endDate = endDate
+        self.keyword = keyword
+        self.limit = limit
+    }
+
+    var normalizedKeyword: String? {
+        guard let keyword = keyword?.trimmingCharacters(in: .whitespacesAndNewlines), !keyword.isEmpty else { return nil }
+        return keyword
+    }
+}
+
 /// Pure persistence layer for `CheckInRecord`.
 final class CheckInRepository {
     private let context: NSManagedObjectContext
@@ -51,16 +78,26 @@ final class CheckInRepository {
 
     /// Fetch full check-in history for a person, newest first.
     func fetchHistory(for person: Person, limit: Int? = nil) throws -> [CheckInRecord] {
+        try fetchHistory(for: person, filter: CheckInHistoryFilter(limit: limit))
+    }
+
+    /// Fetch full check-in history for a person with filters, newest first.
+    func fetchHistory(for person: Person, filter: CheckInHistoryFilter) throws -> [CheckInRecord] {
         let personInContext = try resolve(person: person)
-        return try fetchHistory(forResolvedPerson: personInContext, limit: limit)
+        return try fetchHistory(forResolvedPerson: personInContext, filter: filter)
     }
 
     /// Fetch full check-in history for a person by `objectID`, newest first.
     func fetchHistory(personID: NSManagedObjectID, limit: Int? = nil) throws -> [CheckInRecord] {
+        try fetchHistory(personID: personID, filter: CheckInHistoryFilter(limit: limit))
+    }
+
+    /// Fetch full check-in history for a person by `objectID` with filters, newest first.
+    func fetchHistory(personID: NSManagedObjectID, filter: CheckInHistoryFilter) throws -> [CheckInRecord] {
         guard let person = try context.existingObject(with: personID) as? Person else {
-            throw NSError(domain: "CheckInRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "Person not found for objectID"]) 
+            throw NSError(domain: "CheckInRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "Person not found for objectID"])
         }
-        return try fetchHistory(forResolvedPerson: person, limit: limit)
+        return try fetchHistory(forResolvedPerson: person, filter: filter)
     }
 
     /// Fetch the most recent check-in for a person.
@@ -75,9 +112,17 @@ final class CheckInRepository {
 
     /// Fetch the last N check-ins across all people (newest first).
     func fetchLastVisits(limit: Int) throws -> [CheckInRecord] {
+        try fetchVisits(filter: CheckInHistoryFilter(limit: limit))
+    }
+
+    /// Fetch check-in records across all people with filters (newest first).
+    func fetchVisits(filter: CheckInHistoryFilter) throws -> [CheckInRecord] {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
-        request.fetchLimit = max(0, limit)
+        request.predicate = predicate(for: filter, person: nil)
+        if let limit = filter.limit {
+            request.fetchLimit = max(0, limit)
+        }
         return try context.fetch(request)
     }
 
@@ -88,18 +133,44 @@ final class CheckInRepository {
             return person
         }
         guard let resolved = try context.existingObject(with: person.objectID) as? Person else {
-            throw NSError(domain: "CheckInRepository", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to resolve Person into repository context"]) 
+            throw NSError(domain: "CheckInRepository", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to resolve Person into repository context"])
         }
         return resolved
     }
 
-    private func fetchHistory(forResolvedPerson person: Person, limit: Int?) throws -> [CheckInRecord] {
+    private func fetchHistory(forResolvedPerson person: Person, filter: CheckInHistoryFilter) throws -> [CheckInRecord] {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
-        request.predicate = NSPredicate(format: "person == %@", person)
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
-        if let limit {
+        request.predicate = predicate(for: filter, person: person)
+        if let limit = filter.limit {
             request.fetchLimit = max(0, limit)
         }
         return try context.fetch(request)
+    }
+
+    private func predicate(for filter: CheckInHistoryFilter, person: Person?) -> NSPredicate? {
+        var predicates: [NSPredicate] = []
+
+        if let person {
+            predicates.append(NSPredicate(format: "person == %@", person))
+        }
+
+        if let start = filter.startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", start as NSDate))
+        }
+
+        if let end = filter.endDate {
+            predicates.append(NSPredicate(format: "createdAt <= %@", end as NSDate))
+        }
+
+        if let keyword = filter.normalizedKeyword {
+            // Search symptoms OR concerns (case/diacritic-insensitive)
+            let s = NSPredicate(format: "symptoms CONTAINS[cd] %@", keyword)
+            let c = NSPredicate(format: "concerns CONTAINS[cd] %@", keyword)
+            predicates.append(NSCompoundPredicate(orPredicateWithSubpredicates: [s, c]))
+        }
+
+        guard !predicates.isEmpty else { return nil }
+        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
 }
