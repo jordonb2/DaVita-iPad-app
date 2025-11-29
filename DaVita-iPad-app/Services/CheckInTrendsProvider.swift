@@ -53,7 +53,7 @@ final class CheckInTrendsProvider {
         do {
             records = try repo.fetchHistory(for: person, filter: filter)
         } catch {
-            print("Trends fetch error: \(error)")
+            AppLog.persistence.error("Trends fetch error: \(error, privacy: .public)")
             return PersonTrends(
                 painSeries: [],
                 energyDistribution: [:],

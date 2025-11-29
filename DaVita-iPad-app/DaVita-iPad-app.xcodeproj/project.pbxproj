@@ -23,6 +23,7 @@
 		F76E43452EA1C0A10056439C /* CheckInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43442EA1C0A10056439C /* CheckInService.swift */; };
 		F76E45012EA200010056439C /* CheckInTrendsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E45002EA200010056439C /* CheckInTrendsProvider.swift */; };
 		F76E46012EA210010056439C /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E46002EA210010056439C /* ExportService.swift */; };
+		F76E46032EA210020056439C /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E46022EA210020056439C /* AppLog.swift */; };
 		F76E43112E95B100056439C /* PersonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43102E95B100056439C /* PersonService.swift */; };
 		F76E43132E95B120056439C /* PersonRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43122E95B120056439C /* PersonRepository.swift */; };
 		F76E43152E95B121056439C /* CheckInRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43142E95B121056439C /* CheckInRepository.swift */; };
@@ -52,6 +53,7 @@
 		F76E43442EA1C0A10056439C /* CheckInService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInService.swift; sourceTree = "<group>"; };
 		F76E45002EA200010056439C /* CheckInTrendsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInTrendsProvider.swift; sourceTree = "<group>"; };
 		F76E46002EA210010056439C /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		F76E46022EA210020056439C /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		F76E43102E95B100056439C /* PersonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonService.swift; sourceTree = "<group>"; };
 		F76E43122E95B120056439C /* PersonRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonRepository.swift; sourceTree = "<group>"; };
 		F76E43142E95B121056439C /* CheckInRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInRepository.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 		F76E42A52E90860B0056439C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F76E46022EA210020056439C /* AppLog.swift */,
 				F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */,
 				F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */,
 				F76E42F12E93D200056439C /* AdminSession.swift */,
@@ -274,6 +277,7 @@
 				F76E43452EA1C0A10056439C /* CheckInService.swift in Sources */,
 				F76E45012EA200010056439C /* CheckInTrendsProvider.swift in Sources */,
 				F76E46012EA210010056439C /* ExportService.swift in Sources */,
+				F76E46032EA210020056439C /* AppLog.swift in Sources */,
 				F76E43112E95B100056439C /* PersonService.swift in Sources */,
 				F76E43132E95B120056439C /* PersonRepository.swift in Sources */,
 				F76E43152E95B121056439C /* CheckInRepository.swift in Sources */,

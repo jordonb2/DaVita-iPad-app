@@ -93,7 +93,7 @@ private extension CoreDataStack {
         do {
             try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: path)
         } catch {
-            print("Failed to set file protection for \(url.lastPathComponent): \(error)")
+            AppLog.persistence.error("Failed to set file protection for \(url.lastPathComponent, privacy: .public): \(error, privacy: .public)")
         }
     }
 }

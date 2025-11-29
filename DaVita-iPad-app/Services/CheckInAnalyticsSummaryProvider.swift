@@ -128,7 +128,7 @@ final class CheckInAnalyticsSummaryProvider {
         do {
             return try context.fetch(request)
         } catch {
-            print("Analytics fetch error: \(error)")
+            AppLog.analytics.error("Analytics fetch error: \(error, privacy: .public)")
             return []
         }
     }

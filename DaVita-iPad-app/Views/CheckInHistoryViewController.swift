@@ -173,7 +173,7 @@ final class CheckInHistoryViewController: StandardTableViewController {
                 let records = try checkInRepo.fetchHistory(for: personFilter, filter: currentHistoryFilter)
                 sections = [(personFilter, records)]
             } catch {
-                print("History fetch error: \(error)")
+                AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
                 sections = [(personFilter, [])]
             }
             tableView.reloadData()
@@ -193,14 +193,14 @@ final class CheckInHistoryViewController: StandardTableViewController {
                 do {
                     records = try checkInRepo.fetchHistory(for: person, filter: currentHistoryFilter)
                 } catch {
-                    print("History fetch error for person \(person.name ?? "Person"): \(error)")
+                    AppLog.persistence.error("History fetch error for person \(person.name ?? "Person", privacy: .private): \(error, privacy: .public)")
                     records = []
                 }
                 return (person, records)
             }
             tableView.reloadData()
         } catch {
-            print("History fetch error: \(error)")
+            AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
             sections = []
             tableView.reloadData()
         }

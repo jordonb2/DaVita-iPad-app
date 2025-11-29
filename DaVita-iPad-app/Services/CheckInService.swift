@@ -66,7 +66,7 @@ final class CheckInService {
         bgContext.perform {
             do {
                 guard let bgPerson = try bgContext.existingObject(with: personID) as? Person else {
-                    print("CheckInService: Failed to resolve Person in background context")
+                    AppLog.persistence.error("CheckInService: failed to resolve Person in background context")
                     return
                 }
 
@@ -77,7 +77,7 @@ final class CheckInService {
                     try bgContext.save()
                 }
             } catch {
-                print("CheckInService background save error: \(error)")
+                AppLog.persistence.error("CheckInService background save error: \(error, privacy: .public)")
             }
         }
     }
@@ -108,7 +108,7 @@ final class CheckInService {
         do {
             return try repo.fetchMostRecent(for: person)
         } catch {
-            print("CheckInService latest fetch error: \(error)")
+            AppLog.persistence.error("CheckInService latest fetch error: \(error, privacy: .public)")
             return nil
         }
     }

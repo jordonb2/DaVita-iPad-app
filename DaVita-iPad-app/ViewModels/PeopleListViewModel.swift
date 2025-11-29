@@ -33,7 +33,7 @@ final class PeopleListViewModel: NSObject {
             try frc.performFetch()
             people = frc.fetchedObjects ?? []
         } catch {
-            print("FRC performFetch error: \(error)")
+            AppLog.persistence.error("FRC performFetch error: \(error, privacy: .public)")
         }
 
     }
@@ -43,7 +43,7 @@ final class PeopleListViewModel: NSObject {
     func add(name: String, gender: String? = nil, dob: Date? = nil, checkInData: PersonCheckInData? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            print("Refusing to add Person with empty name")
+            AppLog.ui.warning("Refusing to add Person with empty name")
             return
         }
 
@@ -51,7 +51,7 @@ final class PeopleListViewModel: NSObject {
             let p = try personService.addPerson(name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
             logPerson(p, context: "ADD")
         } catch {
-            print("Add person error: \(error)")
+            AppLog.persistence.error("Add person error: \(error, privacy: .public)")
         }
     }
 
@@ -59,14 +59,14 @@ final class PeopleListViewModel: NSObject {
         do {
             try personService.deletePerson(person)
         } catch {
-            print("Delete person error: \(error)")
+            AppLog.persistence.error("Delete person error: \(error, privacy: .public)")
         }
     }
     
     func update(_ person: Person, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData? = nil) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            print("Refusing to update Person with empty name")
+            AppLog.ui.warning("Refusing to update Person with empty name")
             return
         }
 
@@ -74,7 +74,7 @@ final class PeopleListViewModel: NSObject {
             try personService.updatePerson(person, name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
             logPerson(person, context: "UPDATE")
         } catch {
-            print("Update person error: \(error)")
+            AppLog.persistence.error("Update person error: \(error, privacy: .public)")
         }
     }
 
@@ -98,7 +98,7 @@ final class PeopleListViewModel: NSObject {
         let concerns = person.checkInConcerns ?? "—"
         let teamNote = person.checkInTeamNote ?? "—"
 
-        print("[\(context)] Person saved → Name: \(name), DOB: \(dobText), Gender: \(gender), CheckIn(pain: \(pain), energy: \(energy), mood: \(mood), symptoms: \(symptoms), concerns: \(concerns), teamNote: \(teamNote))")
+        AppLog.ui.debug("[\(context, privacy: .public)] Person saved → Name: \(name, privacy: .private), DOB: \(dobText, privacy: .private), Gender: \(gender, privacy: .private), CheckIn(pain: \(pain, privacy: .public), energy: \(energy, privacy: .private), mood: \(mood, privacy: .private), symptoms: \(symptoms, privacy: .private), concerns: \(concerns, privacy: .private), teamNote: \(teamNote, privacy: .private)")
 #endif
     }
 

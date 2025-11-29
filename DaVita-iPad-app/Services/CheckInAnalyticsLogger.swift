@@ -76,7 +76,7 @@ final class CheckInAnalyticsLogger {
         do {
             try context.save()
         } catch {
-            print("Analytics save error: \(error)")
+            AppLog.analytics.error("Analytics save error: \(error, privacy: .public)")
         }
     }
 }
