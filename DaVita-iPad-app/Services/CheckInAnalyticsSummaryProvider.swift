@@ -45,15 +45,15 @@ final class CheckInAnalyticsSummaryProvider {
         var submissionsByDaypart: [Daypart: Int] = [:]
 
         for event in events {
-            guard let eventType = event.eventType else { continue }
+            guard let eventType = event.eventTypeEnum else { continue }
 
             switch eventType {
-            case CheckInAnalyticsLogger.EventType.stepFirstInteracted.rawValue:
-                if let stepString = event.step, let step = CheckInAnalyticsLogger.Step(rawValue: stepString) {
+            case .stepFirstInteracted:
+                if let step = event.stepEnum {
                     stepCounts[step, default: 0] += 1
                 }
 
-            case CheckInAnalyticsLogger.EventType.submitted.rawValue:
+            case .submitted:
                 submittedCount += 1
                 if event.durationSeconds > 0 {
                     completionDurations.append(event.durationSeconds)
@@ -78,13 +78,13 @@ final class CheckInAnalyticsSummaryProvider {
                     submissionsByDaypart[dp, default: 0] += 1
                 }
 
-            case CheckInAnalyticsLogger.EventType.skipped.rawValue:
+            case .skipped:
                 skippedCount += 1
                 if event.durationSeconds > 0 {
                     skipDurations.append(event.durationSeconds)
                 }
 
-            case CheckInAnalyticsLogger.EventType.dismissed.rawValue:
+            case .dismissed:
                 dismissedCount += 1
 
             default:

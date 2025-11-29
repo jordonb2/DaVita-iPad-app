@@ -47,8 +47,8 @@ final class CheckInAnalyticsLogger {
         let event = CheckInAnalyticsEvent(context: context)
         event.id = UUID()
         event.createdAt = Date()
-        event.eventType = type.rawValue
-        event.step = step?.rawValue
+        event.eventTypeEnum = type
+        event.stepEnum = step
         if let durationSeconds {
             event.durationSeconds = durationSeconds
         }
@@ -80,6 +80,19 @@ final class CheckInAnalyticsLogger {
         }
     }
 }
+
+extension CheckInAnalyticsEvent {
+    var eventTypeEnum: CheckInAnalyticsLogger.EventType? {
+        get { eventType.flatMap(CheckInAnalyticsLogger.EventType.init(rawValue:)) }
+        set { eventType = newValue?.rawValue }
+    }
+
+    var stepEnum: CheckInAnalyticsLogger.Step? {
+        get { step.flatMap(CheckInAnalyticsLogger.Step.init(rawValue:)) }
+        set { step = newValue?.rawValue }
+    }
+}
+
 
 private struct Payload {
     let painBucket: Int16?
