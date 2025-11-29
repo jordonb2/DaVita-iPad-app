@@ -3,15 +3,15 @@ import CoreData
 
 @testable import DaVita_iPad_app
 
-/// In-memory Core Data stack for unit tests.
+/// In-memory Core Data stack for unit tests (fast + isolated).
 final class TestCoreDataStack: CoreDataStacking {
     let persistentContainer: NSPersistentContainer
 
     init() {
-        // Load the same model as the app.
-        guard let modelURL = Bundle(for: CoreDataStack.self).url(forResource: "RecordsModel", withExtension: "momd"),
-              let model = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Failed to load RecordsModel.momd")
+        // Prefer a merged model so tests don't depend on a specific `.momd` filename/path.
+        let bundles = [Bundle(for: CoreDataStack.self)]
+        guard let model = NSManagedObjectModel.mergedModel(from: bundles) else {
+            fatalError("Failed to load merged Core Data model from app bundle")
         }
 
         persistentContainer = NSPersistentContainer(name: "RecordsModel", managedObjectModel: model)

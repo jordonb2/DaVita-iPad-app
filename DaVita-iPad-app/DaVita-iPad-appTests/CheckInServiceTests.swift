@@ -32,26 +32,22 @@ final class CheckInServiceTests: XCTestCase {
             }
         }
 
-        // Wait for background insert to be merged.
-        let exp = expectation(description: "check-in record created")
-        let deadline = Date().addingTimeInterval(2.0)
-
-        func poll() {
-            stack.viewContext.perform {
-                let req: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
-                let count = (try? stack.viewContext.count(for: req)) ?? 0
-                if count >= 1 {
-                    exp.fulfill()
-                } else if Date() < deadline {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        poll()
-                    }
-                }
+        // Wait for background insert/save to complete.
+        let didSave = expectation(description: "background check-in record saved")
+        var token: NSObjectProtocol?
+        token = NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextDidSave,
+            object: nil,
+            queue: nil
+        ) { note in
+            guard let inserts = note.userInfo?[NSInsertedObjectsKey] as? Set<NSManagedObject> else { return }
+            if inserts.contains(where: { $0 is CheckInRecord }) {
+                didSave.fulfill()
             }
         }
 
-        poll()
-        wait(for: [exp], timeout: 2.5)
+        wait(for: [didSave], timeout: 2.5)
+        if let token { NotificationCenter.default.removeObserver(token) }
 
         let req: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         req.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
