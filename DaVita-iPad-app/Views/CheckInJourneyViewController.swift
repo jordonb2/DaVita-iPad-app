@@ -34,7 +34,9 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         view.backgroundColor = .systemBackground
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
+        navigationItem.leftBarButtonItem?.accessibilityIdentifier = "checkIn.cancel"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Submit", style: .done, target: self, action: #selector(submitTapped))
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "checkIn.submit"
 
         buildContent()
         configureSurveyControls()
@@ -81,9 +83,12 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         painSlider.maximumValue = 10
         painSlider.value = 0
         painSlider.addTarget(self, action: #selector(painSliderChanged(_:)), for: .valueChanged)
+        painSlider.accessibilityIdentifier = "checkIn.pain"
 
         energySegmentedControl.addTarget(self, action: #selector(energyChanged(_:)), for: .valueChanged)
+        energySegmentedControl.accessibilityIdentifier = "checkIn.energy"
         moodSegmentedControl.addTarget(self, action: #selector(moodChanged(_:)), for: .valueChanged)
+        moodSegmentedControl.accessibilityIdentifier = "checkIn.mood"
 
         painValueLabel.text = "0"
         painValueLabel.font = UIFont.preferredFont(forTextStyle: .body)
@@ -94,8 +99,11 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         moodSegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
 
         UIFactory.styleTextViewForForm(symptomsTextView)
+        symptomsTextView.accessibilityIdentifier = "checkIn.symptoms"
         UIFactory.styleTextViewForForm(concernsTextView)
+        concernsTextView.accessibilityIdentifier = "checkIn.concerns"
         UIFactory.styleTextViewForForm(teamNoteTextView)
+        teamNoteTextView.accessibilityIdentifier = "checkIn.teamNote"
 
         painSlider.isAccessibilityElement = true
         painSlider.accessibilityLabel = "Pain level"

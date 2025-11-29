@@ -36,11 +36,14 @@
 		F76E470C2EA300000056439C /* TestCoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E47092EA300000056439C /* TestCoreDataStack.swift */; };
 		F76E470D2EA300000056439C /* CheckInServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E470A2EA300000056439C /* CheckInServiceTests.swift */; };
 		F76E470E2EA300000056439C /* CheckInTrendsProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E470B2EA300000056439C /* CheckInTrendsProviderTests.swift */; };
+		F76E471C2EA300100056439C /* DaVita_iPad_appUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E471A2EA300100056439C /* DaVita_iPad_appUITests.swift */; };
+		F76E471D2EA300100056439C /* CriticalFlowsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E471B2EA300100056439C /* CriticalFlowsUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F76E42662E9071DD0056439C /* DaVita-iPad-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DaVita-iPad-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F76E47072EA300000056439C /* DaVita-iPad-appTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DaVita-iPad-appTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F76E47172EA300100056439C /* DaVita-iPad-appUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DaVita-iPad-appUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F76E42A62E908ADE0056439C /* PeopleListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewController.swift; sourceTree = "<group>"; };
 		F76E42A82E9182360056439C /* PeopleListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleListViewModel.swift; sourceTree = "<group>"; };
 		F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewController.swift; sourceTree = "<group>"; };
@@ -70,6 +73,8 @@
 		F76E47092EA300000056439C /* TestCoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCoreDataStack.swift; sourceTree = "<group>"; };
 		F76E470A2EA300000056439C /* CheckInServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInServiceTests.swift; sourceTree = "<group>"; };
 		F76E470B2EA300000056439C /* CheckInTrendsProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInTrendsProviderTests.swift; sourceTree = "<group>"; };
+		F76E471A2EA300100056439C /* DaVita_iPad_appUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaVita_iPad_appUITests.swift; sourceTree = "<group>"; };
+		F76E471B2EA300100056439C /* CriticalFlowsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalFlowsUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -108,12 +113,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F76E47162EA300100056439C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		F76E425D2E9071DD0056439C = {
 			isa = PBXGroup;
 			children = (
+				F76E47182EA300100056439C /* DaVita-iPad-appUITests */,
 				F76E47082EA300000056439C /* DaVita-iPad-appTests */,
 				F76E42A52E90860B0056439C /* Services */,
 				F76E43242E9700100056439C /* Coordinators */,
@@ -136,11 +149,21 @@
 			path = "DaVita-iPad-appTests";
 			sourceTree = "<group>";
 		};
+		F76E47182EA300100056439C /* DaVita-iPad-appUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F76E471A2EA300100056439C /* DaVita_iPad_appUITests.swift */,
+				F76E471B2EA300100056439C /* CriticalFlowsUITests.swift */,
+			);
+			path = "DaVita-iPad-appUITests";
+			sourceTree = "<group>";
+		};
 		F76E42672E9071DD0056439C /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				F76E42662E9071DD0056439C /* DaVita-iPad-app.app */,
 				F76E47072EA300000056439C /* DaVita-iPad-appTests.xctest */,
+				F76E47172EA300100056439C /* DaVita-iPad-appUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -255,6 +278,23 @@
 			productReference = F76E47072EA300000056439C /* DaVita-iPad-appTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		F76E47102EA300100056439C /* DaVita-iPad-appUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F76E47112EA300100056439C /* Build configuration list for PBXNativeTarget "DaVita-iPad-appUITests" */;
+			buildPhases = (
+				F76E47142EA300100056439C /* Sources */,
+				F76E47162EA300100056439C /* Frameworks */,
+				F76E47152EA300100056439C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "DaVita-iPad-appUITests";
+			productName = "DaVita-iPad-appUITests";
+			productReference = F76E47172EA300100056439C /* DaVita-iPad-appUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -269,6 +309,9 @@
 						CreatedOnToolsVersion = 16.4;
 					};
 					F76E47002EA300000056439C = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					F76E47102EA300100056439C = {
 						CreatedOnToolsVersion = 16.4;
 					};
 				};
@@ -289,6 +332,7 @@
 			targets = (
 				F76E42652E9071DD0056439C /* DaVita-iPad-app */,
 				F76E47002EA300000056439C /* DaVita-iPad-appTests */,
+				F76E47102EA300100056439C /* DaVita-iPad-appUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -302,6 +346,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F76E47052EA300000056439C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F76E47152EA300100056439C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -351,6 +402,15 @@
 				F76E470C2EA300000056439C /* TestCoreDataStack.swift in Sources */,
 				F76E470D2EA300000056439C /* CheckInServiceTests.swift in Sources */,
 				F76E470E2EA300000056439C /* CheckInTrendsProviderTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F76E47142EA300100056439C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F76E471C2EA300100056439C /* DaVita_iPad_appUITests.swift in Sources */,
+				F76E471D2EA300100056439C /* CriticalFlowsUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -584,6 +644,46 @@
 			};
 			name = Release;
 		};
+		F76E47122EA300100056439C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = JGUQ8P2XQG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.DaVita-iPad-appUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+				TEST_TARGET_NAME = "DaVita-iPad-app";
+			};
+			name = Debug;
+		};
+		F76E47132EA300100056439C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_TEAM = JGUQ8P2XQG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "Test.DaVita-iPad-appUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+				TEST_TARGET_NAME = "DaVita-iPad-app";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -610,6 +710,15 @@
 			buildConfigurations = (
 				F76E47022EA300000056439C /* Debug */,
 				F76E47032EA300000056439C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F76E47112EA300100056439C /* Build configuration list for PBXNativeTarget "DaVita-iPad-appUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F76E47122EA300100056439C /* Debug */,
+				F76E47132EA300100056439C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

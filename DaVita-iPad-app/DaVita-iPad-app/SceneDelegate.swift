@@ -10,6 +10,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         /// Defaults to enabled if the key hasn't been set.
         static var isEnabled: Bool {
+            if ProcessInfo.processInfo.arguments.contains("UI_TESTING") { return false }
             if UserDefaults.standard.object(forKey: userDefaultsKey) == nil { return true }
             return UserDefaults.standard.bool(forKey: userDefaultsKey)
         }

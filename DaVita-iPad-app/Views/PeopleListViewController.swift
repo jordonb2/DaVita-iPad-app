@@ -46,6 +46,7 @@ import Combine
         button.heightAnchor.constraint(equalToConstant: UIFactory.Theme.Metrics.fabSize).isActive = true
         button.isAccessibilityElement = true
         button.accessibilityLabel = "Analytics"
+        button.accessibilityIdentifier = "peopleList.analytics"
         button.accessibilityHint = "Admin login to view check-in analytics."
         return button
     }()
@@ -61,6 +62,7 @@ import Combine
             target: self,
             action: #selector(didTapAdd)
         )
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "peopleList.add"
 
         configureAnalyticsButton()
 
@@ -72,6 +74,7 @@ import Combine
         }
         
         let tableView = tableViewRef
+        tableViewRef.accessibilityIdentifier = "peopleList.table"
         tableView.dataSource = self
         tableView.delegate = self
         TableStyler.applyPeopleListStyle(to: tableView)

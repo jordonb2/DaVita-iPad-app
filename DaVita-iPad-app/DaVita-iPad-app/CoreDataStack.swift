@@ -17,6 +17,10 @@ final class CoreDataStack: CoreDataStacking {
     static let shared = CoreDataStack()
     private init() {}
 
+    static var isUITesting: Bool {
+        ProcessInfo.processInfo.arguments.contains("UI_TESTING")
+    }
+
     lazy var persistentContainer: NSPersistentContainer = {
         let c = NSPersistentContainer(name: "RecordsModel")
         if let storeDescription = c.persistentStoreDescriptions.first {

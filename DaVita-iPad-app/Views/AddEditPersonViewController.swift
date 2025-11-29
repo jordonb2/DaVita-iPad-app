@@ -54,20 +54,25 @@ final class AddEditPersonViewController: UIViewController {
         fullNameTextField.isAccessibilityElement = true
         fullNameTextField.accessibilityLabel = "Full name"
         fullNameTextField.accessibilityHint = "Enter the patient's full name."
+        fullNameTextField.accessibilityIdentifier = "addEdit.fullName"
         
         datePicker.isAccessibilityElement = true
         datePicker.accessibilityLabel = "Date of birth"
         datePicker.accessibilityHint = "Select the patient's date of birth."
+        datePicker.accessibilityIdentifier = "addEdit.dob"
         
         genderSegmentedControl.isAccessibilityElement = true
         genderSegmentedControl.accessibilityLabel = "Gender"
         genderSegmentedControl.accessibilityHint = "Select the patient's gender."
+        genderSegmentedControl.accessibilityIdentifier = "addEdit.gender"
         
         ageLabel.isAccessibilityElement = true
         ageLabel.accessibilityTraits.insert(.staticText)
         
         navigationItem.leftBarButtonItem?.accessibilityLabel = "Cancel"
+        navigationItem.leftBarButtonItem?.accessibilityIdentifier = "addEdit.cancel"
         navigationItem.rightBarButtonItem?.accessibilityLabel = "Save"
+        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "addEdit.save"
         
         accessibilityElements = [fullNameTextField as Any, datePicker as Any, genderSegmentedControl as Any, ageLabel as Any]
         // Prefill when editing
