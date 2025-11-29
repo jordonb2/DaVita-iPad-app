@@ -7,9 +7,9 @@ import CoreData
 /// - updating the "latest check-in" fields on `Person` (in the person's context)
 /// - creating a `CheckInRecord` on a background context (to keep UI smooth)
 final class CheckInService {
-    private let coreDataStack: CoreDataStack
+    private let coreDataStack: CoreDataStacking
 
-    init(coreDataStack: CoreDataStack = .shared) {
+    init(coreDataStack: CoreDataStacking = CoreDataStack.shared) {
         self.coreDataStack = coreDataStack
     }
 
