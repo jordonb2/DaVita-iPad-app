@@ -71,7 +71,11 @@ final class CheckInService {
                 }
 
                 let repo = CheckInRepository(context: bgContext)
-                _ = repo.createRecord(createdAt: date, for: bgPerson, data: data)
+                let sanitized = data.sanitized()
+                if data.needsSanitization() {
+                    AppLog.persistence.warning("Sanitized check-in input before record creation")
+                }
+                _ = repo.createRecord(createdAt: date, for: bgPerson, data: sanitized)
 
                 if bgContext.hasChanges {
                     try bgContext.save()
@@ -90,7 +94,11 @@ final class CheckInService {
                       data: PersonCheckInData,
                       at date: Date = Date(),
                       savingUsing save: () throws -> Void) rethrows {
-        applyLatestCheckInFields(to: person, data: data)
+        let sanitized = data.sanitized()
+        if data.needsSanitization() {
+            AppLog.persistence.warning("Sanitized check-in input before save")
+        }
+        applyLatestCheckInFields(to: person, data: sanitized)
         try save()
         createCheckInRecord(for: person, data: data, at: date)
     }

@@ -45,31 +45,32 @@ final class CheckInRepository {
         for person: Person,
         data: PersonCheckInData
     ) -> CheckInRecord {
+        let sanitized = data.sanitized()
         let record = CheckInRecord(context: context)
         // Enforce non-optional identity + timestamps at creation time.
         record.id = id
         record.createdAt = createdAt
-        record.painLevel = data.painLevel ?? 0
+        record.painLevel = sanitized.painLevel ?? 0
 
         // Canonical buckets (preferred)
-        if let b = data.energyBucket {
+        if let b = sanitized.energyBucket {
             record.setValue(b.rawValue, forKey: "energyBucket")
         } else {
             record.setValue(nil, forKey: "energyBucket")
         }
-        if let b = data.moodBucket {
+        if let b = sanitized.moodBucket {
             record.setValue(b.rawValue, forKey: "moodBucket")
         } else {
             record.setValue(nil, forKey: "moodBucket")
         }
 
         // Keep legacy string fields populated with canonical text to avoid drift + preserve UI.
-        record.energyLevel = data.energyLevelText
-        record.mood = data.moodText
+        record.energyLevel = sanitized.energyLevelText
+        record.mood = sanitized.moodText
 
-        record.symptoms = data.symptoms
-        record.concerns = data.concerns
-        record.teamNote = data.teamNote
+        record.symptoms = sanitized.symptoms
+        record.concerns = sanitized.concerns
+        record.teamNote = sanitized.teamNote
         record.person = person
         return record
     }
