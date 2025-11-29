@@ -7,6 +7,7 @@ final class PersonDetailViewController: ScrolledStackViewController {
 
     var onEditTapped: ((Person) -> Void)?
     var onHistoryTapped: ((Person) -> Void)?
+    var onTrendsTapped: ((Person) -> Void)?
 
     private lazy var dateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -60,6 +61,13 @@ final class PersonDetailViewController: ScrolledStackViewController {
         historyButton.accessibilityLabel = "View visit history"
         historyButton.accessibilityHint = "Shows this person's past check-ins."
         contentStackView.addArrangedSubview(historyButton)
+
+        let trendsButton = UIFactory.roundedActionButton(title: "View Trends")
+        trendsButton.addTarget(self, action: #selector(trendsTapped), for: .touchUpInside)
+        trendsButton.isAccessibilityElement = true
+        trendsButton.accessibilityLabel = "View trends"
+        trendsButton.accessibilityHint = "Shows pain trend, energy/mood distributions, and symptom frequency over time."
+        contentStackView.addArrangedSubview(trendsButton)
     }
 
     @objc private func editTapped() {
@@ -68,5 +76,9 @@ final class PersonDetailViewController: ScrolledStackViewController {
 
     @objc private func historyTapped() {
         onHistoryTapped?(person)
+    }
+
+    @objc private func trendsTapped() {
+        onTrendsTapped?(person)
     }
 }

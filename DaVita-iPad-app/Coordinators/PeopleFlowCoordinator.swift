@@ -6,6 +6,7 @@ protocol PeopleFlowCoordinating: AnyObject {
                           from presentingVC: UIViewController,
                           onUpdate: @escaping (Person, String, Date, String, PersonCheckInData) -> Void)
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController)
+    func showPersonTrends(_ person: Person, from presentingVC: UIViewController)
 }
 
 /// Owns deeper people-related flows: person detail and history drill-ins.
@@ -38,12 +39,23 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
             self.showPersonHistory(person, from: presentingVC)
         }
 
+        detailVC.onTrendsTapped = { [weak self, weak presentingVC] person in
+            guard let self, let presentingVC else { return }
+            self.showPersonTrends(person, from: presentingVC)
+        }
+
         nav.pushViewController(detailVC, animated: true)
     }
 
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
         let vc = CheckInHistoryViewController(person: person)
+        nav.pushViewController(vc, animated: true)
+    }
+
+    func showPersonTrends(_ person: Person, from presentingVC: UIViewController) {
+        guard let nav = navigationController(from: presentingVC) else { return }
+        let vc = PersonTrendsViewController(person: person)
         nav.pushViewController(vc, animated: true)
     }
 }

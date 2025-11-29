@@ -70,7 +70,7 @@ private extension CoreDataStack {
                 }
             } catch {
                 let storeName = url.lastPathComponent
-                fatalError("Failed reading Core Data store metadata for '\(storeName)': \(error)")
+                fatalError("Failed reading Core Data store metadata for '\(storeName)': \(error)") 
             }
         }
     }
