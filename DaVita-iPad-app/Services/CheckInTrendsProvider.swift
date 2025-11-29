@@ -4,6 +4,10 @@ import CoreData
 /// Computes per-person trend datasets from `CheckInRecord` history.
 final class CheckInTrendsProvider {
 
+    enum TrendsError: Error {
+        case fetchFailed(Error)
+    }
+
     struct Point {
         let date: Date
         let value: Double
@@ -42,7 +46,7 @@ final class CheckInTrendsProvider {
     /// - Parameters:
     ///   - windowDays: lookback window in days (ending now)
     ///   - maxRecords: cap on number of records fetched (newest first)
-    func computeTrends(for person: Person, windowDays: Int = 30, maxRecords: Int = 250) -> PersonTrends {
+    func computeTrends(for person: Person, windowDays: Int = 30, maxRecords: Int = 250) throws -> PersonTrends {
         let end = Date()
         let start = calendar.date(byAdding: .day, value: -max(1, windowDays), to: end) ?? end
 
@@ -54,16 +58,7 @@ final class CheckInTrendsProvider {
             records = try repo.fetchHistory(for: person, filter: filter)
         } catch {
             AppLog.persistence.error("Trends fetch error: \(error, privacy: .public)")
-            return PersonTrends(
-                painSeries: [],
-                energyDistribution: [:],
-                moodDistribution: [:],
-                symptomCategoryDaily: [:],
-                topSymptomCategories: [],
-                totalRecordsInWindow: 0,
-                windowStart: start,
-                windowEnd: end
-            )
+            throw TrendsError.fetchFailed(error)
         }
 
         // Normalize order to chronological for time series.

@@ -174,6 +174,8 @@ final class CheckInHistoryViewController: StandardTableViewController {
                 sections = [(personFilter, records)]
             } catch {
                 AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
+            showToast(message: "Couldn't load history. Please try again.")
+                showToast(message: "Couldn't load history. Please try again.")
                 sections = [(personFilter, [])]
             }
             tableView.reloadData()
@@ -201,6 +203,7 @@ final class CheckInHistoryViewController: StandardTableViewController {
             tableView.reloadData()
         } catch {
             AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
+            showToast(message: "Couldn't load history. Please try again.")
             sections = []
             tableView.reloadData()
         }

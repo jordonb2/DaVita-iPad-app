@@ -30,7 +30,23 @@ final class PersonTrendsViewController: ScrolledStackViewController {
     }
 
     private func render() {
-        let trends = trendsProvider.computeTrends(for: person, windowDays: windowDays)
+        let trends: CheckInTrendsProvider.PersonTrends
+        do {
+            trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays)
+        } catch {
+            AppLog.persistence.error("Failed to compute trends: \(error, privacy: .public)")
+            showToast(message: "Couldn't load trends. Please try again.")
+            trends = CheckInTrendsProvider.PersonTrends(
+                painSeries: [],
+                energyDistribution: [:],
+                moodDistribution: [:],
+                symptomCategoryDaily: [:],
+                topSymptomCategories: [],
+                totalRecordsInWindow: 0,
+                windowStart: Date().addingTimeInterval(-Double(windowDays) * 86400),
+                windowEnd: Date()
+            )
+        }
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Pain (last \(windowDays) days)", textStyle: .title2))
         contentStackView.addArrangedSubview(painCard(series: trends.painSeries))

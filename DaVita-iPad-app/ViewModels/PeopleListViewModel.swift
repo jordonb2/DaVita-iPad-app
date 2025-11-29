@@ -13,6 +13,10 @@ final class PeopleListViewModel: NSObject {
     // Published array the view observes
     @Published private(set) var people: [Person] = []
 
+    // User-visible error hooks (set by the owning VC).
+    var onUserToast: ((String) -> Void)?
+    var onUserAlert: ((String, String?) -> Void)?
+
     private let personService: PersonService
     private let peopleRepo: PersonRepository
 
@@ -34,6 +38,7 @@ final class PeopleListViewModel: NSObject {
             people = frc.fetchedObjects ?? []
         } catch {
             AppLog.persistence.error("FRC performFetch error: \(error, privacy: .public)")
+            onUserAlert?("Couldn't load people", "Please try again.")
         }
 
     }
@@ -44,6 +49,7 @@ final class PeopleListViewModel: NSObject {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             AppLog.ui.warning("Refusing to add Person with empty name")
+            onUserToast?("Please enter a name before saving.")
             return
         }
 
@@ -52,6 +58,7 @@ final class PeopleListViewModel: NSObject {
             logPerson(p, context: "ADD")
         } catch {
             AppLog.persistence.error("Add person error: \(error, privacy: .public)")
+            onUserAlert?("Couldn't save", "Please try again.")
         }
     }
 
@@ -60,6 +67,7 @@ final class PeopleListViewModel: NSObject {
             try personService.deletePerson(person)
         } catch {
             AppLog.persistence.error("Delete person error: \(error, privacy: .public)")
+            onUserAlert?("Couldn't delete", "Please try again.")
         }
     }
     
@@ -67,6 +75,7 @@ final class PeopleListViewModel: NSObject {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             AppLog.ui.warning("Refusing to update Person with empty name")
+            onUserToast?("Please enter a name before saving.")
             return
         }
 
@@ -75,6 +84,7 @@ final class PeopleListViewModel: NSObject {
             logPerson(person, context: "UPDATE")
         } catch {
             AppLog.persistence.error("Update person error: \(error, privacy: .public)")
+            onUserAlert?("Couldn't save", "Please try again.")
         }
     }
 

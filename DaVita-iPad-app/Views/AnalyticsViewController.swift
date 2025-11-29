@@ -22,7 +22,14 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     private func loadSummaryAndRender() {
-        let summary = summaryProvider.makeSummary()
+        let summary: CheckInAnalyticsSummaryProvider.Summary
+        do {
+            summary = try summaryProvider.makeSummary()
+        } catch {
+            AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .public)")
+            showToast(message: "Couldn't load analytics. Please try again.")
+            summary = .empty
+        }
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Engagement"))
         contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Completed", value: "\(summary.totalSubmitted)"))

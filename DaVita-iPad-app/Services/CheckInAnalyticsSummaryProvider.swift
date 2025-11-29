@@ -4,6 +4,25 @@ import CoreData
 final class CheckInAnalyticsSummaryProvider {
 
     struct Summary {
+        static var empty: Summary {
+            Summary(
+                totalPresented: 0,
+                totalSubmitted: 0,
+                totalSkipped: 0,
+                totalDismissed: 0,
+                completionRate: 0,
+                skipRate: 0,
+                averageCompletionSeconds: 0,
+                averageSkipSeconds: 0,
+                stepFirstInteractionCounts: [:],
+                highPainRate: 0,
+                lowEnergyRate: 0,
+                symptomCategoryCounts: [:],
+                concernCategoryCounts: [:],
+                submissionsByDaypart: [:]
+            )
+        }
+
         let totalPresented: Int
         let totalSubmitted: Int
         let totalSkipped: Int
@@ -26,8 +45,8 @@ final class CheckInAnalyticsSummaryProvider {
         self.context = context
     }
 
-    func makeSummary(since startDate: Date? = nil) -> Summary {
-        let events = fetchEvents(since: startDate)
+    func makeSummary(since startDate: Date? = nil) throws -> Summary {
+        let events = try fetchEvents(since: startDate)
 
         var presentedCount = 0
         var submittedCount = 0
@@ -120,7 +139,7 @@ final class CheckInAnalyticsSummaryProvider {
         )
     }
 
-    private func fetchEvents(since startDate: Date?) -> [CheckInAnalyticsEvent] {
+    private func fetchEvents(since startDate: Date?) throws -> [CheckInAnalyticsEvent] {
         let request: NSFetchRequest<CheckInAnalyticsEvent> = CheckInAnalyticsEvent.fetchRequest()
         if let startDate {
             request.predicate = NSPredicate(format: "createdAt >= %@", startDate as NSDate)
@@ -129,7 +148,7 @@ final class CheckInAnalyticsSummaryProvider {
             return try context.fetch(request)
         } catch {
             AppLog.analytics.error("Analytics fetch error: \(error, privacy: .public)")
-            return []
+            throw error
         }
     }
 }

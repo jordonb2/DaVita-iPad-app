@@ -42,3 +42,60 @@ enum AlertFactory {
         return alert
     }
 }
+
+extension UIViewController {
+    func presentErrorAlert(title: String = "Something went wrong", message: String? = nil) {
+        let alert = AlertFactory.okAlert(title: title, message: message)
+        present(alert, animated: true)
+    }
+
+    /// Simple, lightweight toast (no dependencies).
+    func showToast(message: String, duration: TimeInterval = 2.0) {
+        let label = PaddingLabel()
+        label.text = message
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        label.textColor = .white
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        label.layer.cornerRadius = 12
+        label.clipsToBounds = true
+        label.alpha = 0
+        label.isAccessibilityElement = true
+        label.accessibilityLabel = message
+
+        view.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: view.layoutMarginsGuide.leadingAnchor),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: view.layoutMarginsGuide.trailingAnchor)
+        ])
+
+        UIView.animate(withDuration: 0.2) {
+            label.alpha = 1
+        }
+
+        UIView.animate(withDuration: 0.25, delay: duration, options: [.curveEaseInOut]) {
+            label.alpha = 0
+        } completion: { _ in
+            label.removeFromSuperview()
+        }
+    }
+}
+
+private final class PaddingLabel: UILabel {
+    var insets = UIEdgeInsets(top: 10, left: 14, bottom: 10, right: 14)
+
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: insets))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let s = super.intrinsicContentSize
+        return CGSize(width: s.width + insets.left + insets.right,
+                      height: s.height + insets.top + insets.bottom)
+    }
+}
+

@@ -63,6 +63,13 @@ import Combine
         )
 
         configureAnalyticsButton()
+
+        viewModel.onUserToast = { [weak self] message in
+            self?.showToast(message: message)
+        }
+        viewModel.onUserAlert = { [weak self] title, message in
+            self?.presentErrorAlert(title: title, message: message)
+        }
         
         let tableView = tableViewRef
         tableView.dataSource = self
