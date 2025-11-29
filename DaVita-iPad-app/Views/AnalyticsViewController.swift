@@ -63,6 +63,22 @@ final class AnalyticsViewController: ScrolledStackViewController {
         historyButton.accessibilityLabel = "View visit history"
         historyButton.accessibilityHint = "Shows multi-visit check-in records by person."
         contentStackView.addArrangedSubview(historyButton)
+
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Export"))
+
+        let exportCSV = UIFactory.roundedActionButton(title: "Export CSV")
+        exportCSV.addTarget(self, action: #selector(exportCSVTapped(_:)), for: .touchUpInside)
+        exportCSV.isAccessibilityElement = true
+        exportCSV.accessibilityLabel = "Export CSV"
+        exportCSV.accessibilityHint = "Exports check-in history to a CSV file on this device."
+        contentStackView.addArrangedSubview(exportCSV)
+
+        let exportPDF = UIFactory.roundedActionButton(title: "Export PDF")
+        exportPDF.addTarget(self, action: #selector(exportPDFTapped(_:)), for: .touchUpInside)
+        exportPDF.isAccessibilityElement = true
+        exportPDF.accessibilityLabel = "Export PDF"
+        exportPDF.accessibilityHint = "Exports check-in history to a PDF file on this device."
+        contentStackView.addArrangedSubview(exportPDF)
     }
 
     private func percentText(_ value: Double) -> String {
@@ -84,6 +100,50 @@ final class AnalyticsViewController: ScrolledStackViewController {
         presentLogoutConfirmation()
     }
 
+
+
+    @objc private func exportCSVTapped(_ sender: UIButton) {
+        export(format: .csv, sourceView: sender)
+    }
+
+    @objc private func exportPDFTapped(_ sender: UIButton) {
+        export(format: .pdf, sourceView: sender)
+    }
+
+    private enum ExportFormat {
+        case csv
+        case pdf
+    }
+
+    private func export(format: ExportFormat, sourceView: UIView) {
+        guard AdminSession.shared.isLoggedIn else {
+            let alert = AlertFactory.okAlert(title: "Admin required", message: "Please log in as admin to export.")
+            present(alert, animated: true)
+            return
+        }
+
+        let service = ExportService()
+
+        do {
+            let url: URL
+            switch format {
+            case .csv:
+                url = try service.exportCheckInsCSV()
+            case .pdf:
+                url = try service.exportCheckInsPDF()
+            }
+
+            let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            if let popover = activity.popoverPresentationController {
+                popover.sourceView = sourceView
+                popover.sourceRect = sourceView.bounds
+            }
+            present(activity, animated: true)
+        } catch {
+            let alert = AlertFactory.okAlert(title: "Export failed", message: "Could not generate the export file.")
+            present(alert, animated: true)
+        }
+    }
     private func presentLogoutConfirmation() {
         let alert = AlertFactory.confirmAlert(
             title: "Log out?",
