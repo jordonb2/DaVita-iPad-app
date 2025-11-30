@@ -15,11 +15,15 @@ struct CheckInHistoryFilter {
     /// Maximum number of records (newest first). Nil = no limit.
     var limit: Int?
 
-    init(startDate: Date? = nil, endDate: Date? = nil, keyword: String? = nil, limit: Int? = nil) {
+    /// Fetch offset for paging (newest first). Nil/0 = no offset.
+    var offset: Int?
+
+    init(startDate: Date? = nil, endDate: Date? = nil, keyword: String? = nil, limit: Int? = nil, offset: Int? = nil) {
         self.startDate = startDate
         self.endDate = endDate
         self.keyword = keyword
         self.limit = limit
+        self.offset = offset
     }
 
     var normalizedKeyword: String? {
@@ -101,6 +105,29 @@ final class CheckInRepository {
         return try fetchHistory(forResolvedPerson: person, filter: filter)
     }
 
+
+    /// Fetch a page of check-in history for a person.
+    ///
+    /// - Returns: (records, hasMore)
+    func fetchHistoryPage(for person: Person, filter: CheckInHistoryFilter) throws -> ([CheckInRecord], Bool) {
+        // Fetch one extra to detect if more exists.
+        var f = filter
+        let pageSize = f.limit
+        if let pageSize {
+            f.limit = pageSize + 1
+        }
+
+        let records = try fetchHistory(for: person, filter: f)
+        guard let pageSize else {
+            return (records, false)
+        }
+
+        if records.count > pageSize {
+            return (Array(records.prefix(pageSize)), true)
+        }
+        return (records, false)
+    }
+
     /// Fetch the most recent check-in for a person.
     func fetchMostRecent(for person: Person) throws -> CheckInRecord? {
         try fetchHistory(for: person, limit: 1).first
@@ -121,6 +148,9 @@ final class CheckInRepository {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         request.predicate = predicate(for: filter, person: nil)
+        if let offset = filter.offset, offset > 0 {
+            request.fetchOffset = offset
+        }
         if let limit = filter.limit {
             request.fetchLimit = max(0, limit)
         }
@@ -143,6 +173,9 @@ final class CheckInRepository {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         request.predicate = predicate(for: filter, person: person)
+        if let offset = filter.offset, offset > 0 {
+            request.fetchOffset = offset
+        }
         if let limit = filter.limit {
             request.fetchLimit = max(0, limit)
         }

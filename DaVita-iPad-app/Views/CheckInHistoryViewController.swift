@@ -9,7 +9,17 @@ final class CheckInHistoryViewController: StandardTableViewController {
     private let personFilter: Person?
 
     /// Each section is a person, with their check-in records sorted newest first.
-    private var sections: [(person: Person, records: [CheckInRecord])] = []
+    private struct Section {
+        let person: Person
+        var records: [CheckInRecord]
+        var hasMore: Bool
+        var loadedCount: Int
+    }
+
+    private var sections: [Section] = []
+
+    private let pageSize = 20
+    private var loadedCountsByPersonID: [NSManagedObjectID: Int] = [:]
 
 
     // MARK: - Filtering
@@ -170,13 +180,19 @@ final class CheckInHistoryViewController: StandardTableViewController {
     private func loadSections() {
         if let personFilter {
             do {
-                let records = try checkInRepo.fetchHistory(for: personFilter, filter: currentHistoryFilter)
-                sections = [(personFilter, records)]
+                let personID = personFilter.objectID
+                let loaded = loadedCountsByPersonID[personID] ?? pageSize
+                var filter = currentHistoryFilter
+                // Respect explicit limits (e.g., Last 5).
+                if filter.limit == nil { filter.limit = loaded }
+
+                let (records, hasMore) = try checkInRepo.fetchHistoryPage(for: personFilter, filter: filter)
+                loadedCountsByPersonID[personID] = records.count
+                sections = [Section(person: personFilter, records: records, hasMore: hasMore, loadedCount: records.count)]
             } catch {
                 AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
-            showToast(message: "Couldn't load history. Please try again.")
                 showToast(message: "Couldn't load history. Please try again.")
-                sections = [(personFilter, [])]
+                sections = [Section(person: personFilter, records: [], hasMore: false, loadedCount: 0)]
             }
             tableView.reloadData()
             return
@@ -191,14 +207,23 @@ final class CheckInHistoryViewController: StandardTableViewController {
         do {
             let people = try context.fetch(fetch)
             sections = people.map { person in
+                var hasMore = false
                 let records: [CheckInRecord]
                 do {
-                    records = try checkInRepo.fetchHistory(for: person, filter: currentHistoryFilter)
+                    let personID = person.objectID
+                    let loaded = loadedCountsByPersonID[personID] ?? pageSize
+                    var filter = currentHistoryFilter
+                    if filter.limit == nil { filter.limit = loaded }
+                    let page = try checkInRepo.fetchHistoryPage(for: person, filter: filter)
+                    loadedCountsByPersonID[personID] = page.0.count
+                    records = page.0
+                    hasMore = page.1
                 } catch {
                     AppLog.persistence.error("History fetch error for person \(person.name ?? "Person", privacy: .private): \(error, privacy: .public)")
+                    hasMore = false
                     records = []
                 }
-                return (person, records)
+                return Section(person: person, records: records, hasMore: hasMore, loadedCount: records.count)
             }
             tableView.reloadData()
         } catch {
@@ -258,6 +283,21 @@ final class CheckInHistoryViewController: StandardTableViewController {
     }
 }
 
+extension CheckInHistoryViewController {
+
+    private func loadMore(for sectionIndex: Int) {
+        guard sectionIndex >= 0 && sectionIndex < sections.count else { return }
+        let person = sections[sectionIndex].person
+        let personID = person.objectID
+
+        let currentlyLoaded = loadedCountsByPersonID[personID] ?? sections[sectionIndex].loadedCount
+        loadedCountsByPersonID[personID] = currentlyLoaded + pageSize
+
+        // Reload just this section.
+        loadSections()
+    }
+}
+
 extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
@@ -269,19 +309,26 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let records = sections[section].records
-        return max(records.count, 1)
+        let sectionModel = sections[section]
+        if sectionModel.records.isEmpty { return 1 }
+        return sectionModel.records.count + (sectionModel.hasMore ? 1 : 0)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "historyCell", for: indexPath)
         var config = cell.defaultContentConfiguration()
 
-        let records = sections[indexPath.section].records
+        let sectionModel = sections[indexPath.section]
+        let records = sectionModel.records
         if records.isEmpty {
             config.text = "No check-ins yet"
             config.secondaryText = nil
             cell.selectionStyle = .none
+            cell.accessoryType = .none
+        } else if sectionModel.hasMore && indexPath.row == records.count {
+            config.text = "Load more…"
+            config.secondaryText = "Fetch the next \(pageSize) visits"
+            cell.selectionStyle = .default
             cell.accessoryType = .none
         } else {
             let record = records[indexPath.row]
@@ -299,8 +346,14 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let records = sections[indexPath.section].records
+        let sectionModel = sections[indexPath.section]
+        let records = sectionModel.records
         guard !records.isEmpty else { return }
+
+        if sectionModel.hasMore && indexPath.row == records.count {
+            loadMore(for: indexPath.section)
+            return
+        }
 
         let record = records[indexPath.row]
         guard let detail = detailText(for: record) else { return }
