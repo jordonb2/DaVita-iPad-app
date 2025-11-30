@@ -66,7 +66,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         let stack = verticalStack()
 
         let values = series.map { CGFloat($0.value) }
-        let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.accent)
+        let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.accent, accessibilityValueText: painTrendAccessibility(series: series))
         spark.heightAnchor.constraint(equalToConstant: 56).isActive = true
 
         let summary = UILabel()
@@ -143,7 +143,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             let header = UIFactory.keyValueRow(title: title, value: "\(count)")
             rowStack.addArrangedSubview(header)
 
-            let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.textSecondary)
+            let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.textSecondary, accessibilityValueText: "Daily frequency over time")
             spark.heightAnchor.constraint(equalToConstant: 34).isActive = true
             rowStack.addArrangedSubview(spark)
 
@@ -155,7 +155,19 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         return container
     }
 
-    // MARK: - Small UI helpers
+    
+
+    private func painTrendAccessibility(series: [CheckInTrendsProvider.Point]) -> String {
+        guard let first = series.first, let last = series.last else { return "No data" }
+        let start = Int(first.value.rounded())
+        let end = Int(last.value.rounded())
+        let direction: String
+        if end > start { direction = "increasing" }
+        else if end < start { direction = "decreasing" }
+        else { direction = "stable" }
+        return "Latest \(end) out of 10. Trend is \(direction)." 
+    }
+// MARK: - Small UI helpers
 
     private func cardContainer() -> UIView {
         let v = UIView()
@@ -194,14 +206,18 @@ final class PersonTrendsViewController: ScrolledStackViewController {
 private final class SparklineView: UIView {
     private let values: [CGFloat]
     private let strokeColor: UIColor
+    private let accessibilityValueText: String
 
-    init(values: [CGFloat], strokeColor: UIColor) {
+    init(values: [CGFloat], strokeColor: UIColor, accessibilityValueText: String = "") {
         self.values = values
         self.strokeColor = strokeColor
+        self.accessibilityValueText = accessibilityValueText
         super.init(frame: .zero)
         backgroundColor = .clear
         isAccessibilityElement = true
+        accessibilityTraits = [.image]
         accessibilityLabel = "Trend"
+        accessibilityValue = accessibilityValueText
     }
 
     required init?(coder: NSCoder) {
@@ -259,15 +275,21 @@ private final class DistributionRow: UIView {
 
         titleLabel.text = title
         titleLabel.font = UIFactory.Theme.Font.preferred(.body)
+        titleLabel.adjustsFontForContentSizeCategory = true
 
         valueLabel.text = valueText
         valueLabel.font = UIFactory.Theme.Font.preferred(.body)
+        valueLabel.adjustsFontForContentSizeCategory = true
         valueLabel.textColor = UIFactory.Theme.Color.textSecondary
         valueLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         bar.progress = Float(max(0, min(1, fraction)))
         bar.trackTintColor = UIFactory.Theme.Color.separator.withAlphaComponent(0.35)
         bar.progressTintColor = UIFactory.Theme.Color.accent
+
+        isAccessibilityElement = true
+        accessibilityLabel = "\(title)"
+        accessibilityValue = valueText
 
         let header = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
         header.axis = .horizontal

@@ -72,6 +72,7 @@ enum UIFactory {
         let label = UILabel()
         label.text = text
         label.font = Theme.Font.preferred(textStyle)
+        label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
         label.accessibilityTraits.insert(.header)
         return label
@@ -91,11 +92,13 @@ enum UIFactory {
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = Theme.Font.preferred(.body)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.isAccessibilityElement = false
 
         let valueLabel = UILabel()
         valueLabel.text = value
         valueLabel.font = Theme.Font.preferred(.body)
+        valueLabel.adjustsFontForContentSizeCategory = true
         valueLabel.textAlignment = .right
         valueLabel.setContentHuggingPriority(.required, for: .horizontal)
         valueLabel.isAccessibilityElement = false
@@ -114,6 +117,8 @@ enum UIFactory {
             let emptyLabel = UILabel()
             emptyLabel.text = emptyText
             emptyLabel.textColor = Theme.Color.textSecondary
+            emptyLabel.font = Theme.Font.preferred(.body)
+            emptyLabel.adjustsFontForContentSizeCategory = true
             emptyLabel.isAccessibilityElement = true
             emptyLabel.accessibilityLabel = "No data yet"
             container.addArrangedSubview(emptyLabel)
@@ -147,6 +152,7 @@ enum UIFactory {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = Theme.Font.preferred(textStyle)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.contentHorizontalAlignment = .leading
         button.backgroundColor = backgroundColor
         button.layer.cornerRadius = cornerRadius
@@ -165,6 +171,7 @@ enum UIFactory {
             let titleLabel = UILabel()
             titleLabel.text = title
             titleLabel.font = Theme.Font.preferred(.headline)
+            titleLabel.adjustsFontForContentSizeCategory = true
             titleLabel.accessibilityTraits.insert(.header)
             container.addArrangedSubview(titleLabel)
             textView.accessibilityLabel = title
@@ -173,6 +180,7 @@ enum UIFactory {
         let placeholderLabel = UILabel()
         placeholderLabel.text = placeholder
         placeholderLabel.font = Theme.Font.preferred(.subheadline)
+        placeholderLabel.adjustsFontForContentSizeCategory = true
         placeholderLabel.textColor = Theme.Color.textSecondary
         placeholderLabel.isAccessibilityElement = false
 
@@ -183,6 +191,7 @@ enum UIFactory {
 
     static func styleTextViewForForm(_ textView: UITextView) {
         textView.font = Theme.Font.preferred(.body)
+        textView.adjustsFontForContentSizeCategory = true
         textView.layer.borderWidth = Theme.Metrics.formBorderWidth
         textView.layer.borderColor = Theme.Color.separator.cgColor
         textView.layer.cornerRadius = Theme.CornerRadius.s

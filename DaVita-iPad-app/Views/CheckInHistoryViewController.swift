@@ -125,11 +125,15 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
         let search = UISearchController(searchResultsController: nil)
         search.obscuresBackgroundDuringPresentation = false
         search.searchBar.placeholder = "Search symptoms or concerns"
+        search.searchBar.accessibilityIdentifier = "history.search"
         search.searchResultsUpdater = self
         navigationItem.searchController = search
         navigationItem.hidesSearchBarWhenScrolling = false
 
         let filterButton = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: nil)
+        filterButton.accessibilityLabel = "History filter"
+        filterButton.accessibilityHint = "Filter history by date or keyword"
+        filterButton.accessibilityIdentifier = "history.filter"
         filterButton.menu = makeScopeMenu()
         filterButton.primaryAction = nil
         navigationItem.leftBarButtonItem = filterButton
@@ -358,10 +362,12 @@ private final class DateRangePickerViewController: UIViewController {
         let startLabel = UILabel()
         startLabel.text = "Start"
         startLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        startLabel.adjustsFontForContentSizeCategory = true
 
         let endLabel = UILabel()
         endLabel.text = "End"
         endLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        endLabel.adjustsFontForContentSizeCategory = true
 
         stack.addArrangedSubview(startLabel)
         stack.addArrangedSubview(startPicker)
