@@ -3,24 +3,14 @@ import CoreData
 import Foundation
 
 /// Admin-only multi-visit check-in history.
-final class CheckInHistoryViewController: StandardTableViewController {
+///
+/// Uses `NSFetchedResultsController` for live-updating results.
+final class CheckInHistoryViewController: StandardTableViewController, NSFetchedResultsControllerDelegate {
     private let context: NSManagedObjectContext
     private let checkInRepo: CheckInRepository
     private let personFilter: Person?
 
-    /// Each section is a person, with their check-in records sorted newest first.
-    private struct Section {
-        let person: Person
-        var records: [CheckInRecord]
-        var hasMore: Bool
-        var loadedCount: Int
-    }
-
-    private var sections: [Section] = []
-
-    private let pageSize = 20
-    private var loadedCountsByPersonID: [NSManagedObjectID: Int] = [:]
-
+    private var frc: NSFetchedResultsController<CheckInRecord>?
 
     // MARK: - Filtering
 
@@ -28,14 +18,6 @@ final class CheckInHistoryViewController: StandardTableViewController {
         case all
         case last(Int)
         case dateRange(start: Date, end: Date)
-
-        var buttonTitle: String {
-            switch self {
-            case .all: return "All"
-            case .last(let n): return "Last \(n)"
-            case .dateRange: return "Date Range"
-            }
-        }
     }
 
     private var scope: HistoryScope = .all
@@ -45,20 +27,30 @@ final class CheckInHistoryViewController: StandardTableViewController {
     private var currentHistoryFilter: CheckInHistoryFilter {
         var f = CheckInHistoryFilter()
         f.keyword = keyword
+
         switch scope {
         case .all:
             f.limit = nil
             f.startDate = nil
             f.endDate = nil
+
         case .last(let n):
-            f.limit = n
+            // NSFetchedResultsController applies fetchLimit to the whole fetch, not per section.
+            // Only enable in single-person mode.
+            if personFilter != nil {
+                f.limit = n
+            } else {
+                f.limit = nil
+            }
             f.startDate = nil
             f.endDate = nil
+
         case .dateRange(let start, let end):
             f.limit = nil
             f.startDate = start
             f.endDate = end
         }
+
         return f
     }
 
@@ -85,11 +77,13 @@ final class CheckInHistoryViewController: StandardTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         if let personFilter {
             title = "\(personFilter.name ?? "Person") History"
         } else {
             title = "Visit History"
         }
+
         view.backgroundColor = .systemBackground
 
         tableView.dataSource = self
@@ -97,11 +91,34 @@ final class CheckInHistoryViewController: StandardTableViewController {
         TableStyler.applyHistoryStyle(to: tableView)
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Refresh", style: .plain, target: self, action: #selector(refreshTapped))
-        configureFilterUI()
 
-        loadSections()
+        configureFilterUI()
+        configureFRC()
     }
 
+    // MARK: - FRC
+
+    private func configureFRC() {
+        do {
+            frc = try checkInRepo.makeHistoryFRC(person: personFilter, filter: currentHistoryFilter, delegate: self)
+            tableView.reloadData()
+        } catch {
+            AppLog.persistence.error("History FRC setup error: \(error, privacy: .public)")
+            showToast(message: "Couldn't load history. Please try again.")
+            frc = nil
+            tableView.reloadData()
+        }
+    }
+
+    @objc private func refreshTapped() {
+        configureFRC()
+    }
+
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        tableView.reloadData()
+    }
+
+    // MARK: - Filter UI
 
     private func configureFilterUI() {
         // Keyword search (symptoms/concerns)
@@ -112,7 +129,6 @@ final class CheckInHistoryViewController: StandardTableViewController {
         navigationItem.searchController = search
         navigationItem.hidesSearchBarWhenScrolling = false
 
-        // Scope menu (all / last 5 / date range)
         let filterButton = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: nil)
         filterButton.menu = makeScopeMenu()
         filterButton.primaryAction = nil
@@ -126,16 +142,20 @@ final class CheckInHistoryViewController: StandardTableViewController {
         }()) { [weak self] _ in
             self?.scope = .all
             self?.navigationItem.leftBarButtonItem?.menu = self?.makeScopeMenu()
-            self?.loadSections()
+            self?.configureFRC()
         }
 
-        let last5 = UIAction(title: "Last 5 visits", state: {
-            if case .last(5) = scope { return .on }
-            return .off
-        }()) { [weak self] _ in
+        let last5 = UIAction(
+            title: "Last 5 visits",
+            attributes: (personFilter == nil ? [.disabled] : []) ,
+            state: {
+                if case .last(5) = scope { return .on }
+                return .off
+            }()
+        ) { [weak self] _ in
             self?.scope = .last(5)
             self?.navigationItem.leftBarButtonItem?.menu = self?.makeScopeMenu()
-            self?.loadSections()
+            self?.configureFRC()
         }
 
         let dateRange = UIAction(title: "Date range…", state: {
@@ -148,7 +168,8 @@ final class CheckInHistoryViewController: StandardTableViewController {
         let clearKeyword = UIAction(title: "Clear keyword", attributes: (keyword?.isEmpty == false ? [] : [.disabled])) { [weak self] _ in
             self?.keyword = nil
             self?.navigationItem.searchController?.searchBar.text = nil
-            self?.loadSections()
+            self?.navigationItem.leftBarButtonItem?.menu = self?.makeScopeMenu()
+            self?.configureFRC()
         }
 
         return UIMenu(title: "History Filter", children: [all, last5, dateRange, clearKeyword])
@@ -158,89 +179,28 @@ final class CheckInHistoryViewController: StandardTableViewController {
         let vc = DateRangePickerViewController()
         let nav = UINavigationController(rootViewController: vc)
         nav.modalPresentationStyle = .formSheet
+
         vc.onApply = { [weak self] start, end in
             guard let self else { return }
             self.scope = .dateRange(start: start, end: end)
             self.navigationItem.leftBarButtonItem?.menu = self.makeScopeMenu()
-            self.loadSections()
+            self.configureFRC()
         }
+
         vc.onClear = { [weak self] in
             guard let self else { return }
             self.scope = .all
             self.navigationItem.leftBarButtonItem?.menu = self.makeScopeMenu()
-            self.loadSections()
+            self.configureFRC()
         }
+
         present(nav, animated: true)
     }
 
-    @objc private func refreshTapped() {
-        loadSections()
-    }
-
-    private func loadSections() {
-        if let personFilter {
-            do {
-                let personID = personFilter.objectID
-                let loaded = loadedCountsByPersonID[personID] ?? pageSize
-                var filter = currentHistoryFilter
-                // Respect explicit limits (e.g., Last 5).
-                if filter.limit == nil { filter.limit = loaded }
-
-                let (records, hasMore) = try checkInRepo.fetchHistoryPage(for: personFilter, filter: filter)
-                loadedCountsByPersonID[personID] = records.count
-                sections = [Section(person: personFilter, records: records, hasMore: hasMore, loadedCount: records.count)]
-            } catch {
-                AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
-                showToast(message: "Couldn't load history. Please try again.")
-                sections = [Section(person: personFilter, records: [], hasMore: false, loadedCount: 0)]
-            }
-            tableView.reloadData()
-            return
-        }
-
-        let fetch: NSFetchRequest<Person> = Person.fetchRequest()
-        fetch.sortDescriptors = [
-            NSSortDescriptor(key: "name", ascending: true),
-            NSSortDescriptor(key: "createdAt", ascending: false)
-        ]
-
-        do {
-            let people = try context.fetch(fetch)
-            sections = people.map { person in
-                var hasMore = false
-                let records: [CheckInRecord]
-                do {
-                    let personID = person.objectID
-                    let loaded = loadedCountsByPersonID[personID] ?? pageSize
-                    var filter = currentHistoryFilter
-                    if filter.limit == nil { filter.limit = loaded }
-                    let page = try checkInRepo.fetchHistoryPage(for: person, filter: filter)
-                    loadedCountsByPersonID[personID] = page.0.count
-                    records = page.0
-                    hasMore = page.1
-                } catch {
-                    AppLog.persistence.error("History fetch error for person \(person.name ?? "Person", privacy: .private): \(error, privacy: .public)")
-                    hasMore = false
-                    records = []
-                }
-                return Section(person: person, records: records, hasMore: hasMore, loadedCount: records.count)
-            }
-            tableView.reloadData()
-        } catch {
-            AppLog.persistence.error("History fetch error: \(error, privacy: .public)")
-            showToast(message: "Couldn't load history. Please try again.")
-            sections = []
-            tableView.reloadData()
-        }
-    }
+    // MARK: - Display helpers
 
     private func displayText(for record: CheckInRecord) -> String {
-        let painText: String
-        if record.painLevel != 0 {
-            painText = "Pain \(record.painLevel)"
-        } else {
-            painText = "Pain 0"
-        }
+        let painText = "Pain \(record.painLevel)"
 
         let energyText: String = {
             if let n = record.value(forKey: "energyBucket") as? NSNumber,
@@ -278,84 +238,69 @@ final class CheckInHistoryViewController: StandardTableViewController {
         if let n = record.teamNote, !n.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             parts.append("Note: \(n)")
         }
-        if parts.isEmpty { return nil }
+        guard !parts.isEmpty else { return nil }
         return parts.joined(separator: "\n")
     }
 }
 
-extension CheckInHistoryViewController {
-
-    private func loadMore(for sectionIndex: Int) {
-        guard sectionIndex >= 0 && sectionIndex < sections.count else { return }
-        let person = sections[sectionIndex].person
-        let personID = person.objectID
-
-        let currentlyLoaded = loadedCountsByPersonID[personID] ?? sections[sectionIndex].loadedCount
-        loadedCountsByPersonID[personID] = currentlyLoaded + pageSize
-
-        // Reload just this section.
-        loadSections()
-    }
-}
+// MARK: - UITableView
 
 extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
+        return frc?.sections?.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        let person = sections[section].person
-        return person.name ?? "Unnamed Person"
+        if let personFilter {
+            return personFilter.name ?? "Unnamed Person"
+        }
+        return frc?.sections?[section].name
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionModel = sections[section]
-        if sectionModel.records.isEmpty { return 1 }
-        return sectionModel.records.count + (sectionModel.hasMore ? 1 : 0)
+        guard let sectionInfo = frc?.sections?[section] else { return 0 }
+        return max(sectionInfo.numberOfObjects, 1)
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "historyCell", for: indexPath)
         var config = cell.defaultContentConfiguration()
 
-        let sectionModel = sections[indexPath.section]
-        let records = sectionModel.records
-        if records.isEmpty {
+        guard let frc, let sectionInfo = frc.sections?[indexPath.section] else {
+            config.text = "No data"
+            cell.selectionStyle = .none
+            cell.contentConfiguration = config
+            return cell
+        }
+
+        if sectionInfo.numberOfObjects == 0 {
             config.text = "No check-ins yet"
             config.secondaryText = nil
             cell.selectionStyle = .none
             cell.accessoryType = .none
-        } else if sectionModel.hasMore && indexPath.row == records.count {
-            config.text = "Load more…"
-            config.secondaryText = "Fetch the next \(pageSize) visits"
-            cell.selectionStyle = .default
-            cell.accessoryType = .none
-        } else {
-            let record = records[indexPath.row]
-            let dateText = record.createdAt.map { dateFormatter.string(from: $0) } ?? "Unknown date"
-            config.text = dateText
-            config.secondaryText = displayText(for: record)
-            config.secondaryTextProperties.numberOfLines = 2
-            cell.selectionStyle = .default
-            cell.accessoryType = detailText(for: record) == nil ? .none : .disclosureIndicator
+            cell.contentConfiguration = config
+            return cell
         }
 
+        let record = frc.object(at: indexPath)
+        let dateText = record.createdAt.map { dateFormatter.string(from: $0) } ?? "Unknown date"
+        config.text = dateText
+        config.secondaryText = displayText(for: record)
+        config.secondaryTextProperties.numberOfLines = 2
+
+        cell.selectionStyle = .default
+        cell.accessoryType = detailText(for: record) == nil ? .none : .disclosureIndicator
         cell.contentConfiguration = config
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let sectionModel = sections[indexPath.section]
-        let records = sectionModel.records
-        guard !records.isEmpty else { return }
-
-        if sectionModel.hasMore && indexPath.row == records.count {
-            loadMore(for: indexPath.section)
+        guard let frc, let sectionInfo = frc.sections?[indexPath.section], sectionInfo.numberOfObjects > 0 else {
             return
         }
 
-        let record = records[indexPath.row]
+        let record = frc.object(at: indexPath)
         guard let detail = detailText(for: record) else { return }
 
         let alert = AlertFactory.okAlert(title: "Check-in Details", message: detail)
@@ -372,7 +317,7 @@ extension CheckInHistoryViewController: UISearchResultsUpdating {
             guard let self else { return }
             self.keyword = text
             self.navigationItem.leftBarButtonItem?.menu = self.makeScopeMenu()
-            self.loadSections()
+            self.configureFRC()
         }
         pendingSearchWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
@@ -407,7 +352,7 @@ private final class DateRangePickerViewController: UIViewController {
 
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 16
+        stack.spacing = UIFactory.Theme.Spacing.l
         stack.translatesAutoresizingMaskIntoConstraints = false
 
         let startLabel = UILabel()
@@ -427,7 +372,7 @@ private final class DateRangePickerViewController: UIViewController {
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20)
+            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIFactory.Theme.Spacing.xl)
         ])
     }
 
@@ -447,4 +392,3 @@ private final class DateRangePickerViewController: UIViewController {
         dismiss(animated: true)
     }
 }
-

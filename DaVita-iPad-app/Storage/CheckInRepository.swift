@@ -40,6 +40,47 @@ final class CheckInRepository {
         self.context = context
     }
 
+    func makeHistoryFRC(person: Person? = nil,
+                        filter: CheckInHistoryFilter = CheckInHistoryFilter(),
+                        delegate: NSFetchedResultsControllerDelegate?) throws -> NSFetchedResultsController<CheckInRecord> {
+        let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
+
+        // Sort by person then createdAt desc so sections are stable.
+        if person == nil {
+            request.sortDescriptors = [
+                NSSortDescriptor(key: "person.name", ascending: true),
+                NSSortDescriptor(key: "createdAt", ascending: false)
+            ]
+        } else {
+            request.sortDescriptors = [
+                NSSortDescriptor(key: "createdAt", ascending: false)
+            ]
+        }
+
+        // Predicate using the same filter logic.
+        let resolvedPerson: Person?
+        if let person {
+            resolvedPerson = try resolve(person: person)
+        } else {
+            resolvedPerson = nil
+        }
+        request.predicate = predicate(for: filter, person: resolvedPerson)
+
+        // Fetch in batches for memory efficiency.
+        request.fetchBatchSize = 50
+
+        let sectionKeyPath: String? = (person == nil) ? "person.name" : nil
+        let frc = NSFetchedResultsController(
+            fetchRequest: request,
+            managedObjectContext: context,
+            sectionNameKeyPath: sectionKeyPath,
+            cacheName: nil
+        )
+        frc.delegate = delegate
+        try frc.performFetch()
+        return frc
+    }
+
     // MARK: - Creates
 
     @discardableResult
