@@ -3,7 +3,12 @@ import CoreData
 import UIKit
 
 /// Local-only exports (no network).
-final class ExportService {
+protocol ExportServicing {
+    func exportCheckInsCSV(filter: CheckInHistoryFilter) throws -> URL
+    func exportCheckInsPDF(filter: CheckInHistoryFilter) throws -> URL
+}
+
+final class ExportService: ExportServicing {
     enum ExportError: Error {
         case noRecords
         case writeFailed
@@ -11,7 +16,7 @@ final class ExportService {
 
     private let context: NSManagedObjectContext
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
+    init(context: NSManagedObjectContext) {
         self.context = context
     }
 

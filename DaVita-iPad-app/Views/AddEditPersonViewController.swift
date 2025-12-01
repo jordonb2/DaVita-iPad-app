@@ -9,7 +9,7 @@ import UIKit
 
 final class AddEditPersonViewController: UIViewController {
 
-    var router: AppRouting = AppRouter.shared
+    var router: AppRouting!
     
     private var viewModel = AddEditPersonViewModel()
     
@@ -31,6 +31,7 @@ final class AddEditPersonViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        assert(router != nil, "AddEditPersonViewController.router must be injected before presentation")
         title = viewModel.isEditingRecord ? "Edit Person" : "Add/Edit Person"
         view.backgroundColor = .systemBackground
         configureUI()

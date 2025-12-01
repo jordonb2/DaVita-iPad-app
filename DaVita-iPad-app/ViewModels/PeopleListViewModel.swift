@@ -25,7 +25,7 @@ final class PeopleListViewModel: NSObject {
         return peopleRepo.makePeopleFRC(delegate: self)
     }()
 
-    init(coreDataStack: CoreDataStack = CoreDataStack.shared,
+    init(coreDataStack: CoreDataStacking,
          context: NSManagedObjectContext? = nil) {
         let ctx = context ?? coreDataStack.viewContext
         self.context = ctx

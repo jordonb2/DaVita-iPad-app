@@ -10,12 +10,12 @@ import Combine
 
  final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
-    var router: AppRouting = AppRouter.shared
+    var router: AppRouting!
+    var viewModel: PeopleListViewModel!
     
     // If your table view is the ROOT view, we can grab it like this:
     private var tableViewRef: UITableView { self.view as! UITableView }
     
-    private let viewModel = PeopleListViewModel()
     private var cancellables = Set<AnyCancellable>()
     private let calendar = Calendar.current
 
@@ -53,6 +53,8 @@ import Combine
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        assert(router != nil, "PeopleListViewController.router must be injected by a coordinator")
+        assert(viewModel != nil, "PeopleListViewController.viewModel must be injected by a coordinator")
         title = "People List"
         view.backgroundColor = .systemBackground
         

@@ -26,7 +26,7 @@ final class CheckInTrendsProviderTests: XCTestCase {
         }
 
         let provider = CheckInTrendsProvider(context: stack.viewContext)
-        let trends = try provider.computeTrends(for: person, windowDays: 10)
+        let trends = try provider.computeTrends(for: person, windowDays: 10, maxRecords: 250)
 
         XCTAssertEqual(trends.painSeries.count, 3)
         // Chronological ordering

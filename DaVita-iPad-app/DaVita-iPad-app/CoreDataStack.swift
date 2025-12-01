@@ -14,8 +14,7 @@ protocol CoreDataStacking {
 }
 
 final class CoreDataStack: CoreDataStacking {
-    static let shared = CoreDataStack()
-    private init() {}
+    init() {}
 
     static var isUITesting: Bool {
         ProcessInfo.processInfo.arguments.contains("UI_TESTING")

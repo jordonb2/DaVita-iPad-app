@@ -9,7 +9,7 @@ import CoreData
 final class CheckInService {
     private let coreDataStack: CoreDataStacking
 
-    init(coreDataStack: CoreDataStacking = CoreDataStack.shared) {
+    init(coreDataStack: CoreDataStacking) {
         self.coreDataStack = coreDataStack
     }
 

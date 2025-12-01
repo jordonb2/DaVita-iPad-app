@@ -4,7 +4,25 @@ final class AnalyticsViewController: ScrolledStackViewController {
 
     var onLogoutConfirmed: (() -> Void)?
 
-    private let summaryProvider = CheckInAnalyticsSummaryProvider()
+    private let adminSession: AdminSessioning
+    private let summaryProvider: CheckInAnalyticsSummaryProviding
+    private let exportService: ExportServicing
+    private let historyViewControllerFactory: () -> CheckInHistoryViewController
+
+    init(adminSession: AdminSessioning,
+         summaryProvider: CheckInAnalyticsSummaryProviding,
+         exportService: ExportServicing,
+         historyViewControllerFactory: @escaping () -> CheckInHistoryViewController) {
+        self.adminSession = adminSession
+        self.summaryProvider = summaryProvider
+        self.exportService = exportService
+        self.historyViewControllerFactory = historyViewControllerFactory
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +42,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private func loadSummaryAndRender() {
         let summary: CheckInAnalyticsSummaryProvider.Summary
         do {
-            summary = try summaryProvider.makeSummary()
+            summary = try summaryProvider.makeSummary(since: nil)
         } catch {
             AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .public)")
             showToast(message: "Couldn't load analytics. Please try again.")
@@ -45,7 +63,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
         contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Low Energy Rate", value: percentText(summary.lowEnergyRate)))
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Step Drop-Off Signals"))
-        let orderedSteps: [CheckInAnalyticsLogger.Step] = [.pain, .energy, .mood, .symptoms, .concerns, .teamNote]
+        let orderedSteps: [CheckInAnalyticsStep] = [.pain, .energy, .mood, .symptoms, .concerns, .teamNote]
         for step in orderedSteps {
             let count = summary.stepFirstInteractionCounts[step] ?? 0
             contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: step.rawValue.capitalized, value: "\(count)"))
@@ -99,7 +117,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     @objc private func historyTapped() {
-        let vc = CheckInHistoryViewController()
+        let vc = historyViewControllerFactory()
         navigationController?.pushViewController(vc, animated: true)
     }
 
@@ -123,21 +141,19 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     private func export(format: ExportFormat, sourceView: UIView) {
-        guard AdminSession.shared.isLoggedIn else {
+        guard adminSession.isLoggedIn else {
             let alert = AlertFactory.okAlert(title: "Admin required", message: "Please log in as admin to export.")
             present(alert, animated: true)
             return
         }
 
-        let service = ExportService()
-
         do {
             let url: URL
             switch format {
             case .csv:
-                url = try service.exportCheckInsCSV()
+                url = try exportService.exportCheckInsCSV(filter: CheckInHistoryFilter())
             case .pdf:
-                url = try service.exportCheckInsPDF()
+                url = try exportService.exportCheckInsPDF(filter: CheckInHistoryFilter())
             }
 
             let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)

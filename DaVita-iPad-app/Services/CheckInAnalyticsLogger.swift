@@ -1,24 +1,30 @@
 import Foundation
 import CoreData
 
-final class CheckInAnalyticsLogger {
-    static let shared = CheckInAnalyticsLogger(context: CoreDataStack.shared.viewContext)
+enum CheckInAnalyticsEventType: String {
+    case stepFirstInteracted
+    case submitted
+    case skipped
+    case dismissed
+}
 
-    enum EventType: String {
-        case stepFirstInteracted
-        case submitted
-        case skipped
-        case dismissed
-    }
+enum CheckInAnalyticsStep: String {
+    case pain
+    case energy
+    case mood
+    case symptoms
+    case concerns
+    case teamNote
+}
 
-    enum Step: String {
-        case pain
-        case energy
-        case mood
-        case symptoms
-        case concerns
-        case teamNote
-    }
+protocol CheckInAnalyticsLogging {
+    func logStepFirstInteracted(step: CheckInAnalyticsStep)
+    func logSubmitted(checkInData: PersonCheckInData, durationSeconds: Double)
+    func logSkipped(durationSeconds: Double?, lastStep: CheckInAnalyticsStep?)
+    func logDismissed(durationSeconds: Double?, lastStep: CheckInAnalyticsStep?)
+}
+
+final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
 
     private let context: NSManagedObjectContext
 
@@ -26,7 +32,7 @@ final class CheckInAnalyticsLogger {
         self.context = context
     }
 
-    func logStepFirstInteracted(step: Step) {
+    func logStepFirstInteracted(step: CheckInAnalyticsStep) {
         logEvent(type: .stepFirstInteracted, step: step, durationSeconds: nil, payload: nil)
     }
 
@@ -35,15 +41,15 @@ final class CheckInAnalyticsLogger {
         logEvent(type: .submitted, step: nil, durationSeconds: durationSeconds, payload: payload)
     }
 
-    func logSkipped(durationSeconds: Double?, lastStep: Step?) {
+    func logSkipped(durationSeconds: Double?, lastStep: CheckInAnalyticsStep?) {
         logEvent(type: .skipped, step: lastStep, durationSeconds: durationSeconds, payload: nil)
     }
 
-    func logDismissed(durationSeconds: Double?, lastStep: Step?) {
+    func logDismissed(durationSeconds: Double?, lastStep: CheckInAnalyticsStep?) {
         logEvent(type: .dismissed, step: lastStep, durationSeconds: durationSeconds, payload: nil)
     }
 
-    private func logEvent(type: EventType, step: Step?, durationSeconds: Double?, payload: Payload?) {
+    private func logEvent(type: CheckInAnalyticsEventType, step: CheckInAnalyticsStep?, durationSeconds: Double?, payload: Payload?) {
         let event = CheckInAnalyticsEvent(context: context)
         event.id = UUID()
         event.createdAt = Date()
@@ -82,13 +88,13 @@ final class CheckInAnalyticsLogger {
 }
 
 extension CheckInAnalyticsEvent {
-    var eventTypeEnum: CheckInAnalyticsLogger.EventType? {
-        get { eventType.flatMap(CheckInAnalyticsLogger.EventType.init(rawValue:)) }
+    var eventTypeEnum: CheckInAnalyticsEventType? {
+        get { eventType.flatMap(CheckInAnalyticsEventType.init(rawValue:)) }
         set { eventType = newValue?.rawValue }
     }
 
-    var stepEnum: CheckInAnalyticsLogger.Step? {
-        get { step.flatMap(CheckInAnalyticsLogger.Step.init(rawValue:)) }
+    var stepEnum: CheckInAnalyticsStep? {
+        get { step.flatMap(CheckInAnalyticsStep.init(rawValue:)) }
         set { step = newValue?.rawValue }
     }
 }

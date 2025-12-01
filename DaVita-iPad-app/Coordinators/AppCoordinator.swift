@@ -3,11 +3,15 @@ import UIKit
 /// Owns app start and wiring root navigation controller into routing.
 final class AppCoordinator {
     private let window: UIWindow
-    private let router: AppRouter
+    private let router: AppRouting
+    private let coreDataStack: CoreDataStacking
 
-    init(window: UIWindow, router: AppRouter = .shared) {
+    init(window: UIWindow,
+         router: AppRouting,
+         coreDataStack: CoreDataStacking) {
         self.window = window
         self.router = router
+        self.coreDataStack = coreDataStack
     }
 
     func start() {
@@ -25,9 +29,10 @@ final class AppCoordinator {
 
         router.rootNavigationController = rootNav
 
-        // Inject router into root people list if possible
-        if let peopleList = rootNav.viewControllers.first as? PeopleListViewController {
+        // Inject dependencies into root people list if possible
+        if let peopleList = rootNav.viewControllers.first(where: { $0 is PeopleListViewController }) as? PeopleListViewController {
             peopleList.router = router
+            peopleList.viewModel = PeopleListViewModel(coreDataStack: coreDataStack)
         }
 
         window.rootViewController = rootNav

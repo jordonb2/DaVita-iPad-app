@@ -12,9 +12,11 @@ protocol PeopleFlowCoordinating: AnyObject {
 /// Owns deeper people-related flows: person detail and history drill-ins.
 final class PeopleFlowCoordinator: PeopleFlowCoordinating {
     private weak var router: AppRouting?
+    private let coreDataStack: CoreDataStacking
 
-    init(router: AppRouting) {
+    init(router: AppRouting, coreDataStack: CoreDataStacking) {
         self.router = router
+        self.coreDataStack = coreDataStack
     }
 
     private func navigationController(from presentingVC: UIViewController) -> UINavigationController? {
@@ -49,13 +51,14 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
 
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
-        let vc = CheckInHistoryViewController(person: person)
+        let vc = CheckInHistoryViewController(person: person, context: coreDataStack.viewContext)
         nav.pushViewController(vc, animated: true)
     }
 
     func showPersonTrends(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
-        let vc = PersonTrendsViewController(person: person)
+        let provider = CheckInTrendsProvider(context: coreDataStack.viewContext)
+        let vc = PersonTrendsViewController(person: person, trendsProvider: provider)
         nav.pushViewController(vc, animated: true)
     }
 }

@@ -5,7 +5,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     var onComplete: ((PersonCheckInData) -> Void)?
     var onSkip: (() -> Void)?
 
-    private let analyticsLogger = CheckInAnalyticsLogger.shared
+    private let analyticsLogger: CheckInAnalyticsLogging
     private var surveyStartDate: Date?
     private var hasInteractedWithPain = false
     private var hasInteractedWithEnergy = false
@@ -13,7 +13,16 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private var hasInteractedWithSymptoms = false
     private var hasInteractedWithConcerns = false
     private var hasInteractedWithTeamNote = false
-    private var lastInteractedStep: CheckInAnalyticsLogger.Step?
+    private var lastInteractedStep: CheckInAnalyticsStep?
+
+    init(analyticsLogger: CheckInAnalyticsLogging) {
+        self.analyticsLogger = analyticsLogger
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     private let surveyHeaderLabel = UILabel()
     private let closeLabel = UILabel()

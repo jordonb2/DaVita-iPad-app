@@ -61,7 +61,7 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
         return f
     }()
 
-    init(person: Person? = nil, context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
+    init(person: Person? = nil, context: NSManagedObjectContext) {
         self.context = context
         self.checkInRepo = CheckInRepository(context: context)
         self.personFilter = person
@@ -69,10 +69,7 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
     }
 
     required init?(coder: NSCoder) {
-        self.context = CoreDataStack.shared.viewContext
-        self.checkInRepo = CheckInRepository(context: self.context)
-        self.personFilter = nil
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {

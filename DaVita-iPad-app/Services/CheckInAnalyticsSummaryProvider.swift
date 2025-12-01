@@ -1,7 +1,11 @@
 import Foundation
 import CoreData
 
-final class CheckInAnalyticsSummaryProvider {
+protocol CheckInAnalyticsSummaryProviding {
+    func makeSummary(since startDate: Date?) throws -> CheckInAnalyticsSummaryProvider.Summary
+}
+
+final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
 
     struct Summary {
         static var empty: Summary {
@@ -31,7 +35,7 @@ final class CheckInAnalyticsSummaryProvider {
         let skipRate: Double
         let averageCompletionSeconds: Double
         let averageSkipSeconds: Double
-        let stepFirstInteractionCounts: [CheckInAnalyticsLogger.Step: Int]
+        let stepFirstInteractionCounts: [CheckInAnalyticsStep: Int]
         let highPainRate: Double
         let lowEnergyRate: Double
         let symptomCategoryCounts: [String: Int]
@@ -41,7 +45,7 @@ final class CheckInAnalyticsSummaryProvider {
 
     private let context: NSManagedObjectContext
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
+    init(context: NSManagedObjectContext) {
         self.context = context
     }
 
@@ -56,7 +60,7 @@ final class CheckInAnalyticsSummaryProvider {
         var completionDurations: [Double] = []
         var skipDurations: [Double] = []
 
-        var stepCounts: [CheckInAnalyticsLogger.Step: Int] = [:]
+        var stepCounts: [CheckInAnalyticsStep: Int] = [:]
         var highPainSubmitted = 0
         var lowEnergySubmitted = 0
         var symptomCounts: [String: Int] = [:]

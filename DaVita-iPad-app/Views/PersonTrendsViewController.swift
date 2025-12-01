@@ -4,13 +4,13 @@ import UIKit
 final class PersonTrendsViewController: ScrolledStackViewController {
 
     private let person: Person
-    private let trendsProvider: CheckInTrendsProvider
+    private let trendsProvider: CheckInTrendsProviding
 
     private let windowDays: Int
 
     init(person: Person,
          windowDays: Int = 30,
-         trendsProvider: CheckInTrendsProvider = CheckInTrendsProvider()) {
+         trendsProvider: CheckInTrendsProviding) {
         self.person = person
         self.windowDays = windowDays
         self.trendsProvider = trendsProvider
@@ -32,7 +32,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
     private func render() {
         let trends: CheckInTrendsProvider.PersonTrends
         do {
-            trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays)
+            trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays, maxRecords: 250)
         } catch {
             AppLog.persistence.error("Failed to compute trends: \(error, privacy: .public)")
             showToast(message: "Couldn't load trends. Please try again.")

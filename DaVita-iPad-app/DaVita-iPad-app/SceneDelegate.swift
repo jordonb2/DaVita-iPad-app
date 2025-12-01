@@ -4,6 +4,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     private var coordinator: AppCoordinator?
+    private var adminSession: AdminSessioning?
 
     private enum PrivacyScreen {
         static let userDefaultsKey = statingKey("privacyScreenEnabled")
@@ -36,25 +37,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
+        // Build dependencies at the composition root.
+        let coreDataStack: CoreDataStacking = CoreDataStack()
+        let adminSession: AdminSessioning = AdminSession()
+        let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(context: coreDataStack.viewContext)
+        self.adminSession = adminSession
+
         // Configure admin inactivity handling.
-        AdminSession.shared.configureAutoLogout(inactivityTimeoutSeconds: AdminSession.defaultInactivityTimeoutSeconds)
+        adminSession.configureAutoLogout(inactivityTimeoutSeconds: AdminSession.defaultInactivityTimeoutSeconds)
 
         // Install global touch recognizer to record admin activity without interfering with UI.
         window.addGestureRecognizer(inactivityRecognizer)
 
-        let coordinator = AppCoordinator(window: window)
+        let router = AppRouter(coreDataStack: coreDataStack, adminSession: adminSession, analyticsLogger: analyticsLogger)
+        let coordinator = AppCoordinator(window: window, router: router, coreDataStack: coreDataStack)
         self.coordinator = coordinator
         coordinator.start()
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         hidePrivacyOverlay()
-        AdminSession.shared.handleAppDidBecomeActive()
+        adminSession?.handleAppDidBecomeActive()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
         showPrivacyOverlayIfNeeded()
-        AdminSession.shared.handleAppWillResignActive()
+        adminSession?.handleAppWillResignActive()
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -71,7 +79,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     @objc private func userDidInteract(_ recognizer: UILongPressGestureRecognizer) {
         // Only count the beginning of a touch sequence.
         guard recognizer.state == .began else { return }
-        AdminSession.shared.recordActivity()
+        adminSession?.recordActivity()
     }
 
     // MARK: - Privacy screen

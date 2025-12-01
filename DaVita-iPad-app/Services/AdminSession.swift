@@ -1,8 +1,18 @@
 import Foundation
 
-final class AdminSession {
-    static let shared = AdminSession()
-    private init() {}
+protocol AdminSessioning: AnyObject {
+    var isLoggedIn: Bool { get }
+
+    func configureAutoLogout(inactivityTimeoutSeconds: TimeInterval)
+    func logIn()
+    func logOut()
+    func recordActivity()
+    func handleAppDidBecomeActive()
+    func handleAppWillResignActive()
+}
+
+final class AdminSession: AdminSessioning {
+    init() {}
 
     /// Default idle timeout for admin sessions.
     static let defaultInactivityTimeoutSeconds: TimeInterval = 5 * 60

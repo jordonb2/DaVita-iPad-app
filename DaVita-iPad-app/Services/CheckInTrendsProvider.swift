@@ -2,7 +2,11 @@ import Foundation
 import CoreData
 
 /// Computes per-person trend datasets from `CheckInRecord` history.
-final class CheckInTrendsProvider {
+protocol CheckInTrendsProviding {
+    func computeTrends(for person: Person, windowDays: Int, maxRecords: Int) throws -> CheckInTrendsProvider.PersonTrends
+}
+
+final class CheckInTrendsProvider: CheckInTrendsProviding {
 
     enum TrendsError: Error {
         case fetchFailed(Error)
@@ -35,7 +39,7 @@ final class CheckInTrendsProvider {
     private let context: NSManagedObjectContext
     private let calendar: Calendar
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext,
+    init(context: NSManagedObjectContext,
          calendar: Calendar = .current) {
         self.context = context
         self.calendar = calendar
