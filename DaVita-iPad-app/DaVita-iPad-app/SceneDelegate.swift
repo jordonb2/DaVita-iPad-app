@@ -37,21 +37,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
-        // Build dependencies at the composition root.
-        let coreDataStack: CoreDataStacking = CoreDataStack()
-        let adminSession: AdminSessioning = AdminSession()
-        let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(context: coreDataStack.viewContext)
-        self.adminSession = adminSession
-
-        // Configure admin inactivity handling.
-        adminSession.configureAutoLogout(inactivityTimeoutSeconds: AdminSession.defaultInactivityTimeoutSeconds)
+        // Create coordinator (composition root). Dependencies are built inside `AppCoordinator`.
+        let coordinator = AppCoordinator(window: window)
+        self.coordinator = coordinator
+        self.adminSession = coordinator.dependencies.adminSession
 
         // Install global touch recognizer to record admin activity without interfering with UI.
         window.addGestureRecognizer(inactivityRecognizer)
 
-        let router = AppRouter(coreDataStack: coreDataStack, adminSession: adminSession, analyticsLogger: analyticsLogger)
-        let coordinator = AppCoordinator(window: window, router: router, coreDataStack: coreDataStack)
-        self.coordinator = coordinator
+        // Configure admin inactivity handling.
+        adminSession?.configureAutoLogout(inactivityTimeoutSeconds: AdminSession.defaultInactivityTimeoutSeconds)
+
         coordinator.start()
     }
 

@@ -20,18 +20,14 @@ final class PeopleListViewModel: NSObject {
     private let personService: PersonService
     private let peopleRepo: PersonRepository
 
-    private let context: NSManagedObjectContext
     private lazy var frc: NSFetchedResultsController<Person> = {
         return peopleRepo.makePeopleFRC(delegate: self)
     }()
 
-    init(coreDataStack: CoreDataStacking,
-         context: NSManagedObjectContext? = nil) {
-        let ctx = context ?? coreDataStack.viewContext
-        self.context = ctx
-        self.peopleRepo = PersonRepository(context: ctx)
-        let checkInService = CheckInService(coreDataStack: coreDataStack)
-        self.personService = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
+    init(peopleRepo: PersonRepository,
+         personService: PersonService) {
+        self.peopleRepo = peopleRepo
+        self.personService = personService
         super.init()
         do {
             try frc.performFetch()

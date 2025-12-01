@@ -23,21 +23,21 @@ protocol AppRouting: AnyObject {
 final class AppRouter: AppRouting {
     weak var rootNavigationController: UINavigationController?
 
-    private let coreDataStack: CoreDataStacking
     private let adminSession: AdminSessioning
     private let analyticsLogger: CheckInAnalyticsLogging
+    private let makeAnalyticsViewController: () -> AnalyticsViewController
+    private let peopleFlowCoordinatorFactory: (AppRouting) -> PeopleFlowCoordinating
 
-    private lazy var peopleFlowCoordinator: PeopleFlowCoordinating = PeopleFlowCoordinator(
-        router: self,
-        coreDataStack: coreDataStack
-    )
+    private lazy var peopleFlowCoordinator: PeopleFlowCoordinating = peopleFlowCoordinatorFactory(self)
 
-    init(coreDataStack: CoreDataStacking,
-         adminSession: AdminSessioning,
-         analyticsLogger: CheckInAnalyticsLogging) {
-        self.coreDataStack = coreDataStack
+    init(adminSession: AdminSessioning,
+         analyticsLogger: CheckInAnalyticsLogging,
+         makeAnalyticsViewController: @escaping () -> AnalyticsViewController,
+         peopleFlowCoordinatorFactory: @escaping (AppRouting) -> PeopleFlowCoordinating) {
         self.adminSession = adminSession
         self.analyticsLogger = analyticsLogger
+        self.makeAnalyticsViewController = makeAnalyticsViewController
+        self.peopleFlowCoordinatorFactory = peopleFlowCoordinatorFactory
     }
 
     private var mainStoryboard: UIStoryboard {
@@ -73,22 +73,12 @@ final class AppRouter: AppRouting {
     }
 
     func showAnalytics(from presentingVC: UIViewController) {
-        let coreDataStack = self.coreDataStack
         let adminSession = self.adminSession
-        let summaryProvider = CheckInAnalyticsSummaryProvider(context: coreDataStack.viewContext)
-        let exportService = ExportService(context: coreDataStack.viewContext)
 
         let presentAnalytics: () -> Void = { [weak presentingVC] in
             guard let presentingVC else { return }
 
-            let analyticsVC = AnalyticsViewController(
-                adminSession: adminSession,
-                summaryProvider: summaryProvider,
-                exportService: exportService,
-                historyViewControllerFactory: {
-                    CheckInHistoryViewController(person: nil, context: coreDataStack.viewContext)
-                }
-            )
+            let analyticsVC = self.makeAnalyticsViewController()
             analyticsVC.onLogoutConfirmed = { [weak presentingVC] in
                 adminSession.logOut()
                 presentingVC?.dismiss(animated: true)

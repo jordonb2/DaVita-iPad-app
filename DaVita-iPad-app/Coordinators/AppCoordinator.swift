@@ -3,15 +3,47 @@ import UIKit
 /// Owns app start and wiring root navigation controller into routing.
 final class AppCoordinator {
     private let window: UIWindow
-    private let router: AppRouting
-    private let coreDataStack: CoreDataStacking
+    let dependencies: AppDependencies
 
-    init(window: UIWindow,
-         router: AppRouting,
-         coreDataStack: CoreDataStacking) {
+    private lazy var router: AppRouting = {
+        // Screen factories built here (composition root).
+        let makeHistoryVC: (Person?) -> CheckInHistoryViewController = { [dependencies] person in
+            CheckInHistoryViewController(person: person, context: dependencies.coreDataStack.viewContext)
+        }
+
+        let makeAnalyticsVC: () -> AnalyticsViewController = { [dependencies] in
+            AnalyticsViewController(
+                adminSession: dependencies.adminSession,
+                summaryProvider: dependencies.makeAnalyticsSummaryProvider(),
+                exportService: dependencies.makeExportService(),
+                historyViewControllerFactory: { makeHistoryVC(nil) }
+            )
+        }
+
+        let peopleFlowFactory: (AppRouting) -> PeopleFlowCoordinating = { [dependencies] router in
+            PeopleFlowCoordinator(
+                router: router,
+                makeHistoryViewController: { person in makeHistoryVC(person) },
+                makeTrendsViewController: { person in
+                    PersonTrendsViewController(
+                        person: person,
+                        trendsProvider: dependencies.makeTrendsProvider()
+                    )
+                }
+            )
+        }
+
+        return AppRouter(
+            adminSession: dependencies.adminSession,
+            analyticsLogger: dependencies.analyticsLogger,
+            makeAnalyticsViewController: makeAnalyticsVC,
+            peopleFlowCoordinatorFactory: peopleFlowFactory
+        )
+    }()
+
+    init(window: UIWindow, dependencies: AppDependencies = AppDependencies()) {
         self.window = window
-        self.router = router
-        self.coreDataStack = coreDataStack
+        self.dependencies = dependencies
     }
 
     func start() {
@@ -32,7 +64,10 @@ final class AppCoordinator {
         // Inject dependencies into root people list if possible
         if let peopleList = rootNav.viewControllers.first(where: { $0 is PeopleListViewController }) as? PeopleListViewController {
             peopleList.router = router
-            peopleList.viewModel = PeopleListViewModel(coreDataStack: coreDataStack)
+            peopleList.viewModel = PeopleListViewModel(
+                peopleRepo: dependencies.peopleRepo,
+                personService: dependencies.personService
+            )
         }
 
         window.rootViewController = rootNav

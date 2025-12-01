@@ -30,6 +30,7 @@
 		F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43172E95C300056439C /* AddEditPersonViewModel.swift */; };
 		F76E43202E9700010056439C /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43212E9700010056439C /* AppRouter.swift */; };
 		F76E43222E9700020056439C /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43232E9700020056439C /* AppCoordinator.swift */; };
+		F76E48012EC000010056439C /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48002EC000010056439C /* AppDependencies.swift */; };
 		F76E43322E9800030056439C /* PeopleFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43302E9800010056439C /* PeopleFlowCoordinator.swift */; };
 		F76E43332E9800040056439C /* PersonDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E43312E9800020056439C /* PersonDetailViewController.swift */; };
 		F76E45032EA200020056439C /* PersonTrendsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E45022EA200020056439C /* PersonTrendsViewController.swift */; };
@@ -67,6 +68,7 @@
 		F76E43172E95C300056439C /* AddEditPersonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewModel.swift; sourceTree = "<group>"; };
 		F76E43212E9700010056439C /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		F76E43232E9700020056439C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		F76E48002EC000010056439C /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		F76E43302E9800010056439C /* PeopleFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleFlowCoordinator.swift; sourceTree = "<group>"; };
 		F76E43312E9800020056439C /* PersonDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonDetailViewController.swift; sourceTree = "<group>"; };
 		F76E45022EA200020056439C /* PersonTrendsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonTrendsViewController.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 			isa = PBXGroup;
 			children = (
 				F76E43232E9700020056439C /* AppCoordinator.swift */,
+				F76E48002EC000010056439C /* AppDependencies.swift */,
 				F76E43212E9700010056439C /* AppRouter.swift */,
 				F76E43302E9800010056439C /* PeopleFlowCoordinator.swift */,
 			);
@@ -389,6 +392,7 @@
 				F76E43182E95C301056439C /* AddEditPersonViewModel.swift in Sources */,
 				F76E43202E9700010056439C /* AppRouter.swift in Sources */,
 				F76E43222E9700020056439C /* AppCoordinator.swift in Sources */,
+				F76E48012EC000010056439C /* AppDependencies.swift in Sources */,
 				F76E43322E9800030056439C /* PeopleFlowCoordinator.swift in Sources */,
 				F76E43332E9800040056439C /* PersonDetailViewController.swift in Sources */,
 				F76E45032EA200020056439C /* PersonTrendsViewController.swift in Sources */,

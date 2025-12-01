@@ -12,11 +12,15 @@ protocol PeopleFlowCoordinating: AnyObject {
 /// Owns deeper people-related flows: person detail and history drill-ins.
 final class PeopleFlowCoordinator: PeopleFlowCoordinating {
     private weak var router: AppRouting?
-    private let coreDataStack: CoreDataStacking
+    private let makeHistoryViewController: (Person) -> CheckInHistoryViewController
+    private let makeTrendsViewController: (Person) -> PersonTrendsViewController
 
-    init(router: AppRouting, coreDataStack: CoreDataStacking) {
+    init(router: AppRouting,
+         makeHistoryViewController: @escaping (Person) -> CheckInHistoryViewController,
+         makeTrendsViewController: @escaping (Person) -> PersonTrendsViewController) {
         self.router = router
-        self.coreDataStack = coreDataStack
+        self.makeHistoryViewController = makeHistoryViewController
+        self.makeTrendsViewController = makeTrendsViewController
     }
 
     private func navigationController(from presentingVC: UIViewController) -> UINavigationController? {
@@ -51,14 +55,13 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
 
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
-        let vc = CheckInHistoryViewController(person: person, context: coreDataStack.viewContext)
+        let vc = makeHistoryViewController(person)
         nav.pushViewController(vc, animated: true)
     }
 
     func showPersonTrends(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
-        let provider = CheckInTrendsProvider(context: coreDataStack.viewContext)
-        let vc = PersonTrendsViewController(person: person, trendsProvider: provider)
+        let vc = makeTrendsViewController(person)
         nav.pushViewController(vc, animated: true)
     }
 }
