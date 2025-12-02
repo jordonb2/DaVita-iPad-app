@@ -64,6 +64,7 @@ final class CoreDataStack: CoreDataStacking {
         return ctx
     }
 
+    @available(*, deprecated, message: "Avoid saving viewContext directly. Prefer service-owned background transactions via performBackgroundTaskAndWait(_:).")
     func saveContext(_ context: NSManagedObjectContext? = nil) {
         let ctx = context ?? viewContext
         if ctx.hasChanges { try? ctx.save() }

@@ -2,10 +2,10 @@ import Foundation
 import CoreData
 
 protocol CheckInServicing {
-    func writeCheckIn(for person: Person,
+    /// Transaction boundary: this method **owns the save** and always writes on a background context.
+    func writeCheckIn(personID: NSManagedObjectID,
                       data: PersonCheckInData,
-                      at date: Date,
-                      savingUsing save: () throws -> Void) throws
+                      at date: Date) throws
 }
 
 /// Business logic layer for writing check-ins.
@@ -20,94 +20,29 @@ final class CheckInService: CheckInServicing {
         self.coreDataStack = coreDataStack
     }
 
-    func applyLatestCheckInFields(to person: Person, data: PersonCheckInData) {
-        guard let context = person.managedObjectContext else {
-            // Shouldn't happen in normal app flow; keep it non-fatal.
-            person.checkInPain = data.painLevel ?? 0
-            if let b = data.energyBucket {
-                person.setValue(b.rawValue, forKey: "checkInEnergyBucket")
-            } else {
-                person.setValue(nil, forKey: "checkInEnergyBucket")
-            }
-            if let b = data.moodBucket {
-                person.setValue(b.rawValue, forKey: "checkInMoodBucket")
-            } else {
-                person.setValue(nil, forKey: "checkInMoodBucket")
-            }
-            person.checkInEnergy = data.energyLevelText
-            person.checkInMood = data.moodText
-            person.checkInSymptoms = data.symptoms
-            person.checkInConcerns = data.concerns
-            person.checkInTeamNote = data.teamNote
-            return
-        }
-
-        context.performAndWait {
-            person.checkInPain = data.painLevel ?? 0
-            if let b = data.energyBucket {
-                person.setValue(b.rawValue, forKey: "checkInEnergyBucket")
-            } else {
-                person.setValue(nil, forKey: "checkInEnergyBucket")
-            }
-            if let b = data.moodBucket {
-                person.setValue(b.rawValue, forKey: "checkInMoodBucket")
-            } else {
-                person.setValue(nil, forKey: "checkInMoodBucket")
-            }
-            person.checkInEnergy = data.energyLevelText
-            person.checkInMood = data.moodText
-            person.checkInSymptoms = data.symptoms
-            person.checkInConcerns = data.concerns
-            person.checkInTeamNote = data.teamNote
-        }
-    }
-
-    /// Creates a new `CheckInRecord` on a background context and saves that background context.
-    ///
-    /// Important: the `Person` must already be saved to the persistent store so it can be resolved
-    /// by `objectID` from the background context.
-    func createCheckInRecord(for person: Person, data: PersonCheckInData, at date: Date = Date()) {
-        let personID = person.objectID
-        let bgContext = coreDataStack.newBackgroundContext()
-
-        bgContext.perform {
-            do {
-                guard let bgPerson = try bgContext.existingObject(with: personID) as? Person else {
-                    AppLog.persistence.error("CheckInService: failed to resolve Person in background context")
-                    return
-                }
-
-                let repo = CheckInRepository(context: bgContext)
-                let sanitized = data.sanitized()
-                if data.needsSanitization() {
-                    AppLog.persistence.warning("Sanitized check-in input before record creation")
-                }
-                _ = repo.createRecord(createdAt: date, for: bgPerson, data: sanitized)
-
-                if bgContext.hasChanges {
-                    try bgContext.save()
-                }
-            } catch {
-                AppLog.persistence.error("CheckInService background save error: \(error, privacy: .public)")
-            }
-        }
-    }
-
-    /// Common write flow used by multiple screens:
-    /// 1) update latest fields on the `Person` (in UI context)
-    /// 2) caller saves their context (transaction boundary)
-    /// 3) create the `CheckInRecord` on a background context
-    func writeCheckIn(for person: Person,
+    /// Writes a check-in by resolving `personID` into a background context, applying denormalized latest fields,
+    /// inserting the `CheckInRecord`, and saving once (single transaction boundary).
+    func writeCheckIn(personID: NSManagedObjectID,
                       data: PersonCheckInData,
-                      at date: Date = Date(),
-                      savingUsing save: () throws -> Void) throws {
+                      at date: Date = Date()) throws {
         let sanitized = data.sanitized()
         if data.needsSanitization() {
-            AppLog.persistence.warning("Sanitized check-in input before save")
+            AppLog.persistence.warning("Sanitized check-in input before write")
         }
-        applyLatestCheckInFields(to: person, data: sanitized)
-        try save()
-        createCheckInRecord(for: person, data: data, at: date)
+
+        try coreDataStack.performBackgroundTaskAndWait { ctx in
+            guard let person = try ctx.existingObject(with: personID) as? Person else {
+                AppLog.persistence.error("CheckInService: failed to resolve Person for objectID")
+                return
+            }
+
+            applyLatestCheckInFields(to: person, data: sanitized)
+            _ = CheckInRepository(context: ctx).createRecord(createdAt: date, for: person, data: sanitized)
+
+            if ctx.hasChanges {
+                try ctx.save()
+            }
+        }
     }
 
 
@@ -180,5 +115,27 @@ final class CheckInService: CheckInServicing {
             // Re-apply the latest fields from derived history.
             applyLatestCheckInFields(to: person, data: derived)
         }
+    }
+}
+
+private extension CheckInService {
+    /// Assumes the caller is executing on `person`'s context queue.
+    func applyLatestCheckInFields(to person: Person, data: PersonCheckInData) {
+        person.checkInPain = data.painLevel ?? 0
+        if let b = data.energyBucket {
+            person.setValue(b.rawValue, forKey: "checkInEnergyBucket")
+        } else {
+            person.setValue(nil, forKey: "checkInEnergyBucket")
+        }
+        if let b = data.moodBucket {
+            person.setValue(b.rawValue, forKey: "checkInMoodBucket")
+        } else {
+            person.setValue(nil, forKey: "checkInMoodBucket")
+        }
+        person.checkInEnergy = data.energyLevelText
+        person.checkInMood = data.moodText
+        person.checkInSymptoms = data.symptoms
+        person.checkInConcerns = data.concerns
+        person.checkInTeamNote = data.teamNote
     }
 }

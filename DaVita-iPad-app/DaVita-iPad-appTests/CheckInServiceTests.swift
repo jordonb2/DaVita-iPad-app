@@ -26,11 +26,7 @@ final class CheckInServiceTests: XCTestCase {
         )
 
         let service = CheckInService(coreDataStack: stack)
-        try service.writeCheckIn(for: person, data: raw) {
-            try stack.viewContext.performAndWaitThrowing {
-                try stack.viewContext.save()
-            }
-        }
+        try service.writeCheckIn(personID: person.objectID, data: raw, at: Date())
 
         // Wait for background insert/save to complete.
         let didSave = expectation(description: "background check-in record saved")
@@ -64,10 +60,13 @@ final class CheckInServiceTests: XCTestCase {
         XCTAssertNil(record.teamNote)
 
         // Latest fields on person should be updated too.
-        XCTAssertEqual(person.checkInPain, 10)
-        XCTAssertEqual(person.checkInEnergy, EnergyBucket.high.displayText)
-        XCTAssertEqual(person.checkInMood, MoodBucket.good.displayText)
-        XCTAssertEqual(person.checkInSymptoms, "tired")
-        XCTAssertNil(person.checkInTeamNote)
+        let refreshedPerson = try stack.viewContext.performAndWaitThrowing {
+            try stack.viewContext.existingObject(with: person.objectID) as? Person
+        }
+        XCTAssertEqual(refreshedPerson?.checkInPain, 10)
+        XCTAssertEqual(refreshedPerson?.checkInEnergy, EnergyBucket.high.displayText)
+        XCTAssertEqual(refreshedPerson?.checkInMood, MoodBucket.good.displayText)
+        XCTAssertEqual(refreshedPerson?.checkInSymptoms, "tired")
+        XCTAssertNil(refreshedPerson?.checkInTeamNote)
     }
 }
