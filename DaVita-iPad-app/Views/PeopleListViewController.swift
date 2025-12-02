@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 
  final class PeopleListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -16,7 +15,6 @@ import Combine
     // If your table view is the ROOT view, we can grab it like this:
     private var tableViewRef: UITableView { self.view as! UITableView }
     
-    private var cancellables = Set<AnyCancellable>()
     private let calendar = Calendar.current
 
     private lazy var landingHeaderView: LandingHeroHeaderView = {
@@ -81,17 +79,17 @@ import Combine
         tableView.delegate = self
         TableStyler.applyPeopleListStyle(to: tableView)
         
-        // Subscribe to Combine publisher to auto-reload on DB changes
-        viewModel.$people
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.tableViewRef.reloadData()
-                self.updateHeaderContent()
-            }
-            .store(in: &cancellables)
+        // Keep UI in-sync with FRC-driven model updates (no Combine).
+        viewModel.onPeopleChanged = { [weak self] _ in
+            guard let self else { return }
+            self.tableViewRef.reloadData()
+            self.updateHeaderContent()
+        }
 
         configureLandingHeader()
+        // Ensure initial render reflects current data.
+        tableViewRef.reloadData()
+        updateHeaderContent()
     }
 
     override func viewDidLayoutSubviews() {

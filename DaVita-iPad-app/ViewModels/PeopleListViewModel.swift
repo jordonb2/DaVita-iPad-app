@@ -7,11 +7,12 @@
 
 import Foundation
 import CoreData
-import Combine
 
 final class PeopleListViewModel: NSObject {
-    // Published array the view observes
-    @Published private(set) var people: [Person] = []
+    /// Push-driven change notification for the owning view/controller.
+    var onPeopleChanged: (([Person]) -> Void)?
+
+    private(set) var people: [Person] = []
 
     // User-visible error hooks (set by the owning VC).
     var onUserToast: ((String) -> Void)?
@@ -32,6 +33,7 @@ final class PeopleListViewModel: NSObject {
         do {
             try frc.performFetch()
             people = frc.fetchedObjects ?? []
+            onPeopleChanged?(people)
         } catch {
             AppLog.persistence.error("FRC performFetch error: \(error, privacy: .public)")
             onUserAlert?("Couldn't load people", "Please try again.")
@@ -120,6 +122,7 @@ final class PeopleListViewModel: NSObject {
 extension PeopleListViewModel: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         people = frc.fetchedObjects ?? []
+        onPeopleChanged?(people)
     }
 }
 
