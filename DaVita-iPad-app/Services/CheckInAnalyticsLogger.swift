@@ -26,10 +26,10 @@ protocol CheckInAnalyticsLogging {
 
 final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
 
-    private let context: NSManagedObjectContext
+    private let coreDataStack: CoreDataStacking
 
-    init(context: NSManagedObjectContext) {
-        self.context = context
+    init(coreDataStack: CoreDataStacking) {
+        self.coreDataStack = coreDataStack
     }
 
     func logStepFirstInteracted(step: CheckInAnalyticsStep) {
@@ -50,39 +50,44 @@ final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
     }
 
     private func logEvent(type: CheckInAnalyticsEventType, step: CheckInAnalyticsStep?, durationSeconds: Double?, payload: Payload?) {
-        let event = CheckInAnalyticsEvent(context: context)
-        event.id = UUID()
-        event.createdAt = Date()
-        event.eventTypeEnum = type
-        event.stepEnum = step
-        if let durationSeconds {
-            event.durationSeconds = durationSeconds
-        }
-        if let payload {
-            if let painBucket = payload.painBucket {
-                event.painBucket = painBucket
-            } else {
-                event.setValue(nil, forKey: "painBucket")
+        let ctx = coreDataStack.newBackgroundContext()
+        ctx.perform {
+            let event = CheckInAnalyticsEvent(context: ctx)
+            event.id = UUID()
+            event.createdAt = Date()
+            event.eventTypeEnum = type
+            event.stepEnum = step
+            if let durationSeconds {
+                event.durationSeconds = durationSeconds
             }
-            if let energyBucket = payload.energyBucket {
-                event.energyBucket = energyBucket
-            } else {
-                event.setValue(nil, forKey: "energyBucket")
+            if let payload {
+                if let painBucket = payload.painBucket {
+                    event.painBucket = painBucket
+                } else {
+                    event.setValue(nil, forKey: "painBucket")
+                }
+                if let energyBucket = payload.energyBucket {
+                    event.energyBucket = energyBucket
+                } else {
+                    event.setValue(nil, forKey: "energyBucket")
+                }
+                if let moodBucket = payload.moodBucket {
+                    event.moodBucket = moodBucket
+                } else {
+                    event.setValue(nil, forKey: "moodBucket")
+                }
+                event.symptomCategories = payload.symptomCategories
+                event.concernCategories = payload.concernCategories
             }
-            if let moodBucket = payload.moodBucket {
-                event.moodBucket = moodBucket
-            } else {
-                event.setValue(nil, forKey: "moodBucket")
-            }
-            event.symptomCategories = payload.symptomCategories
-            event.concernCategories = payload.concernCategories
-        }
-        event.daypart = Daypart.from(date: event.createdAt ?? Date()).rawValue
+            event.daypart = Daypart.from(date: event.createdAt ?? Date()).rawValue
 
-        do {
-            try context.save()
-        } catch {
-            AppLog.analytics.error("Analytics save error: \(error, privacy: .public)")
+            do {
+                if ctx.hasChanges {
+                    try ctx.save()
+                }
+            } catch {
+                AppLog.analytics.error("Analytics save error: \(error, privacy: .public)")
+            }
         }
     }
 }

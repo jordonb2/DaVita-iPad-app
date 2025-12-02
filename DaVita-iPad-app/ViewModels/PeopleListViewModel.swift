@@ -66,8 +66,10 @@ final class PeopleListViewModel: NSObject {
         }
 
         do {
-            let p = try personService.addPerson(name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
-            logPerson(p, context: "ADD")
+            try personService.addPerson(name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+#if DEBUG
+            AppLog.ui.debug("[ADD] Person saved → Name: \(trimmed, privacy: .private)")
+#endif
         } catch {
             AppLog.persistence.error("Add person error: \(error, privacy: .public)")
             emit(AppError(error, defaultOperation: .savePerson))
@@ -76,7 +78,7 @@ final class PeopleListViewModel: NSObject {
 
     func delete(_ person: Person) {
         do {
-            try personService.deletePerson(person)
+            try personService.deletePerson(personID: person.objectID)
         } catch {
             AppLog.persistence.error("Delete person error: \(error, privacy: .public)")
             emit(AppError(error, defaultOperation: .deletePerson))
@@ -92,36 +94,14 @@ final class PeopleListViewModel: NSObject {
         }
 
         do {
-            try personService.updatePerson(person, name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
-            logPerson(person, context: "UPDATE")
+            try personService.updatePerson(personID: person.objectID, name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+#if DEBUG
+            AppLog.ui.debug("[UPDATE] Person saved → Name: \(trimmed, privacy: .private)")
+#endif
         } catch {
             AppLog.persistence.error("Update person error: \(error, privacy: .public)")
             emit(AppError(error, defaultOperation: .savePerson))
         }
-    }
-
-    private func logPerson(_ person: Person, context: String) {
-#if DEBUG
-        let name = person.name ?? ""
-        let dobText: String
-        if let dob = person.dob {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            dobText = formatter.string(from: dob)
-        } else {
-            dobText = "—"
-        }
-
-        let gender = person.gender ?? "—"
-        let pain = person.checkInPain
-        let energy = person.checkInEnergy ?? "—"
-        let mood = person.checkInMood ?? "—"
-        let symptoms = person.checkInSymptoms ?? "—"
-        let concerns = person.checkInConcerns ?? "—"
-        let teamNote = person.checkInTeamNote ?? "—"
-
-        AppLog.ui.debug("[\(context, privacy: .public)] Person saved → Name: \(name, privacy: .private), DOB: \(dobText, privacy: .private), Gender: \(gender, privacy: .private), CheckIn(pain: \(pain, privacy: .public), energy: \(energy, privacy: .private), mood: \(mood, privacy: .private), symptoms: \(symptoms, privacy: .private), concerns: \(concerns, privacy: .private), teamNote: \(teamNote, privacy: .private)")
-#endif
     }
 
     // Convenience

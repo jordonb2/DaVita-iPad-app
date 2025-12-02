@@ -8,7 +8,6 @@ struct AppDependencies {
 
     // Domain services / repos
     let peopleRepo: PersonRepositorying
-    let checkInService: CheckInServicing
     let personService: PersonServicing
 
     // Providers / exports
@@ -19,18 +18,16 @@ struct AppDependencies {
     init() {
         let coreDataStack: CoreDataStacking = CoreDataStack()
         let adminSession: AdminSessioning = AdminSession()
-        let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(context: coreDataStack.viewContext)
+        let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
-        let checkInService: CheckInServicing = CheckInService(coreDataStack: coreDataStack)
-        let personService: PersonServicing = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
+        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack)
 
         self.coreDataStack = coreDataStack
         self.adminSession = adminSession
         self.analyticsLogger = analyticsLogger
 
         self.peopleRepo = peopleRepo
-        self.checkInService = checkInService
         self.personService = personService
 
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }

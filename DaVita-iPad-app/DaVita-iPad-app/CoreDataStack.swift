@@ -13,6 +13,20 @@ protocol CoreDataStacking {
     func newBackgroundContext() -> NSManagedObjectContext
 }
 
+extension CoreDataStacking {
+    /// Standard background write transaction (private queue context).
+    ///
+    /// - Important: Keeps Core Data saves off the main/view context.
+    func performBackgroundTaskAndWait<T>(_ block: (NSManagedObjectContext) throws -> T) throws -> T {
+        let ctx = newBackgroundContext()
+        var result: Result<T, Error>!
+        ctx.performAndWait {
+            result = Result { try block(ctx) }
+        }
+        return try result.get()
+    }
+}
+
 final class CoreDataStack: CoreDataStacking {
     init() {}
 
