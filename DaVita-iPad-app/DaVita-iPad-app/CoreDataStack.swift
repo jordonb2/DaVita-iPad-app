@@ -107,6 +107,13 @@ private extension CoreDataStack {
             // SQLite sidecars
             setProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-wal"))
             setProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-shm"))
+
+#if DEBUG && !targetEnvironment(simulator)
+            // Verify protection at runtime (helps catch regressions when store options change).
+            assertFileProtectionComplete(for: url)
+            assertFileProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-wal"))
+            assertFileProtectionComplete(for: url.deletingPathExtension().appendingPathExtension(url.pathExtension + "-shm"))
+#endif
         }
     }
 
@@ -119,5 +126,23 @@ private extension CoreDataStack {
             AppLog.persistence.error("Failed to set file protection for \(url.lastPathComponent, privacy: .public): \(error, privacy: .public)")
         }
     }
+
+#if DEBUG && !targetEnvironment(simulator)
+    static func assertFileProtectionComplete(for url: URL) {
+        let path = url.path
+        guard FileManager.default.fileExists(atPath: path) else { return }
+        do {
+            let attrs = try FileManager.default.attributesOfItem(atPath: path)
+            let protection = attrs[.protectionKey] as? FileProtectionType
+            // `.complete` is the intended protection level for encrypt-at-rest on locked devices.
+            assert(
+                protection == .complete,
+                "Expected file protection .complete for \(url.lastPathComponent) but got \(String(describing: protection))"
+            )
+        } catch {
+            assertionFailure("Failed reading file attributes for \(url.lastPathComponent): \(error)")
+        }
+    }
+#endif
 }
 
