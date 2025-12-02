@@ -33,8 +33,7 @@ struct CheckInHistoryFilter {
     }
 
     var normalizedKeyword: String? {
-        guard let keyword = keyword?.trimmingCharacters(in: .whitespacesAndNewlines), !keyword.isEmpty else { return nil }
-        return keyword
+        return InputSanitizer.searchKeyword(keyword)
     }
 }
 

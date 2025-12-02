@@ -89,19 +89,11 @@ extension PersonCheckInData {
             copy.painLevel = min(CheckInGuardrails.painMax, max(CheckInGuardrails.painMin, p))
         }
 
-        copy.symptoms = sanitizeText(copy.symptoms, max: CheckInGuardrails.maxSymptomsChars)
-        copy.concerns = sanitizeText(copy.concerns, max: CheckInGuardrails.maxConcernsChars)
-        copy.teamNote = sanitizeText(copy.teamNote, max: CheckInGuardrails.maxTeamNoteChars)
+        copy.symptoms = InputSanitizer.note(copy.symptoms, max: CheckInGuardrails.maxSymptomsChars)
+        copy.concerns = InputSanitizer.note(copy.concerns, max: CheckInGuardrails.maxConcernsChars)
+        copy.teamNote = InputSanitizer.note(copy.teamNote, max: CheckInGuardrails.maxTeamNoteChars)
 
         return copy
-    }
-
-    private func sanitizeText(_ value: String?, max: Int) -> String? {
-        guard let value else { return nil }
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        if trimmed.count <= max { return trimmed }
-        return String(trimmed.prefix(max))
     }
 
     /// Returns true if sanitization would change any field (used for logging).

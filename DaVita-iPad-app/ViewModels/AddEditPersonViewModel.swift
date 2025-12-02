@@ -30,8 +30,7 @@ final class AddEditPersonViewModel {
 
     /// Returns validation error message if invalid.
     func validate() -> String? {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
+        if InputSanitizer.personName(name) == nil {
             return "Please enter the patient's full name before saving."
         }
         if dob > Date() {
@@ -41,8 +40,9 @@ final class AddEditPersonViewModel {
     }
 
     func makeDraft() -> Draft {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        return Draft(name: trimmed, dob: dob, gender: gender)
+        let sanitizedName = InputSanitizer.personName(name) ?? ""
+        let sanitizedGender = InputSanitizer.gender(gender) ?? ""
+        return Draft(name: sanitizedName, dob: dob, gender: sanitizedGender)
     }
 
     func updateDOB(_ date: Date) {

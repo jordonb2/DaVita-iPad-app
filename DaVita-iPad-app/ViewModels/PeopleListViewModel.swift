@@ -58,17 +58,16 @@ final class PeopleListViewModel: NSObject {
     // MARK: - CRUD
 
     func add(name: String, gender: String? = nil, dob: Date? = nil, checkInData: PersonCheckInData? = nil) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
+        guard let sanitizedName = InputSanitizer.personName(name) else {
             AppLog.ui.warning("Refusing to add Person with empty name")
             emit(.validation(.emptyName))
             return
         }
 
         do {
-            try personService.addPerson(name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+            try personService.addPerson(name: sanitizedName, gender: InputSanitizer.gender(gender), dob: dob, checkInData: checkInData)
 #if DEBUG
-            AppLog.ui.debug("[ADD] Person saved → Name: \(trimmed, privacy: .private)")
+            AppLog.ui.debug("[ADD] Person saved → Name: \(sanitizedName, privacy: .private)")
 #endif
         } catch {
             AppLog.persistence.error("Add person error: \(error, privacy: .public)")
@@ -86,17 +85,16 @@ final class PeopleListViewModel: NSObject {
     }
     
     func update(_ person: Person, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData? = nil) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
+        guard let sanitizedName = InputSanitizer.personName(name) else {
             AppLog.ui.warning("Refusing to update Person with empty name")
             emit(.validation(.emptyName))
             return
         }
 
         do {
-            try personService.updatePerson(personID: person.objectID, name: trimmed, gender: gender, dob: dob, checkInData: checkInData)
+            try personService.updatePerson(personID: person.objectID, name: sanitizedName, gender: InputSanitizer.gender(gender), dob: dob, checkInData: checkInData)
 #if DEBUG
-            AppLog.ui.debug("[UPDATE] Person saved → Name: \(trimmed, privacy: .private)")
+            AppLog.ui.debug("[UPDATE] Person saved → Name: \(sanitizedName, privacy: .private)")
 #endif
         } catch {
             AppLog.persistence.error("Update person error: \(error, privacy: .public)")
