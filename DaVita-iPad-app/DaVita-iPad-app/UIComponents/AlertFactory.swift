@@ -49,6 +49,17 @@ extension UIViewController {
         present(alert, animated: true)
     }
 
+    func present(appError: AppError) {
+        let ui = appError.userFacing
+        switch ui.style {
+        case .toast:
+            // Keep toasts short; show message if present, otherwise title.
+            showToast(message: ui.message ?? ui.title)
+        case .alert:
+            presentErrorAlert(title: ui.title, message: ui.message)
+        }
+    }
+
     /// Simple, lightweight toast (no dependencies).
     func showToast(message: String, duration: TimeInterval = 2.0) {
         let label = PaddingLabel()

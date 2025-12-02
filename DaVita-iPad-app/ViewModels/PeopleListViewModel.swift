@@ -17,6 +17,7 @@ final class PeopleListViewModel: NSObject {
     // User-visible error hooks (set by the owning VC).
     var onUserToast: ((String) -> Void)?
     var onUserAlert: ((String, String?) -> Void)?
+    var onError: ((AppError) -> Void)?
 
     private let personService: PersonServicing
     private let peopleRepo: PersonRepositorying
@@ -36,9 +37,22 @@ final class PeopleListViewModel: NSObject {
             onPeopleChanged?(people)
         } catch {
             AppLog.persistence.error("FRC performFetch error: \(error, privacy: .public)")
-            onUserAlert?("Couldn't load people", "Please try again.")
+            emit(AppError(operation: .loadPeople, underlying: error))
         }
 
+    }
+
+    private func emit(_ error: AppError) {
+        onError?(error)
+
+        // Backward-compatible fallbacks if callers still use the older hooks.
+        let ui = error.userFacing
+        switch ui.style {
+        case .toast:
+            onUserToast?(ui.message ?? ui.title)
+        case .alert:
+            onUserAlert?(ui.title, ui.message)
+        }
     }
 
     // MARK: - CRUD
@@ -47,7 +61,7 @@ final class PeopleListViewModel: NSObject {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             AppLog.ui.warning("Refusing to add Person with empty name")
-            onUserToast?("Please enter a name before saving.")
+            emit(.validation(.emptyName))
             return
         }
 
@@ -56,7 +70,7 @@ final class PeopleListViewModel: NSObject {
             logPerson(p, context: "ADD")
         } catch {
             AppLog.persistence.error("Add person error: \(error, privacy: .public)")
-            onUserAlert?("Couldn't save", "Please try again.")
+            emit(AppError(error, defaultOperation: .savePerson))
         }
     }
 
@@ -65,7 +79,7 @@ final class PeopleListViewModel: NSObject {
             try personService.deletePerson(person)
         } catch {
             AppLog.persistence.error("Delete person error: \(error, privacy: .public)")
-            onUserAlert?("Couldn't delete", "Please try again.")
+            emit(AppError(error, defaultOperation: .deletePerson))
         }
     }
     
@@ -73,7 +87,7 @@ final class PeopleListViewModel: NSObject {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             AppLog.ui.warning("Refusing to update Person with empty name")
-            onUserToast?("Please enter a name before saving.")
+            emit(.validation(.emptyName))
             return
         }
 
@@ -82,7 +96,7 @@ final class PeopleListViewModel: NSObject {
             logPerson(person, context: "UPDATE")
         } catch {
             AppLog.persistence.error("Update person error: \(error, privacy: .public)")
-            onUserAlert?("Couldn't save", "Please try again.")
+            emit(AppError(error, defaultOperation: .savePerson))
         }
     }
 

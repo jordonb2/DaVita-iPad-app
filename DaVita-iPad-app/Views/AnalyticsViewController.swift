@@ -45,7 +45,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
             summary = try summaryProvider.makeSummary(since: nil)
         } catch {
             AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .public)")
-            showToast(message: "Couldn't load analytics. Please try again.")
+            present(appError: AppError(operation: .loadAnalytics, underlying: error))
             summary = .empty
         }
 
@@ -142,8 +142,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
 
     private func export(format: ExportFormat, sourceView: UIView) {
         guard adminSession.isLoggedIn else {
-            let alert = AlertFactory.okAlert(title: "Admin required", message: "Please log in as admin to export.")
-            present(alert, animated: true)
+            present(appError: .authRequired)
             return
         }
 
@@ -163,8 +162,8 @@ final class AnalyticsViewController: ScrolledStackViewController {
             }
             present(activity, animated: true)
         } catch {
-            let alert = AlertFactory.okAlert(title: "Export failed", message: "Could not generate the export file.")
-            present(alert, animated: true)
+            let op: AppError.Operation = (format == .csv) ? .exportCSV : .exportPDF
+            present(appError: AppError(operation: op, underlying: error))
         }
     }
     private func presentLogoutConfirmation() {

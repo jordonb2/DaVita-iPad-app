@@ -72,6 +72,9 @@ import UIKit
         viewModel.onUserAlert = { [weak self] title, message in
             self?.presentErrorAlert(title: title, message: message)
         }
+        viewModel.onError = { [weak self] error in
+            self?.present(appError: error)
+        }
         
         let tableView = tableViewRef
         tableViewRef.accessibilityIdentifier = "peopleList.table"

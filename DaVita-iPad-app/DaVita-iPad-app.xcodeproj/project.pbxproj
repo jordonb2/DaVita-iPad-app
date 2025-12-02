@@ -16,6 +16,7 @@
 		F76E42E22E93C9010056439C /* CheckInAnalyticsLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */; };
 		F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E32E93C9010056439C /* TextCategorizer.swift */; };
 		F76E42E62E93C9010056439C /* Daypart.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E52E93C9010056439C /* Daypart.swift */; };
+		F76E48112EC000020056439C /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48102EC000020056439C /* AppError.swift */; };
 		F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */; };
 		F76E42F22E93D200056439C /* AdminSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F12E93D200056439C /* AdminSession.swift */; };
 		F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42F32E93D200056439C /* AnalyticsViewController.swift */; };
@@ -54,6 +55,7 @@
 		F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsLogger.swift; sourceTree = "<group>"; };
 		F76E42E32E93C9010056439C /* TextCategorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCategorizer.swift; sourceTree = "<group>"; };
 		F76E42E52E93C9010056439C /* Daypart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Daypart.swift; sourceTree = "<group>"; };
+		F76E48102EC000020056439C /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		F76E42E72E93C950056439C /* CheckInAnalyticsSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsSummaryProvider.swift; sourceTree = "<group>"; };
 		F76E42F12E93D200056439C /* AdminSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminSession.swift; sourceTree = "<group>"; };
 		F76E42F32E93D200056439C /* AnalyticsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsViewController.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 		F76E42A42E9086030056439C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F76E48102EC000020056439C /* AppError.swift */,
 				F76E42D32E93C0010056439C /* PersonCheckInData.swift */,
 				F76E42E32E93C9010056439C /* TextCategorizer.swift */,
 				F76E42E52E93C9010056439C /* Daypart.swift */,
@@ -378,6 +381,7 @@
 				F76E42E22E93C9010056439C /* CheckInAnalyticsLogger.swift in Sources */,
 				F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */,
 				F76E42E62E93C9010056439C /* Daypart.swift in Sources */,
+				F76E48112EC000020056439C /* AppError.swift in Sources */,
 				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
 				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
 				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
