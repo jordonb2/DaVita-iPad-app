@@ -66,10 +66,11 @@ extension UIViewController {
         label.text = message
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
+        label.font = UIFactory.Theme.Typography.font(.subheadline)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .white
         label.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        label.layer.cornerRadius = 12
+        label.layer.cornerRadius = UIFactory.Theme.CornerRadius.m
         label.clipsToBounds = true
         label.alpha = 0
         label.isAccessibilityElement = true
@@ -84,11 +85,15 @@ extension UIViewController {
             label.trailingAnchor.constraint(lessThanOrEqualTo: view.layoutMarginsGuide.trailingAnchor)
         ])
 
-        UIView.animate(withDuration: 0.2) {
+        UIView.animate(withDuration: UIFactory.Theme.Animation.Duration.fast) {
             label.alpha = 1
         }
 
-        UIView.animate(withDuration: 0.25, delay: duration, options: [.curveEaseInOut]) {
+        UIView.animate(
+            withDuration: UIFactory.Theme.Animation.Duration.standard,
+            delay: duration,
+            options: UIFactory.Theme.Animation.Curve.standard
+        ) {
             label.alpha = 0
         } completion: { _ in
             label.removeFromSuperview()

@@ -46,6 +46,134 @@ enum UIFactory {
             static let heroGradientEnd: UIColor = accent
         }
 
+        // MARK: - Typography
+
+        enum TypographyToken {
+            case heroTitle
+            case sectionHeader
+            case headline
+            case body
+            case subheadline
+            case footnote
+            case button
+            case monospaceCaption
+        }
+
+        enum Typography {
+            static func font(_ token: TypographyToken) -> UIFont {
+                switch token {
+                case .heroTitle:
+                    return UIFont.preferredFont(forTextStyle: .largeTitle)
+                case .sectionHeader:
+                    return UIFont.preferredFont(forTextStyle: .title2)
+                case .headline:
+                    return UIFont.preferredFont(forTextStyle: .headline)
+                case .body:
+                    return UIFont.preferredFont(forTextStyle: .body)
+                case .subheadline:
+                    return UIFont.preferredFont(forTextStyle: .subheadline)
+                case .footnote:
+                    return UIFont.preferredFont(forTextStyle: .footnote)
+                case .button:
+                    return UIFont.preferredFont(forTextStyle: .headline)
+                case .monospaceCaption:
+                    let base = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+                    return UIFontMetrics(forTextStyle: .caption2).scaledFont(for: base)
+                }
+            }
+
+            static func apply(_ token: TypographyToken, to label: UILabel) {
+                label.font = font(token)
+                label.adjustsFontForContentSizeCategory = true
+            }
+        }
+
+        // MARK: - Line height
+
+        enum LineHeightToken {
+            case body
+            case subheadline
+            case footnote
+            case title
+        }
+
+        enum LineHeight {
+            /// Multiplier applied to the font's line height via `paragraphStyle.lineHeightMultiple`.
+            static func multiple(_ token: LineHeightToken) -> CGFloat {
+                switch token {
+                case .body: return 1.15
+                case .subheadline: return 1.15
+                case .footnote: return 1.12
+                case .title: return 1.05
+                }
+            }
+
+            static func paragraphStyle(for token: LineHeightToken) -> NSMutableParagraphStyle {
+                let p = NSMutableParagraphStyle()
+                p.lineHeightMultiple = multiple(token)
+                p.lineBreakMode = .byWordWrapping
+                return p
+            }
+        }
+
+        // MARK: - Motion
+
+        enum Animation {
+            enum Duration {
+                static let xFast: TimeInterval = 0.12
+                static let fast: TimeInterval = 0.20
+                static let standard: TimeInterval = 0.25
+                static let slow: TimeInterval = 0.35
+            }
+
+            enum Curve {
+                static let standard: UIView.AnimationOptions = [.curveEaseInOut]
+                static let enter: UIView.AnimationOptions = [.curveEaseOut]
+                static let exit: UIView.AnimationOptions = [.curveEaseIn]
+            }
+
+            struct Spring {
+                let duration: TimeInterval
+                let dampingRatio: CGFloat
+                let velocity: CGFloat
+
+                static let standard = Spring(duration: Duration.standard, dampingRatio: 0.86, velocity: 0)
+            }
+        }
+
+        // MARK: - Elevation / Shadow
+
+        struct ShadowToken {
+            let color: UIColor
+            let opacity: Float
+            let radius: CGFloat
+            let offset: CGSize
+
+            func apply(to layer: CALayer) {
+                layer.shadowColor = color.cgColor
+                layer.shadowOpacity = opacity
+                layer.shadowRadius = radius
+                layer.shadowOffset = offset
+                layer.masksToBounds = false
+            }
+        }
+
+        enum Shadow {
+            static let none = ShadowToken(color: .clear, opacity: 0, radius: 0, offset: .zero)
+            static let card = ShadowToken(color: .black, opacity: 0.08, radius: 10, offset: CGSize(width: 0, height: 2))
+            static let fab = ShadowToken(color: .black, opacity: 0.12, radius: 8, offset: CGSize(width: 0, height: 2))
+            static let overlay = ShadowToken(color: .black, opacity: 0.20, radius: 16, offset: CGSize(width: 0, height: 6))
+        }
+
+        // MARK: - Z-order
+
+        enum ZIndex {
+            static let background: CGFloat = 0
+            static let content: CGFloat = 1
+            static let floating: CGFloat = 100
+            static let overlay: CGFloat = 200
+        }
+
         enum Font {
             static func preferred(_ style: UIFont.TextStyle) -> UIFont {
                 UIFont.preferredFont(forTextStyle: style)
@@ -57,9 +185,10 @@ enum UIFactory {
             static let formBorderWidth: CGFloat = 1
 
             static let fabSize: CGFloat = 48
-            static let fabShadowOpacity: Float = 0.12
-            static let fabShadowRadius: CGFloat = 8
-            static let fabShadowOffset: CGSize = CGSize(width: 0, height: 2)
+            // Prefer `Theme.Shadow.fab` for new code.
+            static let fabShadowOpacity: Float = Shadow.fab.opacity
+            static let fabShadowRadius: CGFloat = Shadow.fab.radius
+            static let fabShadowOffset: CGSize = Shadow.fab.offset
 
             static let buttonVerticalPadding: CGFloat = 14
             static let buttonHorizontalPadding: CGFloat = 16
@@ -71,8 +200,13 @@ enum UIFactory {
     static func sectionHeader(text: String, textStyle: UIFont.TextStyle = .title2) -> UILabel {
         let label = UILabel()
         label.text = text
-        label.font = Theme.Font.preferred(textStyle)
-        label.adjustsFontForContentSizeCategory = true
+        // Default: tokenized typography. If a caller passes a custom `textStyle`, honor it.
+        if textStyle == .title2 {
+            Theme.Typography.apply(.sectionHeader, to: label)
+        } else {
+            label.font = Theme.Font.preferred(textStyle)
+            label.adjustsFontForContentSizeCategory = true
+        }
         label.numberOfLines = 0
         label.accessibilityTraits.insert(.header)
         return label
@@ -91,14 +225,12 @@ enum UIFactory {
 
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.font = Theme.Font.preferred(.body)
-        titleLabel.adjustsFontForContentSizeCategory = true
+        Theme.Typography.apply(.body, to: titleLabel)
         titleLabel.isAccessibilityElement = false
 
         let valueLabel = UILabel()
         valueLabel.text = value
-        valueLabel.font = Theme.Font.preferred(.body)
-        valueLabel.adjustsFontForContentSizeCategory = true
+        Theme.Typography.apply(.body, to: valueLabel)
         valueLabel.textAlignment = .right
         valueLabel.setContentHuggingPriority(.required, for: .horizontal)
         valueLabel.isAccessibilityElement = false
@@ -117,8 +249,7 @@ enum UIFactory {
             let emptyLabel = UILabel()
             emptyLabel.text = emptyText
             emptyLabel.textColor = Theme.Color.textSecondary
-            emptyLabel.font = Theme.Font.preferred(.body)
-            emptyLabel.adjustsFontForContentSizeCategory = true
+            Theme.Typography.apply(.body, to: emptyLabel)
             emptyLabel.isAccessibilityElement = true
             emptyLabel.accessibilityLabel = "No data yet"
             container.addArrangedSubview(emptyLabel)
@@ -170,8 +301,7 @@ enum UIFactory {
         if let title {
             let titleLabel = UILabel()
             titleLabel.text = title
-            titleLabel.font = Theme.Font.preferred(.headline)
-            titleLabel.adjustsFontForContentSizeCategory = true
+            Theme.Typography.apply(.headline, to: titleLabel)
             titleLabel.accessibilityTraits.insert(.header)
             container.addArrangedSubview(titleLabel)
             textView.accessibilityLabel = title
@@ -179,8 +309,7 @@ enum UIFactory {
 
         let placeholderLabel = UILabel()
         placeholderLabel.text = placeholder
-        placeholderLabel.font = Theme.Font.preferred(.subheadline)
-        placeholderLabel.adjustsFontForContentSizeCategory = true
+        Theme.Typography.apply(.subheadline, to: placeholderLabel)
         placeholderLabel.textColor = Theme.Color.textSecondary
         placeholderLabel.isAccessibilityElement = false
 
@@ -190,7 +319,7 @@ enum UIFactory {
     }
 
     static func styleTextViewForForm(_ textView: UITextView) {
-        textView.font = Theme.Font.preferred(.body)
+        textView.font = Theme.Typography.font(.body)
         textView.adjustsFontForContentSizeCategory = true
         textView.layer.borderWidth = Theme.Metrics.formBorderWidth
         textView.layer.borderColor = Theme.Color.separator.cgColor

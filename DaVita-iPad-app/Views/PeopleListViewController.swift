@@ -36,10 +36,8 @@ import UIKit
         button.tintColor = UIFactory.Theme.Color.textSecondary
         button.backgroundColor = UIFactory.Theme.Color.fabBackground
         button.layer.cornerRadius = UIFactory.Theme.CornerRadius.fab
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOpacity = UIFactory.Theme.Metrics.fabShadowOpacity
-        button.layer.shadowRadius = UIFactory.Theme.Metrics.fabShadowRadius
-        button.layer.shadowOffset = UIFactory.Theme.Metrics.fabShadowOffset
+        UIFactory.Theme.Shadow.fab.apply(to: button.layer)
+        button.layer.zPosition = UIFactory.Theme.ZIndex.floating
         button.widthAnchor.constraint(equalToConstant: UIFactory.Theme.Metrics.fabSize).isActive = true
         button.heightAnchor.constraint(equalToConstant: UIFactory.Theme.Metrics.fabSize).isActive = true
         button.isAccessibilityElement = true
