@@ -97,11 +97,15 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
         do {
             frc = try checkInRepo.makeHistoryFRC(person: personFilter, filter: currentHistoryFilter, delegate: self)
             try frc?.performFetch()
+            updateBackgroundState()
             tableView.reloadData()
         } catch {
             AppLog.persistence.error("History FRC setup error: \(error, privacy: .public)")
             present(appError: AppError(operation: .loadHistory, underlying: error))
             frc = nil
+            tableView.setBackgroundState(.error(title: "Couldn't load history", message: "Please try again." , actionTitle: "Retry") { [weak self] in
+                self?.configureFRC()
+            })
             tableView.reloadData()
         }
     }
@@ -111,7 +115,37 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
     }
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        updateBackgroundState()
         tableView.reloadData()
+    }
+
+    private func updateBackgroundState() {
+        guard let sections = frc?.sections else {
+            // An error path likely already set an error background view.
+            return
+        }
+        let total = sections.reduce(0) { $0 + $1.numberOfObjects }
+        if total == 0 {
+            tableView.setBackgroundState(
+                .empty(
+                    title: "No check-ins yet",
+                    message: "Try adjusting filters or clear the keyword search.",
+                    actionTitle: "Clear filters",
+                    onAction: { [weak self] in
+                        guard let self else { return }
+                        self.scope = .all
+                        self.keyword = nil
+                        self.navigationItem.searchController?.searchBar.text = nil
+                        self.navigationItem.leftBarButtonItem?.menu = self.makeScopeMenu()
+                        self.configureFRC()
+                    }
+                )
+            )
+        } else {
+            // Restore separators if we previously hid them for an empty/error state.
+            tableView.backgroundView = nil
+            tableView.separatorStyle = .singleLine
+        }
     }
 
     // MARK: - Filter UI
@@ -259,29 +293,14 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let sectionInfo = frc?.sections?[section] else { return 0 }
-        return max(sectionInfo.numberOfObjects, 1)
+        return sectionInfo.numberOfObjects
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "historyCell", for: indexPath)
         var config = cell.defaultContentConfiguration()
 
-        guard let frc, let sectionInfo = frc.sections?[indexPath.section] else {
-            config.text = "No data"
-            cell.selectionStyle = .none
-            cell.contentConfiguration = config
-            return cell
-        }
-
-        if sectionInfo.numberOfObjects == 0 {
-            config.text = "No check-ins yet"
-            config.secondaryText = nil
-            cell.selectionStyle = .none
-            cell.accessoryType = .none
-            cell.contentConfiguration = config
-            return cell
-        }
-
+        guard let frc else { return cell }
         let record = frc.object(at: indexPath)
         let dateText = record.createdAt.map { dateFormatter.string(from: $0) } ?? "Unknown date"
         config.text = dateText
@@ -296,9 +315,7 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let frc, let sectionInfo = frc.sections?[indexPath.section], sectionInfo.numberOfObjects > 0 else {
-            return
-        }
+        guard let frc else { return }
 
         let record = frc.object(at: indexPath)
         guard let detail = detailText(for: record) else { return }

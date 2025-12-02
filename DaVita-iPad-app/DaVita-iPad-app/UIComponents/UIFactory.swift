@@ -266,6 +266,43 @@ enum UIFactory {
         return container
     }
 
+    // MARK: - Cards / Layout helpers
+
+    static func cardContainer(backgroundColor: UIColor = Theme.Color.surfaceElevated,
+                              cornerRadius: CGFloat = Theme.CornerRadius.m,
+                              shadow: Theme.ShadowToken = Theme.Shadow.none) -> UIView {
+        let v = UIView()
+        v.backgroundColor = backgroundColor
+        v.layer.cornerRadius = cornerRadius
+        shadow.apply(to: v.layer)
+        return v
+    }
+
+    static func verticalStack(spacing: CGFloat = Theme.Spacing.l) -> UIStackView {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = spacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }
+
+    static func pin(_ child: UIView, to container: UIView, insets: UIEdgeInsets) {
+        child.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            child.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: insets.left),
+            child.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -insets.right),
+            child.topAnchor.constraint(equalTo: container.topAnchor, constant: insets.top),
+            child.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -insets.bottom)
+        ])
+    }
+
+    static func card(_ content: UIView, padding: CGFloat = Theme.Spacing.l) -> UIView {
+        let container = cardContainer()
+        container.addSubview(content)
+        pin(content, to: container, insets: UIEdgeInsets(top: padding, left: padding, bottom: padding, right: padding))
+        return container
+    }
+
     // MARK: - Buttons
 
     static func roundedActionButton(

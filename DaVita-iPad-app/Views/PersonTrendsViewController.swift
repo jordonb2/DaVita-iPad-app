@@ -62,8 +62,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
     }
 
     private func painCard(series: [CheckInTrendsProvider.Point]) -> UIView {
-        let container = cardContainer()
-        let stack = verticalStack()
+        let stack = UIFactory.verticalStack()
 
         let values = series.map { CGFloat($0.value) }
         let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.accent, accessibilityValueText: painTrendAccessibility(series: series))
@@ -84,9 +83,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         stack.addArrangedSubview(spark)
         stack.addArrangedSubview(summary)
 
-        container.addSubview(stack)
-        pin(stack, to: container)
-        return container
+        return UIFactory.card(stack)
     }
 
     private func distributionCard<T: CaseIterable & Hashable>(
@@ -94,8 +91,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         counts: [T: Int],
         allBuckets: [T]
     ) -> UIView {
-        let container = cardContainer()
-        let stack = verticalStack()
+        let stack = UIFactory.verticalStack()
 
         let total = counts.values.reduce(0, +)
         for bucket in allBuckets {
@@ -108,25 +104,18 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             stack.addArrangedSubview(row)
         }
 
-        container.addSubview(stack)
-        pin(stack, to: container)
-        return container
+        return UIFactory.card(stack)
     }
 
     private func symptomsCard(trends: CheckInTrendsProvider.PersonTrends) -> UIView {
-        let container = cardContainer()
-        let stack = verticalStack()
+        let stack = UIFactory.verticalStack()
 
         if trends.topSymptomCategories.isEmpty {
-            let empty = UILabel()
-            empty.text = "No symptom text captured in this window"
-            empty.font = UIFactory.Theme.Font.preferred(.subheadline)
-            empty.textColor = UIFactory.Theme.Color.textSecondary
-            stack.addArrangedSubview(empty)
-
-            container.addSubview(stack)
-            pin(stack, to: container)
-            return container
+            let state = StateView(model: .empty(
+                title: "No symptoms yet",
+                message: "No symptom text was captured in this window."
+            ))
+            return UIFactory.card(state)
         }
 
         let top = trends.topSymptomCategories.prefix(5)
@@ -150,9 +139,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             stack.addArrangedSubview(rowStack)
         }
 
-        container.addSubview(stack)
-        pin(stack, to: container)
-        return container
+        return UIFactory.card(stack)
     }
 
     
@@ -167,33 +154,6 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         else { direction = "stable" }
         return "Latest \(end) out of 10. Trend is \(direction)." 
     }
-// MARK: - Small UI helpers
-
-    private func cardContainer() -> UIView {
-        let v = UIView()
-        v.backgroundColor = UIFactory.Theme.Color.surfaceElevated
-        v.layer.cornerRadius = UIFactory.Theme.CornerRadius.m
-        return v
-    }
-
-    private func verticalStack() -> UIStackView {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = UIFactory.Theme.Spacing.l
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }
-
-    private func pin(_ child: UIView, to container: UIView) {
-        child.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            child.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: UIFactory.Theme.Spacing.l),
-            child.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -UIFactory.Theme.Spacing.l),
-            child.topAnchor.constraint(equalTo: container.topAnchor, constant: UIFactory.Theme.Spacing.l),
-            child.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -UIFactory.Theme.Spacing.l)
-        ])
-    }
-
     private func bucketTitle<T>(_ bucket: T) -> String {
         if let b = bucket as? EnergyBucket { return b.displayText }
         if let b = bucket as? MoodBucket { return b.displayText }
