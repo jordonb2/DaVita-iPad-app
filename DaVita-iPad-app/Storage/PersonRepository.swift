@@ -1,8 +1,17 @@
 import Foundation
 import CoreData
 
+protocol PersonRepositorying {
+    func makePeopleFRC(delegate: NSFetchedResultsControllerDelegate?) -> NSFetchedResultsController<Person>
+
+    func createPerson(name: String, gender: String?, dob: Date?) -> Person
+
+    func deletePerson(_ person: Person)
+    func save() throws
+}
+
 /// Pure persistence layer for Person CRUD.
-final class PersonRepository {
+final class PersonRepository: PersonRepositorying {
     private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {
@@ -40,6 +49,10 @@ final class PersonRepository {
         p.gender = gender
         p.dob = dob
         return p
+    }
+
+    func createPerson(name: String, gender: String?, dob: Date?) -> Person {
+        createPerson(id: UUID(), createdAt: Date(), name: name, gender: gender, dob: dob)
     }
 
     func deletePerson(_ person: Person) {

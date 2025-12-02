@@ -1,12 +1,20 @@
 import Foundation
 import CoreData
 
-/// Business logic layer for people + visit history.
-final class PersonService {
-    private let peopleRepo: PersonRepository
-    private let checkInService: CheckInService
+protocol PersonServicing {
+    @discardableResult
+    func addPerson(name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws -> Person
 
-    init(peopleRepo: PersonRepository, checkInService: CheckInService) {
+    func updatePerson(_ person: Person, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws
+    func deletePerson(_ person: Person) throws
+}
+
+/// Business logic layer for people + visit history.
+final class PersonService: PersonServicing {
+    private let peopleRepo: PersonRepositorying
+    private let checkInService: CheckInServicing
+
+    init(peopleRepo: PersonRepositorying, checkInService: CheckInServicing) {
         self.peopleRepo = peopleRepo
         self.checkInService = checkInService
     }
@@ -16,7 +24,7 @@ final class PersonService {
         let person = peopleRepo.createPerson(name: name, gender: gender, dob: dob)
 
         if let checkInData {
-            try checkInService.writeCheckIn(for: person, data: checkInData, savingUsing: peopleRepo.save)
+            try checkInService.writeCheckIn(for: person, data: checkInData, at: Date(), savingUsing: peopleRepo.save)
         } else {
             try peopleRepo.save()
         }
@@ -30,7 +38,7 @@ final class PersonService {
         person.dob = dob
 
         if let checkInData {
-            try checkInService.writeCheckIn(for: person, data: checkInData, savingUsing: peopleRepo.save)
+            try checkInService.writeCheckIn(for: person, data: checkInData, at: Date(), savingUsing: peopleRepo.save)
         } else {
             try peopleRepo.save()
         }

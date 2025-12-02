@@ -17,15 +17,15 @@ final class PeopleListViewModel: NSObject {
     var onUserToast: ((String) -> Void)?
     var onUserAlert: ((String, String?) -> Void)?
 
-    private let personService: PersonService
-    private let peopleRepo: PersonRepository
+    private let personService: PersonServicing
+    private let peopleRepo: PersonRepositorying
 
     private lazy var frc: NSFetchedResultsController<Person> = {
         return peopleRepo.makePeopleFRC(delegate: self)
     }()
 
-    init(peopleRepo: PersonRepository,
-         personService: PersonService) {
+    init(peopleRepo: PersonRepositorying,
+         personService: PersonServicing) {
         self.peopleRepo = peopleRepo
         self.personService = personService
         super.init()

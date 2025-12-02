@@ -1,6 +1,12 @@
 import Foundation
 import CoreData
 
+protocol CheckInHistoryRepositorying {
+    func makeHistoryFRC(person: Person?,
+                        filter: CheckInHistoryFilter,
+                        delegate: NSFetchedResultsControllerDelegate?) throws -> NSFetchedResultsController<CheckInRecord>
+}
+
 /// Typed filter for check-in history queries.
 struct CheckInHistoryFilter {
     /// Inclusive start date (>=). Nil = no lower bound.
@@ -33,7 +39,7 @@ struct CheckInHistoryFilter {
 }
 
 /// Pure persistence layer for `CheckInRecord`.
-final class CheckInRepository {
+final class CheckInRepository: CheckInHistoryRepositorying {
     private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext) {

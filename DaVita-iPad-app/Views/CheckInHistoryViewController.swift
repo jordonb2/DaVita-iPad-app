@@ -6,8 +6,7 @@ import Foundation
 ///
 /// Uses `NSFetchedResultsController` for live-updating results.
 final class CheckInHistoryViewController: StandardTableViewController, NSFetchedResultsControllerDelegate {
-    private let context: NSManagedObjectContext
-    private let checkInRepo: CheckInRepository
+    private let checkInRepo: CheckInHistoryRepositorying
     private let personFilter: Person?
 
     private var frc: NSFetchedResultsController<CheckInRecord>?
@@ -61,9 +60,8 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
         return f
     }()
 
-    init(person: Person? = nil, context: NSManagedObjectContext) {
-        self.context = context
-        self.checkInRepo = CheckInRepository(context: context)
+    init(person: Person? = nil, checkInRepo: CheckInHistoryRepositorying) {
+        self.checkInRepo = checkInRepo
         self.personFilter = person
         super.init(style: .insetGrouped)
     }

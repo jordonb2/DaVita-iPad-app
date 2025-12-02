@@ -1,12 +1,19 @@
 import Foundation
 import CoreData
 
+protocol CheckInServicing {
+    func writeCheckIn(for person: Person,
+                      data: PersonCheckInData,
+                      at date: Date,
+                      savingUsing save: () throws -> Void) throws
+}
+
 /// Business logic layer for writing check-ins.
 ///
 /// Centralizes:
 /// - updating the "latest check-in" fields on `Person` (in the person's context)
 /// - creating a `CheckInRecord` on a background context (to keep UI smooth)
-final class CheckInService {
+final class CheckInService: CheckInServicing {
     private let coreDataStack: CoreDataStacking
 
     init(coreDataStack: CoreDataStacking) {
@@ -93,7 +100,7 @@ final class CheckInService {
     func writeCheckIn(for person: Person,
                       data: PersonCheckInData,
                       at date: Date = Date(),
-                      savingUsing save: () throws -> Void) rethrows {
+                      savingUsing save: () throws -> Void) throws {
         let sanitized = data.sanitized()
         if data.needsSanitization() {
             AppLog.persistence.warning("Sanitized check-in input before save")

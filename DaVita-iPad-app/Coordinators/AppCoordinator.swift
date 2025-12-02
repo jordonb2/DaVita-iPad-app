@@ -8,7 +8,8 @@ final class AppCoordinator {
     private lazy var router: AppRouting = {
         // Screen factories built here (composition root).
         let makeHistoryVC: (Person?) -> CheckInHistoryViewController = { [dependencies] person in
-            CheckInHistoryViewController(person: person, context: dependencies.coreDataStack.viewContext)
+            let repo: CheckInHistoryRepositorying = CheckInRepository(context: dependencies.coreDataStack.viewContext)
+            return CheckInHistoryViewController(person: person, checkInRepo: repo)
         }
 
         let makeAnalyticsVC: () -> AnalyticsViewController = { [dependencies] in

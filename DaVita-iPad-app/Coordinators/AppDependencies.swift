@@ -7,9 +7,9 @@ struct AppDependencies {
     let analyticsLogger: CheckInAnalyticsLogging
 
     // Domain services / repos
-    let peopleRepo: PersonRepository
-    let checkInService: CheckInService
-    let personService: PersonService
+    let peopleRepo: PersonRepositorying
+    let checkInService: CheckInServicing
+    let personService: PersonServicing
 
     // Providers / exports
     let makeTrendsProvider: () -> CheckInTrendsProviding
@@ -21,9 +21,9 @@ struct AppDependencies {
         let adminSession: AdminSessioning = AdminSession()
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(context: coreDataStack.viewContext)
 
-        let peopleRepo = PersonRepository(context: coreDataStack.viewContext)
-        let checkInService = CheckInService(coreDataStack: coreDataStack)
-        let personService = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
+        let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
+        let checkInService: CheckInServicing = CheckInService(coreDataStack: coreDataStack)
+        let personService: PersonServicing = PersonService(peopleRepo: peopleRepo, checkInService: checkInService)
 
         self.coreDataStack = coreDataStack
         self.adminSession = adminSession
