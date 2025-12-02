@@ -29,7 +29,10 @@ final class AnalyticsViewController: ScrolledStackViewController {
         title = "Analytics"
         view.backgroundColor = .systemBackground
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backTapped))
+        let logout = UIBarButtonItem(title: "Log out", style: .plain, target: self, action: #selector(backTapped))
+        logout.accessibilityLabel = "Log out"
+        logout.accessibilityHint = "Logs out of the admin session."
+        navigationItem.leftBarButtonItem = logout
 
         isModalInPresentation = true
         presentationController?.delegate = self

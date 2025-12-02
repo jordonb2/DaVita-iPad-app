@@ -32,9 +32,20 @@ final class AddEditPersonViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         assert(router != nil, "AddEditPersonViewController.router must be injected before presentation")
-        title = viewModel.isEditingRecord ? "Edit Person" : "Add/Edit Person"
+        title = viewModel.isEditingRecord ? "Edit Person" : "Add Person"
         view.backgroundColor = .systemBackground
         configureUI()
+
+        // Standardize modal navigation buttons (avoid relying on storyboard wiring).
+        let cancel = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped(_:)))
+        cancel.accessibilityLabel = "Cancel"
+        cancel.accessibilityIdentifier = "addEdit.cancel"
+        navigationItem.leftBarButtonItem = cancel
+
+        let save = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveTapped(_:)))
+        save.accessibilityLabel = "Save"
+        save.accessibilityIdentifier = "addEdit.save"
+        navigationItem.rightBarButtonItem = save
         
         fullNameTextField.font = UIFont.preferredFont(forTextStyle: .body)
         fullNameTextField.adjustsFontForContentSizeCategory = true
@@ -70,11 +81,6 @@ final class AddEditPersonViewController: UIViewController, UITextFieldDelegate {
         
         ageLabel.isAccessibilityElement = true
         ageLabel.accessibilityTraits.insert(.staticText)
-        
-        navigationItem.leftBarButtonItem?.accessibilityLabel = "Cancel"
-        navigationItem.leftBarButtonItem?.accessibilityIdentifier = "addEdit.cancel"
-        navigationItem.rightBarButtonItem?.accessibilityLabel = "Save"
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "addEdit.save"
         
         accessibilityElements = [fullNameTextField as Any, datePicker as Any, genderSegmentedControl as Any, ageLabel as Any]
         // Prefill when editing
@@ -120,7 +126,7 @@ final class AddEditPersonViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Actions
     @IBAction func cancelTapped(_ sender: UIBarButtonItem) {
-        dismiss(animated: true, completion: nil)
+        dismissModalFlow(animated: true)
     }
     
     @IBAction func saveTapped(_ sender: UIBarButtonItem) {
@@ -141,16 +147,12 @@ final class AddEditPersonViewController: UIViewController, UITextFieldDelegate {
         router.presentCheckIn(from: self, onComplete: { [weak self] checkInData in
             guard let self else { return }
             self.onSave?(draft.name, draft.dob, draft.gender, checkInData)
-            self.dismiss(animated: true) { [weak self] in
-                self?.dismiss(animated: true, completion: nil)
-            }
+            self.dismissModalFlow(animated: true)
         }, onSkip: { [weak self] in
             guard let self else { return }
             let emptyCheckIn = PersonCheckInData(painLevel: nil, energyBucket: nil, moodBucket: nil, symptoms: nil, concerns: nil, teamNote: nil)
             self.onSave?(draft.name, draft.dob, draft.gender, emptyCheckIn)
-            self.dismiss(animated: true) { [weak self] in
-                self?.dismiss(animated: true, completion: nil)
-            }
+            self.dismissModalFlow(animated: true)
         })
     }
 

@@ -49,9 +49,7 @@ final class AppRouter: AppRouting {
         guard let addVC = mainStoryboard.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
         addVC.router = self
         addVC.onSave = onSave
-        let nav = UINavigationController(rootViewController: addVC)
-        nav.modalPresentationStyle = .fullScreen
-        nav.modalTransitionStyle = .coverVertical
+        let nav = NavigationHelpers.Modal.embedInNavigation(addVC)
         presentingVC.present(nav, animated: true)
     }
 
@@ -61,8 +59,7 @@ final class AppRouter: AppRouting {
         addVC.personToEdit = person
         addVC.router = self
         addVC.onSave = onSave
-        let nav = UINavigationController(rootViewController: addVC)
-        nav.modalPresentationStyle = .formSheet
+        let nav = NavigationHelpers.Modal.embedInNavigation(addVC)
         presentingVC.present(nav, animated: true)
     }
 
@@ -84,8 +81,7 @@ final class AppRouter: AppRouting {
                 presentingVC?.dismiss(animated: true)
             }
 
-            let nav = UINavigationController(rootViewController: analyticsVC)
-            nav.modalPresentationStyle = .formSheet
+            let nav = NavigationHelpers.Modal.embedInNavigation(analyticsVC, isModalInPresentation: true)
             presentingVC.present(nav, animated: true)
         }
 
@@ -111,10 +107,19 @@ final class AppRouter: AppRouting {
                         onComplete: @escaping (PersonCheckInData) -> Void,
                         onSkip: @escaping () -> Void) {
         let checkInVC = CheckInJourneyViewController(analyticsLogger: analyticsLogger)
-        checkInVC.onComplete = onComplete
-        checkInVC.onSkip = onSkip
-        let nav = UINavigationController(rootViewController: checkInVC)
-        nav.modalPresentationStyle = .formSheet
+        // Ensure the check-in modal consistently dismisses before notifying the caller.
+        checkInVC.onComplete = { [weak presentingVC] data in
+            presentingVC?.dismiss(animated: true) {
+                onComplete(data)
+            }
+        }
+        checkInVC.onSkip = { [weak presentingVC] in
+            presentingVC?.dismiss(animated: true) {
+                onSkip()
+            }
+        }
+
+        let nav = NavigationHelpers.Modal.embedInNavigation(checkInVC, isModalInPresentation: true)
         presentingVC.present(nav, animated: true)
     }
 }

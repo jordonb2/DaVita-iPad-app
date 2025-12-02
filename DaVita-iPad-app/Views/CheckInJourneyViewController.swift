@@ -39,7 +39,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Optional Check-In Survey"
+        title = "Optional Check-In"
         view.backgroundColor = .systemBackground
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))

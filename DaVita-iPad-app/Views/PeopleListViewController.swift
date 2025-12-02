@@ -51,7 +51,7 @@ import UIKit
         super.viewDidLoad()
         assert(router != nil, "PeopleListViewController.router must be injected by a coordinator")
         assert(viewModel != nil, "PeopleListViewController.viewModel must be injected by a coordinator")
-        title = "People List"
+        title = "People"
         view.backgroundColor = .systemBackground
         
         // + button programmatically (no storyboard dragging headaches)
