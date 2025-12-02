@@ -10,7 +10,9 @@ final class PersonTrendsViewController: ScrolledStackViewController {
 
     private enum ViewState {
         case loading
+        case empty
         case loaded(CheckInTrendsProvider.PersonTrends)
+        case error(title: String, message: String)
     }
 
     private var state: ViewState = .loading
@@ -45,27 +47,47 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         } catch {
             AppLog.persistence.error("Failed to compute trends: \(error, privacy: .public)")
             present(appError: AppError(operation: .loadTrends, underlying: error))
-            trends = CheckInTrendsProvider.PersonTrends(
-                painSeries: [],
-                energyDistribution: [:],
-                moodDistribution: [:],
-                symptomCategoryDaily: [:],
-                topSymptomCategories: [],
-                totalRecordsInWindow: 0,
-                windowStart: Date().addingTimeInterval(-Double(windowDays) * 86400),
-                windowEnd: Date()
-            )
+            state = .error(title: "Couldn't load trends", message: "Please try again.")
+            render()
+            return
         }
-        state = .loaded(trends)
+
+        state = (trends.totalRecordsInWindow == 0) ? .empty : .loaded(trends)
         render()
     }
 
     private func render() {
         resetContentStack()
 
-        if case .loading = state {
+        switch state {
+        case .loading:
             contentStackView.addArrangedSubview(StateView(model: .loading(title: "Loading trends…")))
             return
+
+        case .empty:
+            contentStackView.addArrangedSubview(
+                StateView(model: .empty(
+                    title: "No trends yet",
+                    message: "This person doesn't have check-ins in the last \(windowDays) days.",
+                    actionTitle: "Refresh",
+                    onAction: { [weak self] in self?.reloadTrends() }
+                ))
+            )
+            return
+
+        case .error(let title, let message):
+            contentStackView.addArrangedSubview(
+                StateView(model: .error(
+                    title: title,
+                    message: message,
+                    actionTitle: "Retry",
+                    onAction: { [weak self] in self?.reloadTrends() }
+                ))
+            )
+            return
+
+        case .loaded:
+            break
         }
 
         guard case .loaded(let trends) = state else { return }

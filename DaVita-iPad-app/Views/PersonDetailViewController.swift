@@ -40,6 +40,40 @@ final class PersonDetailViewController: ScrolledStackViewController {
 
     private func render() {
         resetContentStack()
+
+        if person.managedObjectContext == nil || person.isDeleted {
+            contentStackView.addArrangedSubview(
+                StateView(model: .error(
+                    title: "Person unavailable",
+                    message: "This record is no longer available.",
+                    actionTitle: "Go back",
+                    onAction: { [weak self] in
+                        self?.navigationController?.popViewController(animated: true)
+                    }
+                ))
+            )
+            return
+        }
+
+        let hasAnyDetail = (person.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false) ||
+            person.dob != nil ||
+            person.genderEnum != nil
+
+        if !hasAnyDetail {
+            contentStackView.addArrangedSubview(
+                StateView(model: .empty(
+                    title: "No details yet",
+                    message: "Add details for this person to see them here.",
+                    actionTitle: "Edit person",
+                    onAction: { [weak self] in
+                        guard let self else { return }
+                        self.onEditTapped?(self.person)
+                    }
+                ))
+            )
+            return
+        }
+
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Details"))
 
         let name = person.name ?? "—"

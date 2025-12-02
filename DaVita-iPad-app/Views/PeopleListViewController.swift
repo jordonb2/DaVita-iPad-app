@@ -17,6 +17,15 @@ import UIKit
     
     private let calendar = Calendar.current
 
+    private enum ViewState {
+        case loading
+        case loaded
+        case empty
+        case error(AppError)
+    }
+
+    private var state: ViewState = .loading
+
     private lazy var landingHeaderView: LandingHeroHeaderView = {
         let header = LandingHeroHeaderView()
         header.onPrimaryTap = { [weak self] in
@@ -71,6 +80,8 @@ import UIKit
             self?.presentErrorAlert(title: title, message: message)
         }
         viewModel.onError = { [weak self] error in
+            self?.state = .error(error)
+            self?.updateListState()
             self?.present(appError: error)
         }
         
@@ -83,12 +94,18 @@ import UIKit
         // Keep UI in-sync with FRC-driven model updates (no Combine).
         viewModel.onPeopleChanged = { [weak self] _ in
             guard let self else { return }
+            self.state = self.viewModel.count == 0 ? .empty : .loaded
+            self.updateListState()
             self.tableViewRef.reloadData()
             self.updateHeaderContent()
         }
 
         configureLandingHeader()
         // Ensure initial render reflects current data.
+        state = .loading
+        updateListState()
+        state = viewModel.count == 0 ? .empty : .loaded
+        updateListState()
         tableViewRef.reloadData()
         updateHeaderContent()
     }
@@ -101,6 +118,37 @@ import UIKit
     @objc private func didTapAdd() {
         router.showAddPerson(from: self) { [weak self] name, dob, gender, checkInData in
             self?.viewModel.add(name: name, gender: gender, dob: dob, checkInData: checkInData)
+        }
+    }
+
+    private func updateListState() {
+        switch state {
+        case .loading:
+            tableViewRef.setBackgroundState(.loading(title: "Loading people…"))
+
+        case .empty:
+            tableViewRef.setBackgroundState(
+                .empty(
+                    title: "No people yet",
+                    message: "Tap + to add your first person.",
+                    actionTitle: "Add person",
+                    onAction: { [weak self] in self?.didTapAdd() }
+                )
+            )
+
+        case .error:
+            tableViewRef.setBackgroundState(
+                .error(
+                    title: "Couldn't load people",
+                    message: "Please try again.",
+                    actionTitle: "Retry",
+                    onAction: { [weak self] in self?.viewModel.refresh() }
+                )
+            )
+
+        case .loaded:
+            tableViewRef.backgroundView = nil
+            tableViewRef.separatorStyle = .singleLine
         }
     }
     

@@ -94,6 +94,7 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
     // MARK: - FRC
 
     private func configureFRC() {
+        tableView.setBackgroundState(.loading(title: "Loading history…"))
         do {
             frc = try checkInRepo.makeHistoryFRC(person: personFilter, filter: currentHistoryFilter, delegate: self)
             try frc?.performFetch()

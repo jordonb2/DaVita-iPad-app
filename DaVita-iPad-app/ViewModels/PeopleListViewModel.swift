@@ -55,6 +55,19 @@ final class PeopleListViewModel: NSObject {
         }
     }
 
+    // MARK: - Data refresh
+
+    func refresh() {
+        do {
+            try frc.performFetch()
+            people = frc.fetchedObjects ?? []
+            onPeopleChanged?(people)
+        } catch {
+            AppLog.persistence.error("FRC refresh performFetch error: \(error, privacy: .public)")
+            emit(AppError(operation: .loadPeople, underlying: error))
+        }
+    }
+
     // MARK: - CRUD
 
     func add(name: String, gender: Gender? = nil, dob: Date? = nil, checkInData: PersonCheckInData? = nil) {

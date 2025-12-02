@@ -11,7 +11,9 @@ final class AnalyticsViewController: ScrolledStackViewController {
 
     private enum ViewState {
         case loading
+        case empty
         case loaded(CheckInAnalyticsSummaryProvider.Summary)
+        case error(title: String, message: String)
     }
 
     private var state: ViewState = .loading
@@ -58,9 +60,13 @@ final class AnalyticsViewController: ScrolledStackViewController {
         } catch {
             AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .public)")
             present(appError: AppError(operation: .loadAnalytics, underlying: error))
-            summary = .empty
+            state = .error(title: "Couldn't load analytics", message: "Please try again.")
+            render()
+            return
         }
-        state = .loaded(summary)
+
+        let total = summary.totalPresented + summary.totalSubmitted + summary.totalSkipped + summary.totalDismissed
+        state = (total == 0) ? .empty : .loaded(summary)
         render()
     }
 
@@ -74,6 +80,28 @@ final class AnalyticsViewController: ScrolledStackViewController {
         switch state {
         case .loading:
             contentStackView.addArrangedSubview(StateView(model: .loading(title: "Loading analytics…")))
+            return
+
+        case .empty:
+            contentStackView.addArrangedSubview(
+                StateView(model: .empty(
+                    title: "No analytics yet",
+                    message: "Complete a check-in to start seeing engagement and trends here.",
+                    actionTitle: "Refresh",
+                    onAction: { [weak self] in self?.reloadSummary() }
+                ))
+            )
+            return
+
+        case .error(let title, let message):
+            contentStackView.addArrangedSubview(
+                StateView(model: .error(
+                    title: title,
+                    message: message,
+                    actionTitle: "Retry",
+                    onAction: { [weak self] in self?.reloadSummary() }
+                ))
+            )
             return
 
         case .loaded:
