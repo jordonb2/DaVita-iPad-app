@@ -106,8 +106,7 @@ final class AddEditPersonViewController: UIViewController {
     private func updateAgeLabel(for date: Date) {
         let calendar = Calendar.current
         let now = Date()
-        let ageComponents = calendar.dateComponents([.year], from: date, to: now)
-        if let years = ageComponents.year {
+        if let years = DateDerived.ageYears(dob: date, now: now, calendar: calendar) {
             ageLabel.text = "Age: \(years)"
             ageLabel.accessibilityLabel = "Age"
             ageLabel.accessibilityValue = "\(years)"

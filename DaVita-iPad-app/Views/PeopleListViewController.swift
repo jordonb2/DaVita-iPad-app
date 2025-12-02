@@ -118,19 +118,10 @@ import UIKit
         config.text = person.name
         
         // Secondary text = DOB and Age if available
-        if let dob = person.dob {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            let dobString = formatter.string(from: dob)
-            let calendar = Calendar.current
-            let ageComponents = calendar.dateComponents([.year], from: dob, to: Date())
-            let age = ageComponents.year ?? 0
-            
-            config.secondaryText = "DOB: \(dobString) — Age: \(age)"
-
-            let nameText = person.name ?? ""
+        if let info = person.dobAndAgeDisplay(now: Date(), calendar: calendar) {
+            config.secondaryText = info.secondaryText
             cell.isAccessibilityElement = true
-            cell.accessibilityLabel = "\(nameText). Date of birth \(dobString). Age \(age)."
+            cell.accessibilityLabel = info.accessibilityLabel
         } else {
             config.secondaryText = "DOB: —"
 

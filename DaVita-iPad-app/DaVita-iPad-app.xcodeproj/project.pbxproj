@@ -43,6 +43,8 @@
 		F76E4A012EC200000056439C /* InputSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4A002EC200000056439C /* InputSanitizer.swift */; };
 		F76E4B012EC200100056439C /* Gender.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4B002EC200100056439C /* Gender.swift */; };
 		F76E4B032EC200110056439C /* Person+Gender.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4B022EC200110056439C /* Person+Gender.swift */; };
+		F76E4C012EC300000056439C /* DateDerived.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4C002EC300000056439C /* DateDerived.swift */; };
+		F76E4C032EC300010056439C /* Person+Derived.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4C022EC300010056439C /* Person+Derived.swift */; };
 		F76E48212EC000030056439C /* DataIntegrityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48202EC000030056439C /* DataIntegrityService.swift */; };
 		F76E49012EC100000056439C /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E49002EC100000056439C /* MigrationTests.swift */; };
 /* End PBXBuildFile section */
@@ -88,6 +90,8 @@
 		F76E4A002EC200000056439C /* InputSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSanitizer.swift; sourceTree = "<group>"; };
 		F76E4B002EC200100056439C /* Gender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gender.swift; sourceTree = "<group>"; };
 		F76E4B022EC200110056439C /* Person+Gender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Person+Gender.swift"; sourceTree = "<group>"; };
+		F76E4C002EC300000056439C /* DateDerived.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateDerived.swift; sourceTree = "<group>"; };
+		F76E4C022EC300010056439C /* Person+Derived.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Person+Derived.swift"; sourceTree = "<group>"; };
 		F76E48202EC000030056439C /* DataIntegrityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataIntegrityService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -194,6 +198,8 @@
 				F76E4A002EC200000056439C /* InputSanitizer.swift */,
 				F76E4B002EC200100056439C /* Gender.swift */,
 				F76E4B022EC200110056439C /* Person+Gender.swift */,
+				F76E4C002EC300000056439C /* DateDerived.swift */,
+				F76E4C022EC300010056439C /* Person+Derived.swift */,
 				F76E42D32E93C0010056439C /* PersonCheckInData.swift */,
 				F76E42E32E93C9010056439C /* TextCategorizer.swift */,
 				F76E42E52E93C9010056439C /* Daypart.swift */,
@@ -400,6 +406,8 @@
 				F76E4A012EC200000056439C /* InputSanitizer.swift in Sources */,
 				F76E4B012EC200100056439C /* Gender.swift in Sources */,
 				F76E4B032EC200110056439C /* Person+Gender.swift in Sources */,
+				F76E4C012EC300000056439C /* DateDerived.swift in Sources */,
+				F76E4C032EC300010056439C /* Person+Derived.swift in Sources */,
 				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
 				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
 				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
