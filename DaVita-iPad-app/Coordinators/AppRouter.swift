@@ -4,14 +4,14 @@ protocol AppRouting: AnyObject {
     var rootNavigationController: UINavigationController? { get set }
 
     func showAddPerson(from presentingVC: UIViewController,
-                       onSave: @escaping (String, Date, String, PersonCheckInData) -> Void)
+                       onSave: @escaping (String, Date, Gender?, PersonCheckInData) -> Void)
     func showEditPerson(_ person: Person, from presentingVC: UIViewController,
-                        onSave: @escaping (String, Date, String, PersonCheckInData) -> Void)
+                        onSave: @escaping (String, Date, Gender?, PersonCheckInData) -> Void)
 
     /// Deeper people flow entrypoint.
     func showPersonDetail(_ person: Person,
                           from presentingVC: UIViewController,
-                          onUpdate: @escaping (Person, String, Date, String, PersonCheckInData) -> Void)
+                          onUpdate: @escaping (Person, String, Date, Gender?, PersonCheckInData) -> Void)
 
     func showAnalytics(from presentingVC: UIViewController)
     func presentCheckIn(from presentingVC: UIViewController,
@@ -45,7 +45,7 @@ final class AppRouter: AppRouting {
     }
 
     func showAddPerson(from presentingVC: UIViewController,
-                       onSave: @escaping (String, Date, String, PersonCheckInData) -> Void) {
+                       onSave: @escaping (String, Date, Gender?, PersonCheckInData) -> Void) {
         guard let addVC = mainStoryboard.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
         addVC.router = self
         addVC.onSave = onSave
@@ -56,7 +56,7 @@ final class AppRouter: AppRouting {
     }
 
     func showEditPerson(_ person: Person, from presentingVC: UIViewController,
-                        onSave: @escaping (String, Date, String, PersonCheckInData) -> Void) {
+                        onSave: @escaping (String, Date, Gender?, PersonCheckInData) -> Void) {
         guard let addVC = mainStoryboard.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
         addVC.personToEdit = person
         addVC.router = self
@@ -68,7 +68,7 @@ final class AppRouter: AppRouting {
 
     func showPersonDetail(_ person: Person,
                           from presentingVC: UIViewController,
-                          onUpdate: @escaping (Person, String, Date, String, PersonCheckInData) -> Void) {
+                          onUpdate: @escaping (Person, String, Date, Gender?, PersonCheckInData) -> Void) {
         peopleFlowCoordinator.showPersonDetail(person, from: presentingVC, onUpdate: onUpdate)
     }
 

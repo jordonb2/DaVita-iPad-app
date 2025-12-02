@@ -21,7 +21,7 @@ final class AddEditPersonViewController: UIViewController {
     
     // MARK: - Callback to send data back
     /// Caller sets this to receive the new/edited person and update the list.
-    var onSave: ((String, Date, String, PersonCheckInData) -> Void)?
+    var onSave: ((String, Date, Gender?, PersonCheckInData) -> Void)?
     
     // MARK: - Prefill (for editing)
     var personToEdit: Person? {
@@ -80,11 +80,11 @@ final class AddEditPersonViewController: UIViewController {
         fullNameTextField.text = viewModel.name
         datePicker.date = viewModel.dob
         updateAgeLabel(for: viewModel.dob)
-        if !viewModel.gender.isEmpty {
-            let map = ["Male", "Female", "Other"]
-            if let idx = map.firstIndex(of: viewModel.gender) {
-                genderSegmentedControl.selectedSegmentIndex = idx
-            }
+        if let gender = viewModel.gender,
+           let idx = Gender.allCases.firstIndex(of: gender) {
+            genderSegmentedControl.selectedSegmentIndex = idx
+        } else {
+            genderSegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
         }
         
     }
@@ -126,8 +126,7 @@ final class AddEditPersonViewController: UIViewController {
     @IBAction func saveTapped(_ sender: UIBarButtonItem) {
         viewModel.name = fullNameTextField.text ?? ""
         viewModel.updateDOB(datePicker.date)
-        let genderTitles = ["Male", "Female", "Other"]
-        viewModel.updateGender(from: genderSegmentedControl.selectedSegmentIndex, titles: genderTitles)
+        viewModel.updateGender(from: genderSegmentedControl.selectedSegmentIndex)
         
         if let errorMessage = viewModel.validate() {
             let alert = AlertFactory.okAlert(title: "Invalid input", message: errorMessage) { [weak self] in

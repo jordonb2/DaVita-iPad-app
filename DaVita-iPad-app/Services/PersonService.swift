@@ -2,9 +2,9 @@ import Foundation
 import CoreData
 
 protocol PersonServicing {
-    func addPerson(name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws
+    func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws
 
-    func updatePerson(personID: NSManagedObjectID, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws
+    func updatePerson(personID: NSManagedObjectID, name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws
     func deletePerson(personID: NSManagedObjectID) throws
 }
 
@@ -16,9 +16,8 @@ final class PersonService: PersonServicing {
         self.coreDataStack = coreDataStack
     }
 
-    func addPerson(name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws {
+    func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
         let name = InputSanitizer.personName(name) ?? ""
-        let gender = InputSanitizer.gender(gender)
         try coreDataStack.performBackgroundTaskAndWait { ctx in
             let peopleRepo = PersonRepository(context: ctx)
             let person = peopleRepo.createPerson(name: name, gender: gender, dob: dob)
@@ -33,15 +32,14 @@ final class PersonService: PersonServicing {
         }
     }
 
-    func updatePerson(personID: NSManagedObjectID, name: String, gender: String?, dob: Date?, checkInData: PersonCheckInData?) throws {
+    func updatePerson(personID: NSManagedObjectID, name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
         let name = InputSanitizer.personName(name) ?? ""
-        let gender = InputSanitizer.gender(gender)
         try coreDataStack.performBackgroundTaskAndWait { ctx in
             let peopleRepo = PersonRepository(context: ctx)
             guard let person = try ctx.existingObject(with: personID) as? Person else { return }
 
             person.name = name
-            person.gender = gender
+            person.genderEnum = gender
             person.dob = dob
 
             if let checkInData {

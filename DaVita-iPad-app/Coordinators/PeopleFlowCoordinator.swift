@@ -4,7 +4,7 @@ import CoreData
 protocol PeopleFlowCoordinating: AnyObject {
     func showPersonDetail(_ person: Person,
                           from presentingVC: UIViewController,
-                          onUpdate: @escaping (Person, String, Date, String, PersonCheckInData) -> Void)
+                          onUpdate: @escaping (Person, String, Date, Gender?, PersonCheckInData) -> Void)
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController)
     func showPersonTrends(_ person: Person, from presentingVC: UIViewController)
 }
@@ -30,7 +30,7 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
 
     func showPersonDetail(_ person: Person,
                           from presentingVC: UIViewController,
-                          onUpdate: @escaping (Person, String, Date, String, PersonCheckInData) -> Void) {
+                          onUpdate: @escaping (Person, String, Date, Gender?, PersonCheckInData) -> Void) {
         guard let nav = navigationController(from: presentingVC) else { return }
 
         let detailVC = PersonDetailViewController(person: person)

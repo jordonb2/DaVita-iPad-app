@@ -50,7 +50,7 @@ final class PersonDetailViewController: ScrolledStackViewController {
             contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "DOB", value: "—"))
         }
 
-        let gender = person.gender?.isEmpty == false ? person.gender! : "—"
+        let gender = person.genderEnum?.displayText ?? "—"
         contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Gender", value: gender))
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Actions", textStyle: .headline))

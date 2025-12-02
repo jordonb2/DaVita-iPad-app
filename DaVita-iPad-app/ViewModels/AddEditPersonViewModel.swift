@@ -6,7 +6,7 @@ final class AddEditPersonViewModel {
     struct Draft {
         let name: String
         let dob: Date
-        let gender: String
+        let gender: Gender?
     }
 
     /// Existing record being edited, if any.
@@ -15,14 +15,14 @@ final class AddEditPersonViewModel {
     /// Current input state.
     var name: String = ""
     var dob: Date = Date()
-    var gender: String = ""
+    var gender: Gender?
 
     init(person: Person? = nil) {
         self.person = person
         if let person {
             self.name = person.name ?? ""
             self.dob = person.dob ?? Date()
-            self.gender = person.gender ?? ""
+            self.gender = person.genderEnum
         }
     }
 
@@ -41,19 +41,14 @@ final class AddEditPersonViewModel {
 
     func makeDraft() -> Draft {
         let sanitizedName = InputSanitizer.personName(name) ?? ""
-        let sanitizedGender = InputSanitizer.gender(gender) ?? ""
-        return Draft(name: sanitizedName, dob: dob, gender: sanitizedGender)
+        return Draft(name: sanitizedName, dob: dob, gender: gender)
     }
 
     func updateDOB(_ date: Date) {
         dob = date
     }
 
-    func updateGender(from segmentIndex: Int, titles: [String]) {
-        if segmentIndex >= 0 && segmentIndex < titles.count {
-            gender = titles[segmentIndex]
-        } else {
-            gender = ""
-        }
+    func updateGender(from segmentIndex: Int) {
+        gender = Gender.fromSegmentIndex(segmentIndex)
     }
 }
