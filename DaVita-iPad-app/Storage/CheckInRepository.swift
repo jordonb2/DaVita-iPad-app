@@ -128,6 +128,9 @@ final class CheckInRepository: CheckInHistoryRepositorying {
         record.concerns = sanitized.concerns
         record.teamNote = sanitized.teamNote
         record.person = person
+#if DEBUG
+        assert(record.id != nil && record.createdAt != nil, "CheckInRecord must have id + createdAt at creation time")
+#endif
         return record
     }
 

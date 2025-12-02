@@ -81,6 +81,10 @@ final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
             }
             event.daypart = Daypart.from(date: event.createdAt ?? Date()).rawValue
 
+#if DEBUG
+            assert(event.id != nil && event.createdAt != nil, "CheckInAnalyticsEvent must have id + createdAt at creation time")
+#endif
+
             do {
                 if ctx.hasChanges {
                     try ctx.save()

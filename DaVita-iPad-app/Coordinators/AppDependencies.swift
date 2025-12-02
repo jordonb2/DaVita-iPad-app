@@ -20,6 +20,9 @@ struct AppDependencies {
         let adminSession: AdminSessioning = AdminSession()
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
 
+        // Fire-and-forget integrity repair (background context).
+        DataIntegrityService(coreDataStack: coreDataStack).runInBackground()
+
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
         let personService: PersonServicing = PersonService(coreDataStack: coreDataStack)
 

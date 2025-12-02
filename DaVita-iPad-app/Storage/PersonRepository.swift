@@ -50,6 +50,9 @@ final class PersonRepository: PersonRepositorying {
         p.name = name
         p.gender = gender
         p.dob = dob
+#if DEBUG
+        assert(p.id != nil && p.createdAt != nil, "Person must have id + createdAt at creation time")
+#endif
         return p
     }
 
