@@ -96,6 +96,7 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
     private func configureFRC() {
         do {
             frc = try checkInRepo.makeHistoryFRC(person: personFilter, filter: currentHistoryFilter, delegate: self)
+            try frc?.performFetch()
             tableView.reloadData()
         } catch {
             AppLog.persistence.error("History FRC setup error: \(error, privacy: .public)")

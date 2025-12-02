@@ -89,7 +89,6 @@ final class CheckInRepository: CheckInHistoryRepositorying {
             cacheName: nil
         )
         frc.delegate = delegate
-        try frc.performFetch()
         return frc
     }
 
