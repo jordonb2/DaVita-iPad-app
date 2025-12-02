@@ -33,7 +33,7 @@ final class AddEditPersonViewModel {
         if InputSanitizer.personName(name) == nil {
             return "Please enter the patient's full name before saving."
         }
-        if dob > Date() {
+        if !ValidationRules.Person.isValidDOB(dob) {
             return "Date of birth cannot be in the future."
         }
         return nil

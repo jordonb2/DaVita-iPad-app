@@ -67,31 +67,21 @@ struct PersonCheckInData {
     var moodText: String? { moodBucket?.displayText }
 }
 
-enum CheckInGuardrails {
-    // Keep these intentionally conservative; we can tune based on real-world usage.
-    static let maxSymptomsChars: Int = 1000
-    static let maxConcernsChars: Int = 1000
-    static let maxTeamNoteChars: Int = 1000
-
-    static let painMin: Int16 = 0
-    static let painMax: Int16 = 10
-}
-
 extension PersonCheckInData {
     /// Returns a validated/sanitized copy suitable for persistence.
     ///
-    /// - Pain is clamped to \(CheckInGuardrails.painMin)...\(CheckInGuardrails.painMax)
+    /// - Pain is clamped to \(ValidationRules.CheckIn.painMin)...\(ValidationRules.CheckIn.painMax)
     /// - Text is trimmed; empty becomes nil; strings are truncated to max lengths
     func sanitized() -> PersonCheckInData {
         var copy = self
 
         if let p = copy.painLevel {
-            copy.painLevel = min(CheckInGuardrails.painMax, max(CheckInGuardrails.painMin, p))
+            copy.painLevel = min(ValidationRules.CheckIn.painMax, max(ValidationRules.CheckIn.painMin, p))
         }
 
-        copy.symptoms = InputSanitizer.note(copy.symptoms, max: CheckInGuardrails.maxSymptomsChars)
-        copy.concerns = InputSanitizer.note(copy.concerns, max: CheckInGuardrails.maxConcernsChars)
-        copy.teamNote = InputSanitizer.note(copy.teamNote, max: CheckInGuardrails.maxTeamNoteChars)
+        copy.symptoms = InputSanitizer.note(copy.symptoms, max: ValidationRules.CheckIn.maxSymptomsChars)
+        copy.concerns = InputSanitizer.note(copy.concerns, max: ValidationRules.CheckIn.maxConcernsChars)
+        copy.teamNote = InputSanitizer.note(copy.teamNote, max: ValidationRules.CheckIn.maxTeamNoteChars)
 
         return copy
     }

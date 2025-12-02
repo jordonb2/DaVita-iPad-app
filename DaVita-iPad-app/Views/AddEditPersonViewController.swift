@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class AddEditPersonViewController: UIViewController {
+final class AddEditPersonViewController: UIViewController, UITextFieldDelegate {
 
     var router: AppRouting!
     
@@ -50,7 +50,8 @@ final class AddEditPersonViewController: UIViewController {
         genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .normal)
         genderSegmentedControl.setTitleTextAttributes(normalAttributes, for: .selected)
         
-        datePicker.maximumDate = Date()
+        datePicker.maximumDate = ValidationRules.Person.maxDOBDate()
+        fullNameTextField.delegate = self
         
         fullNameTextField.isAccessibilityElement = true
         fullNameTextField.accessibilityLabel = "Full name"
@@ -151,5 +152,18 @@ final class AddEditPersonViewController: UIViewController {
                 self?.dismiss(animated: true, completion: nil)
             }
         })
+    }
+
+    // MARK: - UITextFieldDelegate
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // Allow IME composition (marked text) without enforcing hard limits mid-composition.
+        if textField.markedTextRange != nil { return true }
+
+        guard textField === fullNameTextField else { return true }
+        let current = textField.text ?? ""
+        guard let r = Range(range, in: current) else { return true }
+        let next = current.replacingCharacters(in: r, with: string)
+        return next.count <= ValidationRules.Person.nameMaxChars
     }
 }

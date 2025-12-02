@@ -345,8 +345,8 @@ private final class DateRangePickerViewController: UIViewController {
 
         startPicker.datePickerMode = .date
         endPicker.datePickerMode = .date
-        startPicker.maximumDate = Date()
-        endPicker.maximumDate = Date()
+        startPicker.maximumDate = ValidationRules.Person.maxDOBDate()
+        endPicker.maximumDate = ValidationRules.Person.maxDOBDate()
         endPicker.date = Date()
         startPicker.date = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
 

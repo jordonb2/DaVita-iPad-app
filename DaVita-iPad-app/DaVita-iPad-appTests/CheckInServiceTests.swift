@@ -56,7 +56,7 @@ final class CheckInServiceTests: XCTestCase {
 
         XCTAssertEqual(record.painLevel, 10) // clamped
         XCTAssertEqual(record.symptoms?.trimmingCharacters(in: .whitespacesAndNewlines), "tired")
-        XCTAssertTrue((record.concerns ?? "").count <= CheckInGuardrails.maxConcernsChars)
+        XCTAssertTrue((record.concerns ?? "").count <= ValidationRules.CheckIn.maxConcernsChars)
         XCTAssertNil(record.teamNote)
 
         // Latest fields on person should be updated too.

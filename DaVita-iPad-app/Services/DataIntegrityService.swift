@@ -45,20 +45,25 @@ final class DataIntegrityService {
     private func repair(entityName: String, in ctx: NSManagedObjectContext) throws {
         let request = NSFetchRequest<NSManagedObject>(entityName: entityName)
         request.fetchBatchSize = 200
-        request.predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
-            NSPredicate(format: "id == nil"),
-            NSPredicate(format: "createdAt == nil")
-        ])
+        let requiredNilPredicates = ValidationRules.CoreData.requiredIdentityKeys.map { key in
+            NSPredicate(format: "%K == nil", key)
+        }
+        request.predicate = NSCompoundPredicate(orPredicateWithSubpredicates: requiredNilPredicates)
 
         let objects = try ctx.fetch(request)
         guard !objects.isEmpty else { return }
 
         for obj in objects {
-            if obj.value(forKey: "id") == nil {
-                obj.setValue(UUID(), forKey: "id")
-            }
-            if obj.value(forKey: "createdAt") == nil {
-                obj.setValue(Date(), forKey: "createdAt")
+            for key in ValidationRules.CoreData.requiredIdentityKeys {
+                guard obj.value(forKey: key) == nil else { continue }
+                switch key {
+                case "id":
+                    obj.setValue(UUID(), forKey: "id")
+                case "createdAt":
+                    obj.setValue(Date(), forKey: "createdAt")
+                default:
+                    break
+                }
             }
         }
 

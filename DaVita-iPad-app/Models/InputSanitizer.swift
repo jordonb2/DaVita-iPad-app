@@ -8,26 +8,20 @@ import Foundation
 /// - Normalize internal whitespace (names/keywords)
 /// - Apply consistent max-length caps
 enum InputSanitizer {
-    enum Guardrails {
-        static let maxPersonNameChars: Int = 120
-        static let maxGenderChars: Int = 32
-        static let maxKeywordChars: Int = 100
-    }
-
     // MARK: - Names
 
     static func personName(_ raw: String?) -> String? {
-        sanitizeSingleLine(raw, max: Guardrails.maxPersonNameChars, collapseWhitespace: true)
+        sanitizeSingleLine(raw, max: ValidationRules.Person.nameMaxChars, collapseWhitespace: true)
     }
 
     static func gender(_ raw: String?) -> String? {
-        sanitizeSingleLine(raw, max: Guardrails.maxGenderChars, collapseWhitespace: true)
+        sanitizeSingleLine(raw, max: ValidationRules.Gender.maxChars, collapseWhitespace: true)
     }
 
     // MARK: - Keywords
 
     static func searchKeyword(_ raw: String?) -> String? {
-        sanitizeSingleLine(raw, max: Guardrails.maxKeywordChars, collapseWhitespace: true)
+        sanitizeSingleLine(raw, max: ValidationRules.Search.keywordMaxChars, collapseWhitespace: true)
     }
 
     // MARK: - Free text / notes

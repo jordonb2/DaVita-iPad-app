@@ -88,8 +88,8 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     }
 
     private func configureSurveyControls() {
-        painSlider.minimumValue = 0
-        painSlider.maximumValue = 10
+        painSlider.minimumValue = Float(ValidationRules.CheckIn.painMin)
+        painSlider.maximumValue = Float(ValidationRules.CheckIn.painMax)
         painSlider.value = 0
         painSlider.addTarget(self, action: #selector(painSliderChanged(_:)), for: .valueChanged)
         painSlider.accessibilityIdentifier = "checkIn.pain"
@@ -108,10 +108,13 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         moodSegmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
 
         UIFactory.styleTextViewForForm(symptomsTextView)
+        symptomsTextView.delegate = self
         symptomsTextView.accessibilityIdentifier = "checkIn.symptoms"
         UIFactory.styleTextViewForForm(concernsTextView)
+        concernsTextView.delegate = self
         concernsTextView.accessibilityIdentifier = "checkIn.concerns"
         UIFactory.styleTextViewForForm(teamNoteTextView)
+        teamNoteTextView.delegate = self
         teamNoteTextView.accessibilityIdentifier = "checkIn.teamNote"
 
         painSlider.isAccessibilityElement = true
@@ -197,7 +200,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
     private func updatePainAccessibilityValue() {
         let value = Int(painSlider.value)
-        painSlider.accessibilityValue = "\(value) out of 10"
+        painSlider.accessibilityValue = "\(value) out of \(ValidationRules.CheckIn.painMax)"
     }
 
     @objc private func energyChanged(_ sender: UISegmentedControl) {
@@ -238,6 +241,24 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
             lastInteractedStep = .teamNote
             analyticsLogger.logStepFirstInteracted(step: .teamNote)
         }
+    }
+
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        // Allow IME composition (marked text) without enforcing hard limits mid-composition.
+        if textView.markedTextRange != nil { return true }
+
+        let maxChars: Int? = {
+            if textView === symptomsTextView { return ValidationRules.CheckIn.maxSymptomsChars }
+            if textView === concernsTextView { return ValidationRules.CheckIn.maxConcernsChars }
+            if textView === teamNoteTextView { return ValidationRules.CheckIn.maxTeamNoteChars }
+            return nil
+        }()
+        guard let maxChars else { return true }
+
+        let current = textView.text ?? ""
+        guard let r = Range(range, in: current) else { return true }
+        let next = current.replacingCharacters(in: r, with: text)
+        return next.count <= maxChars
     }
 
     @objc private func cancelTapped() {
