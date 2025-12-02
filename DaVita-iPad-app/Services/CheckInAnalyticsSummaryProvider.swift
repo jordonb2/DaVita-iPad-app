@@ -50,7 +50,7 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
     }
 
     func makeSummary(since startDate: Date? = nil) throws -> Summary {
-        let events = try fetchEvents(since: startDate)
+        let events = try fetchEventRows(since: startDate)
 
         var presentedCount = 0
         var submittedCount = 0
@@ -67,44 +67,44 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
         var concernCounts: [String: Int] = [:]
         var submissionsByDaypart: [Daypart: Int] = [:]
 
-        for event in events {
-            guard let eventType = event.eventTypeEnum else { continue }
+        for row in events {
+            guard let eventType = row.eventType else { continue }
 
             switch eventType {
             case .stepFirstInteracted:
-                if let step = event.stepEnum {
+                if let step = row.step {
                     stepCounts[step, default: 0] += 1
                 }
 
             case .submitted:
                 submittedCount += 1
-                if event.durationSeconds > 0 {
-                    completionDurations.append(event.durationSeconds)
+                if let duration = row.durationSeconds, duration > 0 {
+                    completionDurations.append(duration)
                 }
 
-                if event.painBucket == 2 { highPainSubmitted += 1 }
-                if event.energyBucket == 0 { lowEnergySubmitted += 1 }
+                if row.painBucket == 2 { highPainSubmitted += 1 }
+                if row.energyBucket == 0 { lowEnergySubmitted += 1 }
 
-                if let symptomCategories = event.symptomCategories {
+                if let symptomCategories = row.symptomCategories {
                     for category in symptomCategories.split(separator: ",").map({ String($0) }) {
                         symptomCounts[category, default: 0] += 1
                     }
                 }
 
-                if let concernCategories = event.concernCategories {
+                if let concernCategories = row.concernCategories {
                     for category in concernCategories.split(separator: ",").map({ String($0) }) {
                         concernCounts[category, default: 0] += 1
                     }
                 }
 
-                if let daypartString = event.daypart, let dp = Daypart(rawValue: daypartString) {
+                if let daypartString = row.daypart, let dp = Daypart(rawValue: daypartString) {
                     submissionsByDaypart[dp, default: 0] += 1
                 }
 
             case .skipped:
                 skippedCount += 1
-                if event.durationSeconds > 0 {
-                    skipDurations.append(event.durationSeconds)
+                if let duration = row.durationSeconds, duration > 0 {
+                    skipDurations.append(duration)
                 }
 
             case .dismissed:
@@ -143,13 +143,54 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
         )
     }
 
-    private func fetchEvents(since startDate: Date?) throws -> [CheckInAnalyticsEvent] {
-        let request: NSFetchRequest<CheckInAnalyticsEvent> = CheckInAnalyticsEvent.fetchRequest()
+    private struct EventRow {
+        let eventType: CheckInAnalyticsEventType?
+        let step: CheckInAnalyticsStep?
+        let durationSeconds: Double?
+        let painBucket: Int16?
+        let energyBucket: Int16?
+        let symptomCategories: String?
+        let concernCategories: String?
+        let daypart: String?
+    }
+
+    private func fetchEventRows(since startDate: Date?) throws -> [EventRow] {
+        let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .dictionaryResultType
+        request.fetchBatchSize = 500
+        request.propertiesToFetch = [
+            "eventType",
+            "step",
+            "durationSeconds",
+            "painBucket",
+            "energyBucket",
+            "symptomCategories",
+            "concernCategories",
+            "daypart"
+        ]
         if let startDate {
             request.predicate = NSPredicate(format: "createdAt >= %@", startDate as NSDate)
         }
         do {
-            return try context.fetch(request)
+            let rows = try context.fetch(request)
+            return rows.map { dict in
+                let eventTypeRaw = dict["eventType"] as? String
+                let stepRaw = dict["step"] as? String
+                let duration = (dict["durationSeconds"] as? NSNumber)?.doubleValue
+                let painBucket = (dict["painBucket"] as? NSNumber)?.int16Value
+                let energyBucket = (dict["energyBucket"] as? NSNumber)?.int16Value
+
+                return EventRow(
+                    eventType: eventTypeRaw.flatMap(CheckInAnalyticsEventType.init(rawValue:)),
+                    step: stepRaw.flatMap(CheckInAnalyticsStep.init(rawValue:)),
+                    durationSeconds: duration,
+                    painBucket: painBucket,
+                    energyBucket: energyBucket,
+                    symptomCategories: dict["symptomCategories"] as? String,
+                    concernCategories: dict["concernCategories"] as? String,
+                    daypart: dict["daypart"] as? String
+                )
+            }
         } catch {
             AppLog.analytics.error("Analytics fetch error: \(error, privacy: .public)")
             throw error

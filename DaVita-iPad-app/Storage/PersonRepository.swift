@@ -24,6 +24,8 @@ final class PersonRepository: PersonRepositorying {
             NSSortDescriptor(key: "createdAt", ascending: false),
             NSSortDescriptor(key: "name", ascending: true)
         ]
+        // Stream results in batches to keep memory stable for large datasets.
+        fetch.fetchBatchSize = 50
         let controller = NSFetchedResultsController(
             fetchRequest: fetch,
             managedObjectContext: context,

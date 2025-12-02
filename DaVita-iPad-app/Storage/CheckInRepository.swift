@@ -74,6 +74,12 @@ final class CheckInRepository: CheckInHistoryRepositorying {
 
         // Fetch in batches for memory efficiency.
         request.fetchBatchSize = 50
+        if let offset = filter.offset, offset > 0 {
+            request.fetchOffset = offset
+        }
+        if let limit = filter.limit {
+            request.fetchLimit = max(0, limit)
+        }
 
         let sectionKeyPath: String? = (person == nil) ? "person.name" : nil
         let frc = NSFetchedResultsController(
@@ -195,6 +201,7 @@ final class CheckInRepository: CheckInHistoryRepositorying {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         request.predicate = predicate(for: filter, person: nil)
+        request.fetchBatchSize = 200
         if let offset = filter.offset, offset > 0 {
             request.fetchOffset = offset
         }
@@ -220,6 +227,7 @@ final class CheckInRepository: CheckInHistoryRepositorying {
         let request: NSFetchRequest<CheckInRecord> = CheckInRecord.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         request.predicate = predicate(for: filter, person: person)
+        request.fetchBatchSize = 200
         if let offset = filter.offset, offset > 0 {
             request.fetchOffset = offset
         }
