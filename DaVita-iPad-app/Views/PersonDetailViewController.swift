@@ -29,7 +29,7 @@ final class PersonDetailViewController: ScrolledStackViewController {
         title = person.name ?? "Person"
         view.backgroundColor = .systemBackground
 
-        buildContent()
+        render()
         configureNavItems()
     }
 
@@ -38,7 +38,8 @@ final class PersonDetailViewController: ScrolledStackViewController {
         navigationItem.rightBarButtonItem?.accessibilityLabel = "Edit person"
     }
 
-    private func buildContent() {
+    private func render() {
+        resetContentStack()
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Details"))
 
         let name = person.name ?? "—"

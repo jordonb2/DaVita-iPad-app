@@ -9,6 +9,13 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private let exportService: ExportServicing
     private let historyViewControllerFactory: () -> CheckInHistoryViewController
 
+    private enum ViewState {
+        case loading
+        case loaded(CheckInAnalyticsSummaryProvider.Summary)
+    }
+
+    private var state: ViewState = .loading
+
     init(adminSession: AdminSessioning,
          summaryProvider: CheckInAnalyticsSummaryProviding,
          exportService: ExportServicing,
@@ -37,7 +44,9 @@ final class AnalyticsViewController: ScrolledStackViewController {
         isModalInPresentation = true
         presentationController?.delegate = self
 
-        loadSummaryAndRender()
+        state = .loading
+        render()
+        reloadSummary()
 
         NotificationCenter.default.addObserver(self, selector: #selector(adminDidAutoLogout), name: .adminSessionDidAutoLogout, object: nil)
     }
@@ -51,6 +60,27 @@ final class AnalyticsViewController: ScrolledStackViewController {
             present(appError: AppError(operation: .loadAnalytics, underlying: error))
             summary = .empty
         }
+        state = .loaded(summary)
+        render()
+    }
+
+    private func reloadSummary() {
+        loadSummaryAndRender()
+    }
+
+    private func render() {
+        resetContentStack()
+
+        switch state {
+        case .loading:
+            contentStackView.addArrangedSubview(StateView(model: .loading(title: "Loading analytics…")))
+            return
+
+        case .loaded:
+            break
+        }
+
+        guard case .loaded(let summary) = state else { return }
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Engagement"))
         contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Completed", value: "\(summary.totalSubmitted)"))

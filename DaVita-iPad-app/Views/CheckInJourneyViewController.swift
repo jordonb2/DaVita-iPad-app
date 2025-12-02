@@ -60,6 +60,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     override var stackSpacing: CGFloat { UIFactory.Theme.Spacing.xl }
 
     private func buildContent() {
+        resetContentStack()
         surveyHeaderLabel.text = "How are you today?"
         surveyHeaderLabel.font = UIFont.preferredFont(forTextStyle: .title2)
         surveyHeaderLabel.numberOfLines = 0

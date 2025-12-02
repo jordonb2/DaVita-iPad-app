@@ -18,6 +18,11 @@ class ScrolledStackViewController: UIViewController {
         configureScrolledStackLayout()
     }
 
+    /// Clears the scroll content stack so subclasses can safely re-render without duplicating UI.
+    func resetContentStack() {
+        contentStackView.removeAllArrangedSubviews()
+    }
+
     private func configureScrolledStackLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)

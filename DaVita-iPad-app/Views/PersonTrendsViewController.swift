@@ -8,6 +8,13 @@ final class PersonTrendsViewController: ScrolledStackViewController {
 
     private let windowDays: Int
 
+    private enum ViewState {
+        case loading
+        case loaded(CheckInTrendsProvider.PersonTrends)
+    }
+
+    private var state: ViewState = .loading
+
     init(person: Person,
          windowDays: Int = 30,
          trendsProvider: CheckInTrendsProviding) {
@@ -26,10 +33,12 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         title = "Trends"
         view.backgroundColor = UIFactory.Theme.Color.surface
 
+        state = .loading
         render()
+        reloadTrends()
     }
 
-    private func render() {
+    private func reloadTrends() {
         let trends: CheckInTrendsProvider.PersonTrends
         do {
             trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays, maxRecords: 250)
@@ -47,6 +56,19 @@ final class PersonTrendsViewController: ScrolledStackViewController {
                 windowEnd: Date()
             )
         }
+        state = .loaded(trends)
+        render()
+    }
+
+    private func render() {
+        resetContentStack()
+
+        if case .loading = state {
+            contentStackView.addArrangedSubview(StateView(model: .loading(title: "Loading trends…")))
+            return
+        }
+
+        guard case .loaded(let trends) = state else { return }
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Pain (last \(windowDays) days)", textStyle: .title2))
         contentStackView.addArrangedSubview(painCard(series: trends.painSeries))
