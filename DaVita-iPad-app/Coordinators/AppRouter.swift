@@ -49,7 +49,8 @@ final class AppRouter: AppRouting {
         guard let addVC = mainStoryboard.instantiateViewController(withIdentifier: "AddEditPersonVC") as? AddEditPersonViewController else { return }
         addVC.router = self
         addVC.onSave = onSave
-        let nav = NavigationHelpers.Modal.embedInNavigation(addVC)
+        // Add-person is a primary flow and should present full-screen (matches prior behavior).
+        let nav = NavigationHelpers.Modal.embedInNavigation(addVC, presentationStyle: .fullScreen, isModalInPresentation: true)
         presentingVC.present(nav, animated: true)
     }
 

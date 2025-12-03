@@ -16,6 +16,8 @@ import UIKit
     private var tableViewRef: UITableView { self.view as! UITableView }
     
     private let calendar = Calendar.current
+    private var headerNeedsSizing: Bool = true
+    private var headerLastSizedWidth: CGFloat = 0
 
     private enum ViewState {
         case loading
@@ -113,6 +115,13 @@ import UIKit
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateHeaderHeightIfNeeded()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // Dynamic Type / size class changes can affect the header's intrinsic height.
+        headerNeedsSizing = true
+        view.setNeedsLayout()
     }
     
     @objc private func didTapAdd() {
@@ -217,14 +226,20 @@ import UIKit
     // MARK: - Landing Header
 
     private func configureLandingHeader() {
-        landingHeaderView.translatesAutoresizingMaskIntoConstraints = false
+        // `tableHeaderView` is frame-driven; keep autoresizing enabled so it spans the full table width.
+        landingHeaderView.translatesAutoresizingMaskIntoConstraints = true
+        landingHeaderView.autoresizingMask = [.flexibleWidth]
         tableViewRef.tableHeaderView = landingHeaderView
         updateHeaderContent()
     }
 
     private func updateHeaderContent() {
         landingHeaderView.apply(makeHeaderModel())
-        updateHeaderHeightIfNeeded()
+        headerNeedsSizing = true
+        // Wait until we have a real table width; doing sizing in the next run loop avoids extra layout churn.
+        DispatchQueue.main.async { [weak self] in
+            self?.updateHeaderHeightIfNeeded(force: true)
+        }
     }
 
     private func makeHeaderModel() -> LandingHeroHeaderView.Model {
@@ -254,9 +269,28 @@ import UIKit
         )
     }
 
-    private func updateHeaderHeightIfNeeded() {
+    private func updateHeaderHeightIfNeeded(force: Bool = false) {
         guard let header = tableViewRef.tableHeaderView else { return }
-        let targetSize = CGSize(width: tableViewRef.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        let width = tableViewRef.bounds.width
+        guard width > 0 else { return }
+
+        if !force && !headerNeedsSizing && abs(width - headerLastSizedWidth) < 0.5 {
+            return
+        }
+
+        // Ensure the header has the correct width *before* we ask Auto Layout for its fitting height.
+        if abs(header.frame.width - width) > 0.5 {
+            var f = header.frame
+            f.size.width = width
+            // Keep a non-zero height so internal constraints can lay out.
+            if f.size.height < 1 { f.size.height = 1 }
+            header.frame = f
+        }
+
+        header.setNeedsLayout()
+        header.layoutIfNeeded()
+
+        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
         let height = header.systemLayoutSizeFitting(
             targetSize,
             withHorizontalFittingPriority: .required,
@@ -264,14 +298,17 @@ import UIKit
         ).height
 
         var frame = header.frame
-        let needsHeightUpdate = frame.height != height
-        let needsWidthUpdate = frame.width != tableViewRef.bounds.width
+        let needsHeightUpdate = abs(frame.height - height) > 0.5
+        let needsWidthUpdate = abs(frame.width - width) > 0.5
         if needsHeightUpdate || needsWidthUpdate {
             frame.size.height = height
-            frame.size.width = tableViewRef.bounds.width
+            frame.size.width = width
             header.frame = frame
             tableViewRef.tableHeaderView = header
         }
+
+        headerLastSizedWidth = width
+        headerNeedsSizing = false
     }
 
     private func greetingText(for date: Date) -> String {

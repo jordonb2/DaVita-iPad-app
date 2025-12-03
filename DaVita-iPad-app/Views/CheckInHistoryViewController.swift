@@ -53,7 +53,7 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
         return f
     }
 
-    private lazy var dateFormatter: DateFormatter = {
+    private static let dateTimeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
         f.timeStyle = .short
@@ -303,7 +303,7 @@ extension CheckInHistoryViewController: UITableViewDataSource, UITableViewDelega
 
         guard let frc else { return cell }
         let record = frc.object(at: indexPath)
-        let dateText = record.createdAt.map { dateFormatter.string(from: $0) } ?? "Unknown date"
+        let dateText = record.createdAt.map { Self.dateTimeFormatter.string(from: $0) } ?? "Unknown date"
         config.text = dateText
         config.secondaryText = displayText(for: record)
         config.secondaryTextProperties.numberOfLines = 2

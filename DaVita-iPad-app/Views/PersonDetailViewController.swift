@@ -9,9 +9,10 @@ final class PersonDetailViewController: ScrolledStackViewController {
     var onHistoryTapped: ((Person) -> Void)?
     var onTrendsTapped: ((Person) -> Void)?
 
-    private lazy var dateFormatter: DateFormatter = {
+    private static let dobFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
+        f.timeStyle = .none
         return f
     }()
 
@@ -80,7 +81,7 @@ final class PersonDetailViewController: ScrolledStackViewController {
         contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "Name", value: name))
 
         if let dob = person.dob {
-            contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "DOB", value: dateFormatter.string(from: dob)))
+            contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "DOB", value: Self.dobFormatter.string(from: dob)))
         } else {
             contentStackView.addArrangedSubview(UIFactory.keyValueRow(title: "DOB", value: "—"))
         }

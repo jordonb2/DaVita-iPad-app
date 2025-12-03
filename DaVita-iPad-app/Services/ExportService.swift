@@ -15,6 +15,24 @@ final class ExportService: ExportServicing {
     }
 
     private let context: NSManagedObjectContext
+    private lazy var isoFormatter: ISO8601DateFormatter = {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return iso
+    }()
+
+    private lazy var dateTimeFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        df.timeStyle = .short
+        return df
+    }()
+
+    private lazy var fileNameTimestampFormatter: ISO8601DateFormatter = {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime]
+        return iso
+    }()
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -29,9 +47,6 @@ final class ExportService: ExportServicing {
         let repo = CheckInRepository(context: context)
         let records = try repo.fetchVisits(filter: filter)
         guard !records.isEmpty else { throw ExportError.noRecords }
-
-        let iso = ISO8601DateFormatter()
-        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
         var lines: [String] = []
         lines.reserveCapacity(records.count + 1)
@@ -55,7 +70,7 @@ final class ExportService: ExportServicing {
             let personName = r.person?.name ?? ""
             let personId = r.person?.id?.uuidString ?? ""
             let recordId = r.id?.uuidString ?? ""
-            let createdAt = r.createdAt.map { iso.string(from: $0) } ?? ""
+            let createdAt = r.createdAt.map { isoFormatter.string(from: $0) } ?? ""
 
             let pain = String(r.painLevel)
 
@@ -112,10 +127,6 @@ final class ExportService: ExportServicing {
         let pageRect = CGRect(x: 0, y: 0, width: 612, height: 792) // US Letter @ 72dpi
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
 
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .short
-
         do {
             try renderer.writePDF(to: url, withActions: { ctx in
                 var y: CGFloat = 36
@@ -134,7 +145,7 @@ final class ExportService: ExportServicing {
                 draw(text: "Records: \(records.count)", at: CGPoint(x: 36, y: y), font: .systemFont(ofSize: 12), color: .darkGray)
                 y += 18
 
-                draw(text: "Generated: \(df.string(from: Date()))", at: CGPoint(x: 36, y: y), font: .systemFont(ofSize: 12), color: .darkGray)
+                draw(text: "Generated: \(dateTimeFormatter.string(from: Date()))", at: CGPoint(x: 36, y: y), font: .systemFont(ofSize: 12), color: .darkGray)
                 y += 24
 
                 // Header row
@@ -155,7 +166,7 @@ final class ExportService: ExportServicing {
                         newPage()
                     }
 
-                    let dateText = r.createdAt.map { df.string(from: $0) } ?? "—"
+                    let dateText = r.createdAt.map { dateTimeFormatter.string(from: $0) } ?? "—"
                     let personText = r.person?.name ?? "—"
                     let painText = String(r.painLevel)
 
@@ -184,7 +195,7 @@ final class ExportService: ExportServicing {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("exports", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
-        let ts = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let ts = fileNameTimestampFormatter.string(from: Date()).replacingOccurrences(of: ":", with: "-")
         let filename = "checkins_\(ts).\(ext)"
         return dir.appendingPathComponent(filename)
     }
