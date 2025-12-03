@@ -115,6 +115,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         let summary = UILabel()
         summary.numberOfLines = 0
         summary.font = UIFactory.Theme.Font.preferred(.subheadline)
+        summary.adjustsFontForContentSizeCategory = true
         summary.textColor = UIFactory.Theme.Color.textSecondary
 
         if let last = series.last {

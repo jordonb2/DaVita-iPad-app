@@ -63,6 +63,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         resetContentStack()
         surveyHeaderLabel.text = "How are you today?"
         surveyHeaderLabel.font = UIFont.preferredFont(forTextStyle: .title2)
+        surveyHeaderLabel.adjustsFontForContentSizeCategory = true
         surveyHeaderLabel.numberOfLines = 0
         surveyHeaderLabel.accessibilityTraits.insert(.header)
         contentStackView.addArrangedSubview(surveyHeaderLabel)
@@ -81,6 +82,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         closeLabel.numberOfLines = 0
         closeLabel.textAlignment = .center
         closeLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        closeLabel.adjustsFontForContentSizeCategory = true
         closeLabel.textColor = UIFactory.Theme.Color.textSecondary
         closeLabel.text = "Thanks for your response, your care team will review this before your session."
         closeLabel.isAccessibilityElement = true
@@ -102,6 +104,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
         painValueLabel.text = "0"
         painValueLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        painValueLabel.adjustsFontForContentSizeCategory = true
         painValueLabel.textAlignment = .right
         painValueLabel.isAccessibilityElement = false
 
@@ -145,6 +148,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         let titleLabel = UILabel()
         titleLabel.text = "Pain"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.isAccessibilityElement = false
 
         titleRow.addArrangedSubview(titleLabel)
@@ -164,6 +168,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         let titleLabel = UILabel()
         titleLabel.text = "Energy"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.isAccessibilityElement = false
 
         container.addArrangedSubview(titleLabel)
@@ -179,6 +184,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         let titleLabel = UILabel()
         titleLabel.text = "Mood"
         titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.isAccessibilityElement = false
 
         container.addArrangedSubview(titleLabel)

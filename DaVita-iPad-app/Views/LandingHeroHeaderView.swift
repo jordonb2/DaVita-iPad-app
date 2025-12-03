@@ -65,7 +65,8 @@ final class LandingHeroHeaderView: UIView {
     private let badgeLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.font = LandingHeroHeaderView.scaledFont(size: 12, weight: .semibold, textStyle: .caption2)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .white
         label.backgroundColor = UIColor.white.withAlphaComponent(0.18)
         label.textAlignment = .center
@@ -80,7 +81,8 @@ final class LandingHeroHeaderView: UIView {
     private let greetingLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.font = LandingHeroHeaderView.scaledFont(size: 16, weight: .medium, textStyle: .subheadline)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = UIColor.white.withAlphaComponent(0.9)
         label.text = "Welcome back"
         return label
@@ -89,7 +91,8 @@ final class LandingHeroHeaderView: UIView {
     private let headlineLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 34, weight: .bold)
+        label.font = LandingHeroHeaderView.scaledFont(size: 34, weight: .bold, textStyle: .largeTitle)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .white
         label.numberOfLines = 0
         label.accessibilityTraits.insert(.header)
@@ -100,7 +103,8 @@ final class LandingHeroHeaderView: UIView {
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.font = LandingHeroHeaderView.scaledFont(size: 17, weight: .regular, textStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = UIColor.white.withAlphaComponent(0.9)
         label.numberOfLines = 0
         label.text = "Keep every client conversation warm and every record current."
@@ -122,9 +126,13 @@ final class LandingHeroHeaderView: UIView {
         button.setTitle("Add Client", for: .normal)
         button.backgroundColor = UIColor.white
         button.setTitleColor(UIFactory.Theme.Color.accent, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        if let titleLabel = button.titleLabel {
+            titleLabel.font = LandingHeroHeaderView.scaledFont(size: 17, weight: .semibold, textStyle: .headline)
+            titleLabel.adjustsFontForContentSizeCategory = true
+        }
         button.layer.cornerRadius = UIFactory.Theme.CornerRadius.l
-        button.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 54).isActive = true
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         return button
     }()
 
@@ -133,11 +141,15 @@ final class LandingHeroHeaderView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("View Records", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
+        if let titleLabel = button.titleLabel {
+            titleLabel.font = LandingHeroHeaderView.scaledFont(size: 17, weight: .medium, textStyle: .headline)
+            titleLabel.adjustsFontForContentSizeCategory = true
+        }
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
         button.layer.cornerRadius = UIFactory.Theme.CornerRadius.l
-        button.heightAnchor.constraint(equalToConstant: 54).isActive = true
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 54).isActive = true
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         return button
     }()
 
@@ -289,17 +301,20 @@ private final class MetricCardView: UIView {
         accessibilityTraits.insert(.staticText)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+        titleLabel.font = LandingHeroHeaderView.scaledFont(size: 13, weight: .semibold, textStyle: .caption1)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = UIColor.white.withAlphaComponent(0.85)
         titleLabel.isAccessibilityElement = false
 
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        valueLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        valueLabel.font = LandingHeroHeaderView.scaledFont(size: 28, weight: .bold, textStyle: .title2)
+        valueLabel.adjustsFontForContentSizeCategory = true
         valueLabel.textColor = .white
         valueLabel.isAccessibilityElement = false
 
         footnoteLabel.translatesAutoresizingMaskIntoConstraints = false
-        footnoteLabel.font = .systemFont(ofSize: 13, weight: .regular)
+        footnoteLabel.font = LandingHeroHeaderView.scaledFont(size: 13, weight: .regular, textStyle: .caption1)
+        footnoteLabel.adjustsFontForContentSizeCategory = true
         footnoteLabel.textColor = UIColor.white.withAlphaComponent(0.8)
         footnoteLabel.numberOfLines = 2
         footnoteLabel.isAccessibilityElement = false
@@ -325,5 +340,14 @@ private final class MetricCardView: UIView {
 
         let footnotePart = metric.footnote.isEmpty ? "" : ", \(metric.footnote)"
         accessibilityLabel = "\(metric.title), \(metric.value)\(footnotePart)"
+    }
+}
+
+// MARK: - Dynamic Type helpers
+
+private extension LandingHeroHeaderView {
+    static func scaledFont(size: CGFloat, weight: UIFont.Weight, textStyle: UIFont.TextStyle) -> UIFont {
+        let base = UIFont.systemFont(ofSize: size, weight: weight)
+        return UIFontMetrics(forTextStyle: textStyle).scaledFont(for: base)
     }
 }
