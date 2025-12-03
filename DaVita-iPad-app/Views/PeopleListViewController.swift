@@ -74,6 +74,7 @@ import UIKit
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "peopleList.add"
 
         configureAnalyticsButton()
+        configureFocusOrder()
 
         viewModel.onUserToast = { [weak self] message in
             self?.showToast(message: message)
@@ -334,6 +335,12 @@ import UIKit
             analyticsButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
         analyticsButton.addTarget(self, action: #selector(analyticsTapped), for: .touchUpInside)
+    }
+
+    private func configureFocusOrder() {
+        // Keep VoiceOver navigation predictable: table content first, then the floating analytics button.
+        // (Navigation bar items are handled by the nav bar itself.)
+        view.accessibilityElements = [tableViewRef as Any, analyticsButton as Any]
     }
 
     @objc private func analyticsTapped() {

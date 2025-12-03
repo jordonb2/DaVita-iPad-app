@@ -49,6 +49,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
         buildContent()
         configureSurveyControls()
+        configureFocusOrder()
 
         presentationController?.delegate = self
     }
@@ -134,6 +135,20 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         moodSegmentedControl.isAccessibilityElement = true
         moodSegmentedControl.accessibilityLabel = "Mood"
         moodSegmentedControl.accessibilityHint = "Select your mood today."
+    }
+
+    private func configureFocusOrder() {
+        // Provide a stable, meaningful VoiceOver traversal order for this multi-control form.
+        accessibilityElements = [
+            surveyHeaderLabel,
+            painSlider,
+            energySegmentedControl,
+            moodSegmentedControl,
+            symptomsTextView,
+            concernsTextView,
+            teamNoteTextView,
+            closeLabel
+        ]
     }
 
     private func makePainSection() -> UIView {
