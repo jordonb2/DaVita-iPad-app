@@ -109,7 +109,13 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         let stack = UIFactory.verticalStack()
 
         let values = series.map { CGFloat($0.value) }
-        let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.accent, accessibilityValueText: painTrendAccessibility(series: series))
+        let spark = SparklineView(
+            values: values,
+            strokeColor: UIFactory.Theme.Color.accent,
+            accessibilityLabelText: "Pain trend",
+            accessibilityValueText: painTrendAccessibility(series: series),
+            accessibilityHintText: "Chart of pain levels over time."
+        )
         spark.heightAnchor.constraint(equalToConstant: 56).isActive = true
 
         let summary = UILabel()
@@ -177,7 +183,13 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             let header = UIFactory.keyValueRow(title: title, value: "\(count)")
             rowStack.addArrangedSubview(header)
 
-            let spark = SparklineView(values: values, strokeColor: UIFactory.Theme.Color.textSecondary, accessibilityValueText: "Daily frequency over time")
+            let spark = SparklineView(
+                values: values,
+                strokeColor: UIFactory.Theme.Color.textSecondary,
+                accessibilityLabelText: "\(title) trend",
+                accessibilityValueText: "Daily frequency over time.",
+                accessibilityHintText: "Chart of symptom frequency over time."
+            )
             spark.heightAnchor.constraint(equalToConstant: 34).isActive = true
             rowStack.addArrangedSubview(spark)
 
@@ -213,7 +225,11 @@ private final class SparklineView: UIView {
     private let strokeColor: UIColor
     private let accessibilityValueText: String
 
-    init(values: [CGFloat], strokeColor: UIColor, accessibilityValueText: String = "") {
+    init(values: [CGFloat],
+         strokeColor: UIColor,
+         accessibilityLabelText: String = "Trend",
+         accessibilityValueText: String = "",
+         accessibilityHintText: String? = nil) {
         self.values = values
         self.strokeColor = strokeColor
         self.accessibilityValueText = accessibilityValueText
@@ -221,8 +237,9 @@ private final class SparklineView: UIView {
         backgroundColor = .clear
         isAccessibilityElement = true
         accessibilityTraits = [.image]
-        accessibilityLabel = "Trend"
+        accessibilityLabel = accessibilityLabelText
         accessibilityValue = accessibilityValueText
+        accessibilityHint = accessibilityHintText
     }
 
     required init?(coder: NSCoder) {

@@ -338,8 +338,9 @@ private final class MetricCardView: UIView {
         valueLabel.text = metric.value
         footnoteLabel.text = metric.footnote
 
-        let footnotePart = metric.footnote.isEmpty ? "" : ", \(metric.footnote)"
-        accessibilityLabel = "\(metric.title), \(metric.value)\(footnotePart)"
+        accessibilityLabel = metric.title
+        accessibilityValue = metric.value
+        accessibilityHint = metric.footnote.isEmpty ? nil : metric.footnote
     }
 }
 
