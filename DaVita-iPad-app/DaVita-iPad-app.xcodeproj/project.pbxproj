@@ -38,6 +38,7 @@
 		F76E470E2EA300000056439C /* CheckInTrendsProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E470B2EA300000056439C /* CheckInTrendsProviderTests.swift */; };
 		F76E471C2EA300100056439C /* DaVita_iPad_appUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E471A2EA300100056439C /* DaVita_iPad_appUITests.swift */; };
 		F76E471D2EA300100056439C /* CriticalFlowsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E471B2EA300100056439C /* CriticalFlowsUITests.swift */; };
+		F7C0AAA02F0000010056439C /* CheckInAnalyticsSummaryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AA9F2F0000010056439C /* CheckInAnalyticsSummaryProviderTests.swift */; };
 		F76E48012EC000010056439C /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48002EC000010056439C /* AppDependencies.swift */; };
 		F76E48112EC000020056439C /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48102EC000020056439C /* AppError.swift */; };
 		F76E4A012EC200000056439C /* InputSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4A002EC200000056439C /* InputSanitizer.swift */; };
@@ -86,6 +87,7 @@
 		F76E47172EA300100056439C /* DaVita-iPad-appUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DaVita-iPad-appUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F76E471A2EA300100056439C /* DaVita_iPad_appUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaVita_iPad_appUITests.swift; sourceTree = "<group>"; };
 		F76E471B2EA300100056439C /* CriticalFlowsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalFlowsUITests.swift; sourceTree = "<group>"; };
+		F7C0AA9F2F0000010056439C /* CheckInAnalyticsSummaryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsSummaryProviderTests.swift; sourceTree = "<group>"; };
 		F76E48002EC000010056439C /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		F76E48102EC000020056439C /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		F76E4A002EC200000056439C /* InputSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSanitizer.swift; sourceTree = "<group>"; };
@@ -253,6 +255,7 @@
 				F76E470A2EA300000056439C /* CheckInServiceTests.swift */,
 				F76E470B2EA300000056439C /* CheckInTrendsProviderTests.swift */,
 				F76E49002EC100000056439C /* MigrationTests.swift */,
+				F7C0AA9F2F0000010056439C /* CheckInAnalyticsSummaryProviderTests.swift */,
 			);
 			path = "DaVita-iPad-appTests";
 			sourceTree = "<group>";
@@ -442,6 +445,7 @@
 				F76E470D2EA300000056439C /* CheckInServiceTests.swift in Sources */,
 				F76E470E2EA300000056439C /* CheckInTrendsProviderTests.swift in Sources */,
 				F76E49012EC100000056439C /* MigrationTests.swift in Sources */,
+				F7C0AAA02F0000010056439C /* CheckInAnalyticsSummaryProviderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
