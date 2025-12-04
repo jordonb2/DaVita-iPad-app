@@ -17,6 +17,21 @@ enum CheckInAnalyticsStep: String {
     case teamNote
 }
 
+enum CheckInAnalyticsPainBucket: Int16 {
+    case noneOrLow = 0
+    case moderate = 1
+    case high = 2
+
+    static func from(painLevel: Int16?) -> CheckInAnalyticsPainBucket? {
+        guard let painLevel else { return nil }
+        switch painLevel {
+        case 0...3: return .noneOrLow
+        case 4...7: return .moderate
+        default: return .high
+        }
+    }
+}
+
 protocol CheckInAnalyticsLogging {
     func logStepFirstInteracted(step: CheckInAnalyticsStep)
     func logSubmitted(checkInData: PersonCheckInData, durationSeconds: Double)
@@ -61,25 +76,13 @@ final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
                 event.durationSeconds = durationSeconds
             }
             if let payload {
-                if let painBucket = payload.painBucket {
-                    event.painBucket = painBucket
-                } else {
-                    event.setValue(nil, forKey: "painBucket")
-                }
-                if let energyBucket = payload.energyBucket {
-                    event.energyBucket = energyBucket
-                } else {
-                    event.setValue(nil, forKey: "energyBucket")
-                }
-                if let moodBucket = payload.moodBucket {
-                    event.moodBucket = moodBucket
-                } else {
-                    event.setValue(nil, forKey: "moodBucket")
-                }
-                event.symptomCategories = payload.symptomCategories
-                event.concernCategories = payload.concernCategories
+                event.painBucketEnum = payload.painBucket
+                event.energyBucketEnum = payload.energyBucket
+                event.moodBucketEnum = payload.moodBucket
+                event.symptomCategoriesList = payload.symptomCategories
+                event.concernCategoriesList = payload.concernCategories
             }
-            event.daypart = Daypart.from(date: event.createdAt ?? Date()).rawValue
+            event.daypartEnum = Daypart.from(date: event.createdAt ?? Date())
 
 #if DEBUG
             assert(event.id != nil && event.createdAt != nil, "CheckInAnalyticsEvent must have id + createdAt at creation time")
@@ -106,20 +109,97 @@ extension CheckInAnalyticsEvent {
         get { step.flatMap(CheckInAnalyticsStep.init(rawValue:)) }
         set { step = newValue?.rawValue }
     }
+
+    var painBucketEnum: CheckInAnalyticsPainBucket? {
+        get {
+            guard let number = value(forKey: "painBucket") as? NSNumber else { return nil }
+            return CheckInAnalyticsPainBucket(rawValue: number.int16Value)
+        }
+        set {
+            if let v = newValue {
+                painBucket = v.rawValue
+            } else {
+                setValue(nil, forKey: "painBucket")
+            }
+        }
+    }
+
+    var energyBucketEnum: EnergyBucket? {
+        get {
+            guard let number = value(forKey: "energyBucket") as? NSNumber else { return nil }
+            return EnergyBucket(rawValue: number.int16Value)
+        }
+        set {
+            if let v = newValue {
+                energyBucket = v.rawValue
+            } else {
+                setValue(nil, forKey: "energyBucket")
+            }
+        }
+    }
+
+    var moodBucketEnum: MoodBucket? {
+        get {
+            guard let number = value(forKey: "moodBucket") as? NSNumber else { return nil }
+            return MoodBucket(rawValue: number.int16Value)
+        }
+        set {
+            if let v = newValue {
+                moodBucket = v.rawValue
+            } else {
+                setValue(nil, forKey: "moodBucket")
+            }
+        }
+    }
+
+    var daypartEnum: Daypart? {
+        get { daypart.flatMap(Daypart.init(rawValue:)) }
+        set { daypart = newValue?.rawValue }
+    }
+
+    var symptomCategoriesList: [String]? {
+        get {
+            guard let text = symptomCategories else { return nil }
+            let list = text.split(separator: ",").map { String($0) }
+            return list.isEmpty ? nil : list
+        }
+        set {
+            if let list = newValue, !list.isEmpty {
+                symptomCategories = list.joined(separator: ",")
+            } else {
+                symptomCategories = nil
+            }
+        }
+    }
+
+    var concernCategoriesList: [String]? {
+        get {
+            guard let text = concernCategories else { return nil }
+            let list = text.split(separator: ",").map { String($0) }
+            return list.isEmpty ? nil : list
+        }
+        set {
+            if let list = newValue, !list.isEmpty {
+                concernCategories = list.joined(separator: ",")
+            } else {
+                concernCategories = nil
+            }
+        }
+    }
 }
 
 
 private struct Payload {
-    let painBucket: Int16?
-    let energyBucket: Int16?
-    let moodBucket: Int16?
-    let symptomCategories: String?
-    let concernCategories: String?
+    let painBucket: CheckInAnalyticsPainBucket?
+    let energyBucket: EnergyBucket?
+    let moodBucket: MoodBucket?
+    let symptomCategories: [String]?
+    let concernCategories: [String]?
 
     static func from(checkInData: PersonCheckInData) -> Payload {
-        let painBucket = PainBucket.from(painLevel: checkInData.painLevel)?.rawValue
-        let energyBucket = checkInData.energyBucket?.rawValue
-        let moodBucket = checkInData.moodBucket?.rawValue
+        let painBucket = CheckInAnalyticsPainBucket.from(painLevel: checkInData.painLevel)
+        let energyBucket = checkInData.energyBucket
+        let moodBucket = checkInData.moodBucket
 
         let symptomCategories = TextCategorizer.categorizeSymptoms(from: checkInData.symptoms)
         let concernCategories = TextCategorizer.categorizeConcerns(from: checkInData.concerns)
@@ -128,24 +208,9 @@ private struct Payload {
             painBucket: painBucket,
             energyBucket: energyBucket,
             moodBucket: moodBucket,
-            symptomCategories: symptomCategories.isEmpty ? nil : symptomCategories.joined(separator: ","),
-            concernCategories: concernCategories.isEmpty ? nil : concernCategories.joined(separator: ",")
+            symptomCategories: symptomCategories.isEmpty ? nil : symptomCategories,
+            concernCategories: concernCategories.isEmpty ? nil : concernCategories
         )
-    }
-}
-
-private enum PainBucket: Int16 {
-    case noneOrLow = 0
-    case moderate = 1
-    case high = 2
-
-    static func from(painLevel: Int16?) -> PainBucket? {
-        guard let painLevel else { return nil }
-        switch painLevel {
-        case 0...3: return .noneOrLow
-        case 4...7: return .moderate
-        default: return .high
-        }
     }
 }
 

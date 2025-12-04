@@ -82,22 +82,22 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
                     completionDurations.append(duration)
                 }
 
-                if row.painBucket == 2 { highPainSubmitted += 1 }
-                if row.energyBucket == 0 { lowEnergySubmitted += 1 }
+                if row.painBucket == .high { highPainSubmitted += 1 }
+                if row.energyBucket == .low { lowEnergySubmitted += 1 }
 
-                if let symptomCategories = row.symptomCategories {
-                    for category in symptomCategories.split(separator: ",").map({ String($0) }) {
+                if let symptomCategories = row.symptomCategoriesList {
+                    for category in symptomCategories {
                         symptomCounts[category, default: 0] += 1
                     }
                 }
 
-                if let concernCategories = row.concernCategories {
-                    for category in concernCategories.split(separator: ",").map({ String($0) }) {
+                if let concernCategories = row.concernCategoriesList {
+                    for category in concernCategories {
                         concernCounts[category, default: 0] += 1
                     }
                 }
 
-                if let daypartString = row.daypart, let dp = Daypart(rawValue: daypartString) {
+                if let dp = row.daypart {
                     submissionsByDaypart[dp, default: 0] += 1
                 }
 
@@ -147,11 +147,11 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
         let eventType: CheckInAnalyticsEventType?
         let step: CheckInAnalyticsStep?
         let durationSeconds: Double?
-        let painBucket: Int16?
-        let energyBucket: Int16?
-        let symptomCategories: String?
-        let concernCategories: String?
-        let daypart: String?
+        let painBucket: CheckInAnalyticsPainBucket?
+        let energyBucket: EnergyBucket?
+        let symptomCategoriesList: [String]?
+        let concernCategoriesList: [String]?
+        let daypart: Daypart?
     }
 
     private func fetchEventRows(since startDate: Date?) throws -> [EventRow] {
@@ -184,11 +184,17 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
                     eventType: eventTypeRaw.flatMap(CheckInAnalyticsEventType.init(rawValue:)),
                     step: stepRaw.flatMap(CheckInAnalyticsStep.init(rawValue:)),
                     durationSeconds: duration,
-                    painBucket: painBucket,
-                    energyBucket: energyBucket,
-                    symptomCategories: dict["symptomCategories"] as? String,
-                    concernCategories: dict["concernCategories"] as? String,
-                    daypart: dict["daypart"] as? String
+                    painBucket: painBucket.flatMap(CheckInAnalyticsPainBucket.init(rawValue:)),
+                    energyBucket: energyBucket.flatMap(EnergyBucket.init(rawValue:)),
+                    symptomCategoriesList: (dict["symptomCategories"] as? String).flatMap { text in
+                        let parts = text.split(separator: ",").map { String($0) }
+                        return parts.isEmpty ? nil : parts
+                    },
+                    concernCategoriesList: (dict["concernCategories"] as? String).flatMap { text in
+                        let parts = text.split(separator: ",").map { String($0) }
+                        return parts.isEmpty ? nil : parts
+                    },
+                    daypart: (dict["daypart"] as? String).flatMap(Daypart.init(rawValue:))
                 )
             }
         } catch {
