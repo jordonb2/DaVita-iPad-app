@@ -44,6 +44,66 @@ enum UIFactory {
             // Hero gradient
             static let heroGradientStart: UIColor = .systemPurple
             static let heroGradientEnd: UIColor = accent
+
+            // MARK: - Accessibility-aware "on hero" colors
+
+            /// Primary text drawn on top of the hero gradient.
+            static var heroTextPrimary: UIColor {
+                UIColor { tc in
+                    // Always keep primary hero text fully opaque for contrast.
+                    return .white
+                }
+            }
+
+            /// Secondary text on top of the hero gradient (can be slightly subdued unless in high contrast).
+            static var heroTextSecondary: UIColor {
+                UIColor { tc in
+                    if tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled {
+                        return .white
+                    }
+                    return UIColor.white.withAlphaComponent(0.9)
+                }
+            }
+
+            /// Background for the hero badge pill (avoid white-on-white low contrast).
+            static var heroBadgeBackground: UIColor {
+                UIColor { tc in
+                    let alpha: CGFloat = (tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled) ? 0.38 : 0.26
+                    return UIColor.black.withAlphaComponent(alpha)
+                }
+            }
+
+            /// Background for hero metric cards.
+            static var heroCardBackground: UIColor {
+                UIColor { tc in
+                    let alpha: CGFloat = (tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled) ? 0.22 : 0.14
+                    return UIColor.black.withAlphaComponent(alpha)
+                }
+            }
+
+            /// Border color for hero metric cards.
+            static var heroCardBorder: UIColor {
+                UIColor { tc in
+                    let alpha: CGFloat = (tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled) ? 0.45 : 0.32
+                    return UIColor.white.withAlphaComponent(alpha)
+                }
+            }
+
+            /// Border color for secondary hero CTA.
+            static var heroSecondaryButtonBorder: UIColor {
+                UIColor { tc in
+                    let alpha: CGFloat = (tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled) ? 0.8 : 0.55
+                    return UIColor.white.withAlphaComponent(alpha)
+                }
+            }
+
+            /// Toast background (more opaque in high contrast).
+            static var toastBackground: UIColor {
+                UIColor { tc in
+                    let alpha: CGFloat = (tc.accessibilityContrast == .high || UIAccessibility.isDarkerSystemColorsEnabled) ? 0.92 : 0.80
+                    return UIColor.black.withAlphaComponent(alpha)
+                }
+            }
         }
 
         // MARK: - Typography

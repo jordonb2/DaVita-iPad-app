@@ -43,7 +43,8 @@ enum TableStyler {
     static func applyPeopleListStyle(to tableView: UITableView) {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.separatorInset = UIEdgeInsets(top: 0, left: UIFactory.Theme.Spacing.xxl, bottom: 0, right: UIFactory.Theme.Spacing.xxl)
-        tableView.separatorColor = UIFactory.Theme.Color.surfaceElevated
+        // Use system separator color for better contrast in Dark Mode / Increased Contrast.
+        tableView.separatorColor = UIFactory.Theme.Color.separator
         tableView.backgroundColor = UIColor.systemGroupedBackground
         tableView.contentInset = UIEdgeInsets(top: UIFactory.Theme.Spacing.m, left: 0, bottom: UIFactory.Theme.Spacing.huge, right: 0)
     }

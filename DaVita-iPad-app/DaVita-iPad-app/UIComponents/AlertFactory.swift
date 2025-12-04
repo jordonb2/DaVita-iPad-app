@@ -69,7 +69,7 @@ extension UIViewController {
         label.font = UIFactory.Theme.Typography.font(.subheadline)
         label.adjustsFontForContentSizeCategory = true
         label.textColor = .white
-        label.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        label.backgroundColor = UIFactory.Theme.Color.toastBackground
         label.layer.cornerRadius = UIFactory.Theme.CornerRadius.m
         label.clipsToBounds = true
         label.alpha = 0

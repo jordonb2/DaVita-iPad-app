@@ -46,7 +46,8 @@ final class LandingHeroHeaderView: UIView {
     }()
 
     private let blurView: UIVisualEffectView = {
-        let blur = UIBlurEffect(style: .systemMaterialLight)
+        // Adaptive blur that works in both light/dark mode and respects accessibility settings.
+        let blur = UIBlurEffect(style: .systemMaterial)
         let view = UIVisualEffectView(effect: blur)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = UIFactory.Theme.CornerRadius.xl
@@ -67,8 +68,8 @@ final class LandingHeroHeaderView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = LandingHeroHeaderView.scaledFont(size: 12, weight: .semibold, textStyle: .caption2)
         label.adjustsFontForContentSizeCategory = true
-        label.textColor = .white
-        label.backgroundColor = UIColor.white.withAlphaComponent(0.18)
+        label.textColor = UIFactory.Theme.Color.heroTextPrimary
+        label.backgroundColor = UIFactory.Theme.Color.heroBadgeBackground
         label.textAlignment = .center
         label.layer.cornerRadius = UIFactory.Theme.CornerRadius.m
         label.clipsToBounds = true
@@ -83,7 +84,7 @@ final class LandingHeroHeaderView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = LandingHeroHeaderView.scaledFont(size: 16, weight: .medium, textStyle: .subheadline)
         label.adjustsFontForContentSizeCategory = true
-        label.textColor = UIColor.white.withAlphaComponent(0.9)
+        label.textColor = UIFactory.Theme.Color.heroTextSecondary
         label.text = "Welcome back"
         return label
     }()
@@ -93,7 +94,7 @@ final class LandingHeroHeaderView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = LandingHeroHeaderView.scaledFont(size: 34, weight: .bold, textStyle: .largeTitle)
         label.adjustsFontForContentSizeCategory = true
-        label.textColor = .white
+        label.textColor = UIFactory.Theme.Color.heroTextPrimary
         label.numberOfLines = 0
         label.accessibilityTraits.insert(.header)
         label.text = "Care Hub"
@@ -105,7 +106,7 @@ final class LandingHeroHeaderView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = LandingHeroHeaderView.scaledFont(size: 17, weight: .regular, textStyle: .body)
         label.adjustsFontForContentSizeCategory = true
-        label.textColor = UIColor.white.withAlphaComponent(0.9)
+        label.textColor = UIFactory.Theme.Color.heroTextSecondary
         label.numberOfLines = 0
         label.text = "Keep every client conversation warm and every record current."
         return label
@@ -146,7 +147,7 @@ final class LandingHeroHeaderView: UIView {
             titleLabel.adjustsFontForContentSizeCategory = true
         }
         button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
+        button.layer.borderColor = UIFactory.Theme.Color.heroSecondaryButtonBorder.cgColor
         button.layer.cornerRadius = UIFactory.Theme.CornerRadius.l
         button.heightAnchor.constraint(greaterThanOrEqualToConstant: 54).isActive = true
         button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
@@ -294,8 +295,8 @@ private final class MetricCardView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 18
         layer.borderWidth = 1
-        layer.borderColor = UIColor.white.withAlphaComponent(0.25).cgColor
-        backgroundColor = UIColor.white.withAlphaComponent(0.08)
+        layer.borderColor = UIFactory.Theme.Color.heroCardBorder.cgColor
+        backgroundColor = UIFactory.Theme.Color.heroCardBackground
 
         isAccessibilityElement = true
         accessibilityTraits.insert(.staticText)
@@ -303,19 +304,19 @@ private final class MetricCardView: UIView {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = LandingHeroHeaderView.scaledFont(size: 13, weight: .semibold, textStyle: .caption1)
         titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = UIColor.white.withAlphaComponent(0.85)
+        titleLabel.textColor = UIFactory.Theme.Color.heroTextSecondary
         titleLabel.isAccessibilityElement = false
 
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.font = LandingHeroHeaderView.scaledFont(size: 28, weight: .bold, textStyle: .title2)
         valueLabel.adjustsFontForContentSizeCategory = true
-        valueLabel.textColor = .white
+        valueLabel.textColor = UIFactory.Theme.Color.heroTextPrimary
         valueLabel.isAccessibilityElement = false
 
         footnoteLabel.translatesAutoresizingMaskIntoConstraints = false
         footnoteLabel.font = LandingHeroHeaderView.scaledFont(size: 13, weight: .regular, textStyle: .caption1)
         footnoteLabel.adjustsFontForContentSizeCategory = true
-        footnoteLabel.textColor = UIColor.white.withAlphaComponent(0.8)
+        footnoteLabel.textColor = UIFactory.Theme.Color.heroTextSecondary
         footnoteLabel.numberOfLines = 2
         footnoteLabel.isAccessibilityElement = false
 
