@@ -50,77 +50,25 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
     }
 
     func makeSummary(since startDate: Date? = nil) throws -> Summary {
-        let events = try fetchEventRows(since: startDate)
+        let eventCounts = try fetchEventTypeCounts(since: startDate)
+        let stepCounts = try fetchStepInteractionCounts(since: startDate)
+        let submissionDurationsAverage = try fetchAverageDuration(for: .submitted, since: startDate)
+        let skipDurationsAverage = try fetchAverageDuration(for: .skipped, since: startDate)
+        let submissionsByDaypart = try fetchDaypartCounts(since: startDate)
 
-        var presentedCount = 0
-        var submittedCount = 0
-        var skippedCount = 0
-        var dismissedCount = 0
+        let highPainSubmitted = try countSubmitted(where: NSPredicate(format: "painBucket == %d", CheckInAnalyticsPainBucket.high.rawValue), since: startDate)
+        let lowEnergySubmitted = try countSubmitted(where: NSPredicate(format: "energyBucket == %d", EnergyBucket.low.rawValue), since: startDate)
 
-        var completionDurations: [Double] = []
-        var skipDurations: [Double] = []
+        let categoryCounts = try fetchCategoryCounts(since: startDate)
 
-        var stepCounts: [CheckInAnalyticsStep: Int] = [:]
-        var highPainSubmitted = 0
-        var lowEnergySubmitted = 0
-        var symptomCounts: [String: Int] = [:]
-        var concernCounts: [String: Int] = [:]
-        var submissionsByDaypart: [Daypart: Int] = [:]
-
-        for row in events {
-            guard let eventType = row.eventType else { continue }
-
-            switch eventType {
-            case .stepFirstInteracted:
-                if let step = row.step {
-                    stepCounts[step, default: 0] += 1
-                }
-
-            case .submitted:
-                submittedCount += 1
-                if let duration = row.durationSeconds, duration > 0 {
-                    completionDurations.append(duration)
-                }
-
-                if row.painBucket == .high { highPainSubmitted += 1 }
-                if row.energyBucket == .low { lowEnergySubmitted += 1 }
-
-                if let symptomCategories = row.symptomCategoriesList {
-                    for category in symptomCategories {
-                        symptomCounts[category, default: 0] += 1
-                    }
-                }
-
-                if let concernCategories = row.concernCategoriesList {
-                    for category in concernCategories {
-                        concernCounts[category, default: 0] += 1
-                    }
-                }
-
-                if let dp = row.daypart {
-                    submissionsByDaypart[dp, default: 0] += 1
-                }
-
-            case .skipped:
-                skippedCount += 1
-                if let duration = row.durationSeconds, duration > 0 {
-                    skipDurations.append(duration)
-                }
-
-            case .dismissed:
-                dismissedCount += 1
-
-            default:
-                break
-            }
-        }
+        let presentedCount = eventCounts[.stepFirstInteracted, default: 0] + eventCounts[.submitted, default: 0] + eventCounts[.skipped, default: 0] + eventCounts[.dismissed, default: 0]
+        let submittedCount = eventCounts[.submitted, default: 0]
+        let skippedCount = eventCounts[.skipped, default: 0]
+        let dismissedCount = eventCounts[.dismissed, default: 0]
 
         let totalCompletedOrSkipped = submittedCount + skippedCount + dismissedCount
         let completionRate = totalCompletedOrSkipped == 0 ? 0 : Double(submittedCount) / Double(totalCompletedOrSkipped)
         let skipRate = totalCompletedOrSkipped == 0 ? 0 : Double(skippedCount) / Double(totalCompletedOrSkipped)
-
-        let averageCompletionSeconds = completionDurations.mean
-        let averageSkipSeconds = skipDurations.mean
 
         let highPainRate = submittedCount == 0 ? 0 : Double(highPainSubmitted) / Double(submittedCount)
         let lowEnergyRate = submittedCount == 0 ? 0 : Double(lowEnergySubmitted) / Double(submittedCount)
@@ -132,75 +80,169 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
             totalDismissed: dismissedCount,
             completionRate: completionRate,
             skipRate: skipRate,
-            averageCompletionSeconds: averageCompletionSeconds,
-            averageSkipSeconds: averageSkipSeconds,
+            averageCompletionSeconds: submissionDurationsAverage,
+            averageSkipSeconds: skipDurationsAverage,
             stepFirstInteractionCounts: stepCounts,
             highPainRate: highPainRate,
             lowEnergyRate: lowEnergyRate,
-            symptomCategoryCounts: symptomCounts,
-            concernCategoryCounts: concernCounts,
+            symptomCategoryCounts: categoryCounts.symptomCounts,
+            concernCategoryCounts: categoryCounts.concernCounts,
             submissionsByDaypart: submissionsByDaypart
         )
     }
 
-    private struct EventRow {
-        let eventType: CheckInAnalyticsEventType?
-        let step: CheckInAnalyticsStep?
-        let durationSeconds: Double?
-        let painBucket: CheckInAnalyticsPainBucket?
-        let energyBucket: EnergyBucket?
-        let symptomCategoriesList: [String]?
-        let concernCategoriesList: [String]?
-        let daypart: Daypart?
-    }
+    // MARK: - Aggregates
 
-    private func fetchEventRows(since startDate: Date?) throws -> [EventRow] {
+    private func fetchEventTypeCounts(since startDate: Date?) throws -> [CheckInAnalyticsEventType: Int] {
         let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
         request.resultType = .dictionaryResultType
-        request.fetchBatchSize = 500
-        request.propertiesToFetch = [
-            "eventType",
-            "step",
-            "durationSeconds",
-            "painBucket",
-            "energyBucket",
-            "symptomCategories",
-            "concernCategories",
-            "daypart"
-        ]
+        request.propertiesToGroupBy = ["eventType"]
+
+        let countDescription = NSExpressionDescription()
+        countDescription.name = "count"
+        countDescription.expression = NSExpression(forFunction: "count:", arguments: [NSExpression(forKeyPath: "eventType")])
+        countDescription.expressionResultType = .integer32AttributeType
+
+        request.propertiesToFetch = ["eventType", countDescription]
         if let startDate {
             request.predicate = NSPredicate(format: "createdAt >= %@", startDate as NSDate)
         }
-        do {
-            let rows = try context.fetch(request)
-            return rows.map { dict in
-                let eventTypeRaw = dict["eventType"] as? String
-                let stepRaw = dict["step"] as? String
-                let duration = (dict["durationSeconds"] as? NSNumber)?.doubleValue
-                let painBucket = (dict["painBucket"] as? NSNumber)?.int16Value
-                let energyBucket = (dict["energyBucket"] as? NSNumber)?.int16Value
 
-                return EventRow(
-                    eventType: eventTypeRaw.flatMap(CheckInAnalyticsEventType.init(rawValue:)),
-                    step: stepRaw.flatMap(CheckInAnalyticsStep.init(rawValue:)),
-                    durationSeconds: duration,
-                    painBucket: painBucket.flatMap(CheckInAnalyticsPainBucket.init(rawValue:)),
-                    energyBucket: energyBucket.flatMap(EnergyBucket.init(rawValue:)),
-                    symptomCategoriesList: (dict["symptomCategories"] as? String).flatMap { text in
-                        let parts = text.split(separator: ",").map { String($0) }
-                        return parts.isEmpty ? nil : parts
-                    },
-                    concernCategoriesList: (dict["concernCategories"] as? String).flatMap { text in
-                        let parts = text.split(separator: ",").map { String($0) }
-                        return parts.isEmpty ? nil : parts
-                    },
-                    daypart: (dict["daypart"] as? String).flatMap(Daypart.init(rawValue:))
-                )
-            }
-        } catch {
-            AppLog.analytics.error("Analytics fetch error: \(error, privacy: .private)")
-            throw error
+        let rows = try context.fetch(request)
+        var counts: [CheckInAnalyticsEventType: Int] = [:]
+        for dict in rows {
+            guard
+                let raw = dict["eventType"] as? String,
+                let type = CheckInAnalyticsEventType(rawValue: raw),
+                let count = dict["count"] as? NSNumber
+            else { continue }
+            counts[type] = count.intValue
         }
+        return counts
+    }
+
+    private func fetchAverageDuration(for type: CheckInAnalyticsEventType, since startDate: Date?) throws -> Double {
+        let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .dictionaryResultType
+
+        let avgDescription = NSExpressionDescription()
+        avgDescription.name = "avgDuration"
+        avgDescription.expression = NSExpression(forFunction: "average:", arguments: [NSExpression(forKeyPath: "durationSeconds")])
+        avgDescription.expressionResultType = .doubleAttributeType
+
+        var predicates: [NSPredicate] = [NSPredicate(format: "eventType == %@", type.rawValue)]
+        if let startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", startDate as NSDate))
+        }
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        request.propertiesToFetch = [avgDescription]
+
+        let rows = try context.fetch(request)
+        let value = (rows.first?["avgDuration"] as? NSNumber)?.doubleValue ?? 0
+        return value
+    }
+
+    private func fetchStepInteractionCounts(since startDate: Date?) throws -> [CheckInAnalyticsStep: Int] {
+        let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .dictionaryResultType
+        request.propertiesToGroupBy = ["step"]
+
+        let countDescription = NSExpressionDescription()
+        countDescription.name = "count"
+        countDescription.expression = NSExpression(forFunction: "count:", arguments: [NSExpression(forKeyPath: "step")])
+        countDescription.expressionResultType = .integer32AttributeType
+
+        var predicates: [NSPredicate] = [NSPredicate(format: "eventType == %@", CheckInAnalyticsEventType.stepFirstInteracted.rawValue)]
+        if let startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", startDate as NSDate))
+        }
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        request.propertiesToFetch = ["step", countDescription]
+
+        let rows = try context.fetch(request)
+        var counts: [CheckInAnalyticsStep: Int] = [:]
+        for dict in rows {
+            guard let raw = dict["step"] as? String,
+                  let step = CheckInAnalyticsStep(rawValue: raw),
+                  let count = dict["count"] as? NSNumber else { continue }
+            counts[step] = count.intValue
+        }
+        return counts
+    }
+
+    private func fetchDaypartCounts(since startDate: Date?) throws -> [Daypart: Int] {
+        let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .dictionaryResultType
+        request.propertiesToGroupBy = ["daypart"]
+
+        let countDescription = NSExpressionDescription()
+        countDescription.name = "count"
+        countDescription.expression = NSExpression(forFunction: "count:", arguments: [NSExpression(forKeyPath: "daypart")])
+        countDescription.expressionResultType = .integer32AttributeType
+
+        var predicates: [NSPredicate] = [NSPredicate(format: "eventType == %@", CheckInAnalyticsEventType.submitted.rawValue)]
+        if let startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", startDate as NSDate))
+        }
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        request.propertiesToFetch = ["daypart", countDescription]
+
+        let rows = try context.fetch(request)
+        var counts: [Daypart: Int] = [:]
+        for dict in rows {
+            guard let raw = dict["daypart"] as? String,
+                  let dp = Daypart(rawValue: raw),
+                  let count = dict["count"] as? NSNumber else { continue }
+            counts[dp] = count.intValue
+        }
+        return counts
+    }
+
+    private func countSubmitted(where predicate: NSPredicate, since startDate: Date?) throws -> Int {
+        let request = NSFetchRequest<NSNumber>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .countResultType
+
+        var predicates: [NSPredicate] = [
+            NSPredicate(format: "eventType == %@", CheckInAnalyticsEventType.submitted.rawValue),
+            predicate
+        ]
+        if let startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", startDate as NSDate))
+        }
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+
+        return try context.count(for: request)
+    }
+
+    private func fetchCategoryCounts(since startDate: Date?) throws -> (symptomCounts: [String: Int], concernCounts: [String: Int]) {
+        let request = NSFetchRequest<NSDictionary>(entityName: "CheckInAnalyticsEvent")
+        request.resultType = .dictionaryResultType
+        request.propertiesToFetch = ["symptomCategories", "concernCategories"]
+
+        var predicates: [NSPredicate] = [NSPredicate(format: "eventType == %@", CheckInAnalyticsEventType.submitted.rawValue)]
+        if let startDate {
+            predicates.append(NSPredicate(format: "createdAt >= %@", startDate as NSDate))
+        }
+        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        request.fetchBatchSize = 200
+
+        let rows = try context.fetch(request)
+        var symptomCounts: [String: Int] = [:]
+        var concernCounts: [String: Int] = [:]
+
+        func addCounts(from text: String?, into dict: inout [String: Int]) {
+            guard let text else { return }
+            for category in text.split(separator: ",").map({ String($0) }).filter({ !$0.isEmpty }) {
+                dict[category, default: 0] += 1
+            }
+        }
+
+        for dict in rows {
+            addCounts(from: dict["symptomCategories"] as? String, into: &symptomCounts)
+            addCounts(from: dict["concernCategories"] as? String, into: &concernCounts)
+        }
+
+        return (symptomCounts, concernCounts)
     }
 }
 
