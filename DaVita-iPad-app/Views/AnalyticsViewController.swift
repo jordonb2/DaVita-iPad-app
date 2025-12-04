@@ -9,6 +9,33 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private let exportService: ExportServicing
     private let historyViewControllerFactory: () -> CheckInHistoryViewController
 
+    private enum ExportScope: Int, CaseIterable {
+        case all
+        case last30
+        case last90
+
+        var title: String {
+            switch self {
+            case .all: return "All"
+            case .last30: return "30d"
+            case .last90: return "90d"
+            }
+        }
+
+        func filter(now: Date = Date()) -> CheckInHistoryFilter {
+            switch self {
+            case .all:
+                return CheckInHistoryFilter()
+            case .last30:
+                let start = Calendar.current.date(byAdding: .day, value: -30, to: now)
+                return CheckInHistoryFilter(startDate: start)
+            case .last90:
+                let start = Calendar.current.date(byAdding: .day, value: -90, to: now)
+                return CheckInHistoryFilter(startDate: start)
+            }
+        }
+    }
+
     private enum ViewState {
         case loading
         case empty
@@ -17,6 +44,15 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     private var state: ViewState = .loading
+    private var exportScope: ExportScope = .all
+    private lazy var exportScopeControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ExportScope.allCases.map { $0.title })
+        control.selectedSegmentIndex = exportScope.rawValue
+        control.addTarget(self, action: #selector(exportScopeChanged(_:)), for: .valueChanged)
+        control.accessibilityLabel = "Export scope"
+        control.accessibilityHint = "Choose how much history to include in exports."
+        return control
+    }()
 
     init(adminSession: AdminSessioning,
          summaryProvider: CheckInAnalyticsSummaryProviding,
@@ -151,6 +187,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
         contentStackView.addArrangedSubview(historyButton)
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Export"))
+        contentStackView.addArrangedSubview(exportScopeControl)
 
         let exportCSV = UIFactory.roundedActionButton(title: "Export CSV")
         exportCSV.addTarget(self, action: #selector(exportCSVTapped(_:)), for: .touchUpInside)
@@ -209,11 +246,12 @@ final class AnalyticsViewController: ScrolledStackViewController {
 
         do {
             let url: URL
+            let filter = exportScope.filter()
             switch format {
             case .csv:
-                url = try exportService.exportCheckInsCSV(filter: CheckInHistoryFilter())
+                url = try exportService.exportCheckInsCSV(filter: filter)
             case .pdf:
-                url = try exportService.exportCheckInsPDF(filter: CheckInHistoryFilter())
+                url = try exportService.exportCheckInsPDF(filter: filter)
             }
 
             let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
@@ -238,6 +276,11 @@ final class AnalyticsViewController: ScrolledStackViewController {
             self?.onLogoutConfirmed?()
         }
         present(alert, animated: true)
+    }
+
+    @objc private func exportScopeChanged(_ sender: UISegmentedControl) {
+        guard let scope = ExportScope(rawValue: sender.selectedSegmentIndex) else { return }
+        exportScope = scope
     }
 
     deinit {

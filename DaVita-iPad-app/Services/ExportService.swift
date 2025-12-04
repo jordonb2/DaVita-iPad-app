@@ -34,6 +34,11 @@ final class ExportService: ExportServicing {
         return iso
     }()
 
+    /// Directory for exports. Kept in a dedicated temp subdirectory.
+    private lazy var exportDirectory: URL = {
+        FileManager.default.temporaryDirectory.appendingPathComponent("exports", isDirectory: true)
+    }()
+
     init(context: NSManagedObjectContext) {
         self.context = context
     }
@@ -130,9 +135,11 @@ final class ExportService: ExportServicing {
         do {
             try renderer.writePDF(to: url, withActions: { ctx in
                 var y: CGFloat = 36
+                let watermark = "DaVita – Local Export Only"
 
                 func newPage() {
                     ctx.beginPage()
+                    drawWatermark(text: watermark, in: ctx, pageRect: pageRect)
                     y = 36
                 }
 
@@ -192,12 +199,11 @@ final class ExportService: ExportServicing {
     // MARK: - Private
 
     private func makeExportURL(ext: String) throws -> URL {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("exports", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try prepareExportDirectory()
 
         let ts = fileNameTimestampFormatter.string(from: Date()).replacingOccurrences(of: ":", with: "-")
         let filename = "checkins_\(ts).\(ext)"
-        return dir.appendingPathComponent(filename)
+        return exportDirectory.appendingPathComponent(filename)
     }
 
     private func csv(_ value: String) -> String {
@@ -222,5 +228,40 @@ final class ExportService: ExportServicing {
         UIColor.lightGray.setStroke()
         p.lineWidth = 1
         p.stroke()
+    }
+
+    private func drawWatermark(text: String, in ctx: UIGraphicsPDFRendererContext, pageRect: CGRect) {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 32, weight: .semibold),
+            .foregroundColor: UIColor.lightGray.withAlphaComponent(0.15)
+        ]
+
+        let size = (text as NSString).size(withAttributes: attributes)
+        let center = CGPoint(x: pageRect.midX - size.width / 2, y: pageRect.midY - size.height / 2)
+        ctx.cgContext.saveGState()
+        ctx.cgContext.translateBy(x: pageRect.midX, y: pageRect.midY)
+        ctx.cgContext.rotate(by: -.pi / 6) // slight angle
+        (text as NSString).draw(at: CGPoint(x: -size.width / 2, y: -size.height / 2), withAttributes: attributes)
+        ctx.cgContext.restoreGState()
+    }
+
+    private func prepareExportDirectory() throws {
+        try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
+        cleanupOldExports()
+    }
+
+    /// Best-effort cleanup of temp export files older than 24 hours.
+    private func cleanupOldExports(maxAge: TimeInterval = 24 * 60 * 60) {
+        let fm = FileManager.default
+        guard let contents = try? fm.contentsOfDirectory(at: exportDirectory, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]) else { return }
+
+        let cutoff = Date().addingTimeInterval(-maxAge)
+        for url in contents {
+            let values = try? url.resourceValues(forKeys: [.contentModificationDateKey])
+            let modified = values?.contentModificationDate ?? Date.distantPast
+            if modified < cutoff {
+                try? fm.removeItem(at: url)
+            }
+        }
     }
 }
