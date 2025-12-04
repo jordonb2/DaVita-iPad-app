@@ -36,7 +36,7 @@ final class PeopleListViewModel: NSObject {
             people = frc.fetchedObjects ?? []
             onPeopleChanged?(people)
         } catch {
-            AppLog.persistence.error("FRC performFetch error: \(error, privacy: .public)")
+            AppLog.persistence.error("FRC performFetch error: \(error, privacy: .private)")
             emit(AppError(operation: .loadPeople, underlying: error))
         }
 
@@ -63,7 +63,7 @@ final class PeopleListViewModel: NSObject {
             people = frc.fetchedObjects ?? []
             onPeopleChanged?(people)
         } catch {
-            AppLog.persistence.error("FRC refresh performFetch error: \(error, privacy: .public)")
+            AppLog.persistence.error("FRC refresh performFetch error: \(error, privacy: .private)")
             emit(AppError(operation: .loadPeople, underlying: error))
         }
     }
@@ -83,7 +83,7 @@ final class PeopleListViewModel: NSObject {
             AppLog.ui.debug("[ADD] Person saved → Name: \(sanitizedName, privacy: .private)")
 #endif
         } catch {
-            AppLog.persistence.error("Add person error: \(error, privacy: .public)")
+            AppLog.persistence.error("Add person error: \(error, privacy: .private)")
             emit(AppError(error, defaultOperation: .savePerson))
         }
     }
@@ -92,7 +92,7 @@ final class PeopleListViewModel: NSObject {
         do {
             try personService.deletePerson(personID: person.objectID)
         } catch {
-            AppLog.persistence.error("Delete person error: \(error, privacy: .public)")
+            AppLog.persistence.error("Delete person error: \(error, privacy: .private)")
             emit(AppError(error, defaultOperation: .deletePerson))
         }
     }
@@ -110,7 +110,7 @@ final class PeopleListViewModel: NSObject {
             AppLog.ui.debug("[UPDATE] Person saved → Name: \(sanitizedName, privacy: .private)")
 #endif
         } catch {
-            AppLog.persistence.error("Update person error: \(error, privacy: .public)")
+            AppLog.persistence.error("Update person error: \(error, privacy: .private)")
             emit(AppError(error, defaultOperation: .savePerson))
         }
     }

@@ -61,7 +61,7 @@ final class CheckInTrendsProvider: CheckInTrendsProviding {
         do {
             records = try repo.fetchHistory(for: person, filter: filter)
         } catch {
-            AppLog.persistence.error("Trends fetch error: \(error, privacy: .public)")
+            AppLog.persistence.error("Trends fetch error: \(error, privacy: .private)")
             throw TrendsError.fetchFailed(error)
         }
 

@@ -58,7 +58,7 @@ final class CheckInService: CheckInServicing {
         do {
             return try repo.fetchMostRecent(for: person)
         } catch {
-            AppLog.persistence.error("CheckInService latest fetch error: \(error, privacy: .public)")
+            AppLog.persistence.error("CheckInService latest fetch error: \(error, privacy: .private)")
             return nil
         }
     }

@@ -58,7 +58,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
         do {
             summary = try summaryProvider.makeSummary(since: nil)
         } catch {
-            AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .public)")
+            AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .private)")
             present(appError: AppError(operation: .loadAnalytics, underlying: error))
             state = .error(title: "Couldn't load analytics", message: "Please try again.")
             render()

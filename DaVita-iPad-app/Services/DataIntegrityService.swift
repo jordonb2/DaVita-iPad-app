@@ -29,7 +29,7 @@ final class DataIntegrityService {
                     try ctx.save()
                 }
             } catch {
-                AppLog.persistence.error("Data integrity check failed: \(error, privacy: .public)")
+                AppLog.persistence.error("Data integrity check failed: \(error, privacy: .private)")
             }
         }
     }
@@ -201,7 +201,7 @@ final class DataIntegrityService {
         let rows = try ctx.fetch(request)
         guard !rows.isEmpty else { return }
 
-        AppLog.persistence.error("Detected duplicate IDs in \(entityName, privacy: .public): \(rows.count, privacy: .public) duplicate group(s)")
+        AppLog.persistence.error("Detected duplicate IDs in \(entityName, privacy: .public): \(rows.count, privacy: .private) duplicate group(s)")
     }
 }
 

@@ -90,7 +90,7 @@ final class CheckInAnalyticsLogger: CheckInAnalyticsLogging {
                     try ctx.save()
                 }
             } catch {
-                AppLog.analytics.error("Analytics save error: \(error, privacy: .public)")
+                AppLog.analytics.error("Analytics save error: \(error, privacy: .private)")
             }
         }
     }

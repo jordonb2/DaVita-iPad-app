@@ -192,7 +192,7 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
                 )
             }
         } catch {
-            AppLog.analytics.error("Analytics fetch error: \(error, privacy: .public)")
+            AppLog.analytics.error("Analytics fetch error: \(error, privacy: .private)")
             throw error
         }
     }

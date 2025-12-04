@@ -45,7 +45,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         do {
             trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays, maxRecords: 250)
         } catch {
-            AppLog.persistence.error("Failed to compute trends: \(error, privacy: .public)")
+            AppLog.persistence.error("Failed to compute trends: \(error, privacy: .private)")
             present(appError: AppError(operation: .loadTrends, underlying: error))
             state = .error(title: "Couldn't load trends", message: "Please try again.")
             render()
