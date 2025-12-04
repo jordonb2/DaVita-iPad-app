@@ -36,6 +36,7 @@ final class AppCoordinator {
 
         return AppRouter(
             adminSession: dependencies.adminSession,
+            adminAuthenticator: dependencies.adminAuthenticator,
             analyticsLogger: dependencies.analyticsLogger,
             makeAnalyticsViewController: makeAnalyticsVC,
             peopleFlowCoordinatorFactory: peopleFlowFactory

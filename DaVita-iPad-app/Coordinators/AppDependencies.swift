@@ -4,6 +4,7 @@ import Foundation
 struct AppDependencies {
     let coreDataStack: CoreDataStacking
     let adminSession: AdminSessioning
+    let adminAuthenticator: AdminAuthenticating
     let analyticsLogger: CheckInAnalyticsLogging
 
     // Domain services / repos
@@ -18,6 +19,7 @@ struct AppDependencies {
     init() {
         let coreDataStack: CoreDataStacking = CoreDataStack()
         let adminSession: AdminSessioning = AdminSession()
+        let adminAuthenticator: AdminAuthenticating = AdminAuthenticator()
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
 
         // Fire-and-forget integrity repair (background context).
@@ -28,6 +30,7 @@ struct AppDependencies {
 
         self.coreDataStack = coreDataStack
         self.adminSession = adminSession
+        self.adminAuthenticator = adminAuthenticator
         self.analyticsLogger = analyticsLogger
 
         self.peopleRepo = peopleRepo

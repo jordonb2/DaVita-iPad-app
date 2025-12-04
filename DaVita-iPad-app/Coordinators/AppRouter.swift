@@ -24,6 +24,7 @@ final class AppRouter: AppRouting {
     weak var rootNavigationController: UINavigationController?
 
     private let adminSession: AdminSessioning
+    private let adminAuthenticator: AdminAuthenticating
     private let analyticsLogger: CheckInAnalyticsLogging
     private let makeAnalyticsViewController: () -> AnalyticsViewController
     private let peopleFlowCoordinatorFactory: (AppRouting) -> PeopleFlowCoordinating
@@ -31,10 +32,12 @@ final class AppRouter: AppRouting {
     private lazy var peopleFlowCoordinator: PeopleFlowCoordinating = peopleFlowCoordinatorFactory(self)
 
     init(adminSession: AdminSessioning,
+         adminAuthenticator: AdminAuthenticating,
          analyticsLogger: CheckInAnalyticsLogging,
          makeAnalyticsViewController: @escaping () -> AnalyticsViewController,
          peopleFlowCoordinatorFactory: @escaping (AppRouting) -> PeopleFlowCoordinating) {
         self.adminSession = adminSession
+        self.adminAuthenticator = adminAuthenticator
         self.analyticsLogger = analyticsLogger
         self.makeAnalyticsViewController = makeAnalyticsViewController
         self.peopleFlowCoordinatorFactory = peopleFlowCoordinatorFactory
@@ -72,6 +75,7 @@ final class AppRouter: AppRouting {
 
     func showAnalytics(from presentingVC: UIViewController) {
         let adminSession = self.adminSession
+        let adminAuthenticator = self.adminAuthenticator
 
         let presentAnalytics: () -> Void = { [weak presentingVC] in
             guard let presentingVC else { return }
@@ -91,13 +95,30 @@ final class AppRouter: AppRouting {
             return
         }
 
+        if let remaining = adminAuthenticator.lockoutRemainingSeconds() {
+            let message = "Too many failed attempts. Try again in \(self.formattedDuration(remaining))."
+            let lockoutAlert = AlertFactory.okAlert(title: "Locked out", message: message)
+            presentingVC.present(lockoutAlert, animated: true)
+            return
+        }
+
         let alert = AlertFactory.adminLoginAlert { [weak presentingVC] username, password in
             guard let presentingVC else { return }
-            if username == "admin" && password == "analytics" {
+            switch adminAuthenticator.authenticate(username: username, password: password) {
+            case .success:
                 adminSession.logIn()
                 presentAnalytics()
-            } else {
-                let errorAlert = AlertFactory.okAlert(title: "Login failed", message: "Incorrect username or password.")
+            case .invalid(let attemptsRemaining):
+                let message = "Incorrect username or password. \(attemptsRemaining) attempts left before lockout."
+                let errorAlert = AlertFactory.okAlert(title: "Login failed", message: message)
+                presentingVC.present(errorAlert, animated: true)
+            case .rateLimited(let retryAfter):
+                let message = "Too many attempts. Please wait \(self.formattedDuration(retryAfter)) before trying again."
+                let errorAlert = AlertFactory.okAlert(title: "Slow down", message: message)
+                presentingVC.present(errorAlert, animated: true)
+            case .locked(let remaining):
+                let message = "Account locked. Try again in \(self.formattedDuration(remaining))."
+                let errorAlert = AlertFactory.okAlert(title: "Locked out", message: message)
                 presentingVC.present(errorAlert, animated: true)
             }
         }
@@ -122,5 +143,15 @@ final class AppRouter: AppRouting {
 
         let nav = NavigationHelpers.Modal.embedInNavigation(checkInVC, isModalInPresentation: true)
         presentingVC.present(nav, animated: true)
+    }
+
+    private func formattedDuration(_ seconds: TimeInterval) -> String {
+        if seconds >= 60 {
+            let minutes = Int(ceil(seconds / 60))
+            return "\(minutes) minute\(minutes == 1 ? "" : "s")"
+        } else {
+            let secs = Int(ceil(seconds))
+            return "\(secs) second\(secs == 1 ? "" : "s")"
+        }
     }
 }

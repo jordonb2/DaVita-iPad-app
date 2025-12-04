@@ -28,10 +28,15 @@ enum AlertFactory {
         alert.addTextField { field in
             field.placeholder = "Username"
             field.autocapitalizationType = .none
+            field.autocorrectionType = .no
+            field.textContentType = .username
         }
         alert.addTextField { field in
             field.placeholder = "Password"
             field.isSecureTextEntry = true
+            field.autocapitalizationType = .none
+            field.autocorrectionType = .no
+            field.textContentType = .password
         }
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Login", style: .default) { _ in
