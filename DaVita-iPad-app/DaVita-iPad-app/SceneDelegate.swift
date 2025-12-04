@@ -1,4 +1,5 @@
 import UIKit
+import CoreData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -49,6 +50,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         adminSession?.configureAutoLogout(inactivityTimeoutSeconds: coordinator.dependencies.adminInactivityTimeoutSeconds)
 
         coordinator.start()
+
+        seedUITestDataIfNeeded(dependencies: coordinator.dependencies)
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
@@ -116,6 +119,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func hidePrivacyOverlay() {
         privacyOverlayView?.removeFromSuperview()
         privacyOverlayView = nil
+    }
+
+    // MARK: - UI Test Seeding
+
+    private func seedUITestDataIfNeeded(dependencies: AppDependencies) {
+        guard ProcessInfo.processInfo.arguments.contains("UI_TEST_SEED") else { return }
+
+        let context = dependencies.coreDataStack.viewContext
+        context.performAndWait {
+            // Clear existing data to keep seeds deterministic across runs.
+            let personFetch: NSFetchRequest<Person> = Person.fetchRequest()
+            if let people = try? context.fetch(personFetch) {
+                for p in people { context.delete(p) }
+            }
+
+            let repo = PersonRepository(context: context)
+            let checkInRepo = CheckInRepository(context: context)
+
+            let now = Date()
+            let p1 = repo.createPerson(name: "Seed One", gender: .male, dob: nil)
+            let p2 = repo.createPerson(name: "Seed Two", gender: .female, dob: nil)
+
+            _ = checkInRepo.createRecord(createdAt: now.addingTimeInterval(-3600), for: p1, data: PersonCheckInData(painLevel: 4, energyBucket: .okay, moodBucket: .neutral, symptoms: "fatigue", concerns: "diet", teamNote: nil))
+            _ = checkInRepo.createRecord(createdAt: now.addingTimeInterval(-7200), for: p2, data: PersonCheckInData(painLevel: 7, energyBucket: .low, moodBucket: .sad, symptoms: "cramps", concerns: "sleep", teamNote: nil))
+
+            do {
+                try repo.save()
+            } catch {
+                assertionFailure("UI test seed save failed: \(error)")
+            }
+        }
     }
 }
 

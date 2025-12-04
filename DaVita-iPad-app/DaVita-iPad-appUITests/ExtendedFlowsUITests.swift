@@ -2,7 +2,7 @@ import XCTest
 
 final class ExtendedFlowsUITests: XCTestCase {
 
-    private func makeApp(arguments: [String] = ["UI_TESTING"], environment: [String: String] = [:]) -> XCUIApplication {
+    private func makeApp(arguments: [String] = ["UI_TESTING", "UI_TEST_SEED"], environment: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = arguments
         app.launchEnvironment = environment
