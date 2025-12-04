@@ -46,7 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.addGestureRecognizer(inactivityRecognizer)
 
         // Configure admin inactivity handling.
-        adminSession?.configureAutoLogout(inactivityTimeoutSeconds: AdminSession.defaultInactivityTimeoutSeconds)
+        adminSession?.configureAutoLogout(inactivityTimeoutSeconds: coordinator.dependencies.adminInactivityTimeoutSeconds)
 
         coordinator.start()
     }

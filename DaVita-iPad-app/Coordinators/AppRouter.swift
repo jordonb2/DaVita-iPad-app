@@ -28,6 +28,8 @@ final class AppRouter: AppRouting {
     private let analyticsLogger: CheckInAnalyticsLogging
     private let makeAnalyticsViewController: () -> AnalyticsViewController
     private let peopleFlowCoordinatorFactory: (AppRouting) -> PeopleFlowCoordinating
+    private weak var presentedAdminNav: UINavigationController?
+    private var adminAutoLogoutObserver: NSObjectProtocol?
 
     private lazy var peopleFlowCoordinator: PeopleFlowCoordinating = peopleFlowCoordinatorFactory(self)
 
@@ -41,6 +43,14 @@ final class AppRouter: AppRouting {
         self.analyticsLogger = analyticsLogger
         self.makeAnalyticsViewController = makeAnalyticsViewController
         self.peopleFlowCoordinatorFactory = peopleFlowCoordinatorFactory
+
+        adminAutoLogoutObserver = NotificationCenter.default.addObserver(
+            forName: .adminSessionDidAutoLogout,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.dismissAdminFlowIfPresent()
+        }
     }
 
     private var mainStoryboard: UIStoryboard {
@@ -83,10 +93,12 @@ final class AppRouter: AppRouting {
             let analyticsVC = self.makeAnalyticsViewController()
             analyticsVC.onLogoutConfirmed = { [weak presentingVC] in
                 adminSession.logOut()
+                self.dismissAdminFlowIfPresent()
                 presentingVC?.dismiss(animated: true)
             }
 
             let nav = NavigationHelpers.Modal.embedInNavigation(analyticsVC, isModalInPresentation: true)
+            self.presentedAdminNav = nav
             presentingVC.present(nav, animated: true)
         }
 
@@ -152,6 +164,18 @@ final class AppRouter: AppRouting {
         } else {
             let secs = Int(ceil(seconds))
             return "\(secs) second\(secs == 1 ? "" : "s")"
+        }
+    }
+
+    private func dismissAdminFlowIfPresent(animated: Bool = true) {
+        guard let nav = presentedAdminNav else { return }
+        nav.dismiss(animated: animated)
+        presentedAdminNav = nil
+    }
+
+    deinit {
+        if let token = adminAutoLogoutObserver {
+            NotificationCenter.default.removeObserver(token)
         }
     }
 }

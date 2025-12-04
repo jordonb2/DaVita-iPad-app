@@ -5,6 +5,7 @@ struct AppDependencies {
     let coreDataStack: CoreDataStacking
     let adminSession: AdminSessioning
     let adminAuthenticator: AdminAuthenticating
+    let adminInactivityTimeoutSeconds: TimeInterval
     let analyticsLogger: CheckInAnalyticsLogging
 
     // Domain services / repos
@@ -17,8 +18,12 @@ struct AppDependencies {
     let makeExportService: () -> ExportServicing
 
     init() {
+        let resolvedTimeout = AppDependencies.resolveAdminInactivityTimeoutSeconds(
+            infoDictionary: Bundle.main.infoDictionary,
+            environment: ProcessInfo.processInfo.environment
+        )
         let coreDataStack: CoreDataStacking = CoreDataStack()
-        let adminSession: AdminSessioning = AdminSession()
+        let adminSession: AdminSessioning = AdminSession(defaultTimeoutSeconds: resolvedTimeout)
         let adminAuthenticator: AdminAuthenticating = AdminAuthenticator()
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
 
@@ -31,6 +36,7 @@ struct AppDependencies {
         self.coreDataStack = coreDataStack
         self.adminSession = adminSession
         self.adminAuthenticator = adminAuthenticator
+        self.adminInactivityTimeoutSeconds = resolvedTimeout
         self.analyticsLogger = analyticsLogger
 
         self.peopleRepo = peopleRepo
@@ -39,6 +45,25 @@ struct AppDependencies {
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(context: coreDataStack.viewContext) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }
+    }
+
+    private static func resolveAdminInactivityTimeoutSeconds(infoDictionary: [String: Any]?,
+                                                             environment: [String: String]) -> TimeInterval {
+        if let envValue = environment["ADMIN_INACTIVITY_TIMEOUT_SECONDS"], let parsed = TimeInterval(envValue) {
+            let safe = max(AdminSession.minimumInactivityTimeoutSeconds, parsed)
+            return safe
+        }
+
+        if let plistValue = infoDictionary?["AdminInactivityTimeoutSeconds"] {
+            if let number = plistValue as? NSNumber {
+                return max(AdminSession.minimumInactivityTimeoutSeconds, number.doubleValue)
+            }
+            if let string = plistValue as? String, let parsed = TimeInterval(string) {
+                return max(AdminSession.minimumInactivityTimeoutSeconds, parsed)
+            }
+        }
+
+        return AdminSession.defaultInactivityTimeoutSeconds
     }
 }
 

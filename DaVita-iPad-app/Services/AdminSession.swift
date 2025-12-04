@@ -238,19 +238,23 @@ protocol AdminSessioning: AnyObject {
 }
 
 final class AdminSession: AdminSessioning {
-    init() {}
+    init(defaultTimeoutSeconds: TimeInterval = AdminSession.defaultInactivityTimeoutSeconds) {
+        let clamped = max(AdminSession.minimumInactivityTimeoutSeconds, defaultTimeoutSeconds)
+        self.inactivityTimeoutSeconds = clamped
+    }
 
     /// Default idle timeout for admin sessions.
     static let defaultInactivityTimeoutSeconds: TimeInterval = 5 * 60
+    static let minimumInactivityTimeoutSeconds: TimeInterval = 5
 
     private(set) var isLoggedIn: Bool = false
 
-    private var inactivityTimeoutSeconds: TimeInterval = AdminSession.defaultInactivityTimeoutSeconds
+    private var inactivityTimeoutSeconds: TimeInterval
     private var lastActivityDate: Date = Date()
     private var inactivityTimer: Timer?
 
     func configureAutoLogout(inactivityTimeoutSeconds: TimeInterval = AdminSession.defaultInactivityTimeoutSeconds) {
-        self.inactivityTimeoutSeconds = max(5, inactivityTimeoutSeconds)
+        self.inactivityTimeoutSeconds = max(AdminSession.minimumInactivityTimeoutSeconds, inactivityTimeoutSeconds)
         if isLoggedIn {
             recordActivity()
         }
