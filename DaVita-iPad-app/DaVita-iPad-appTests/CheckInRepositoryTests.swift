@@ -60,5 +60,37 @@ final class CheckInRepositoryTests: XCTestCase {
         results = try repo.fetchVisits(filter: filter)
         XCTAssertEqual(results.map { $0.id }, [r2.id, r3.id])
     }
+
+    func testMaxRecordsPerPersonFiltersLatestOnly() throws {
+        let stack = TestCoreDataStack()
+        let ctx = stack.viewContext
+        let repo = CheckInRepository(context: ctx)
+
+        let person = Person(context: ctx)
+        person.id = UUID()
+        person.createdAt = Date()
+        person.name = "PerPerson"
+
+        let now = Date()
+        var createdIds: [UUID] = []
+        for i in 0..<5 {
+            let id = UUID()
+            createdIds.append(id)
+            _ = repo.createRecord(
+                id: id,
+                createdAt: now.addingTimeInterval(TimeInterval(-i * 60)),
+                for: person,
+                data: PersonCheckInData(painLevel: Int16(i), energyBucket: .okay, moodBucket: .neutral, symptoms: nil, concerns: nil, teamNote: nil)
+            )
+        }
+        try ctx.save()
+
+        let filter = CheckInHistoryFilter(maxRecordsPerPerson: 2)
+        let results = try repo.fetchVisits(filter: filter)
+        XCTAssertEqual(results.count, 2)
+        // Should be the newest two records.
+        let expected = Array(createdIds.prefix(2))
+        XCTAssertEqual(results.map { $0.id }, expected)
+    }
 }
 

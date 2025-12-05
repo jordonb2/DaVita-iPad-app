@@ -24,12 +24,21 @@ struct CheckInHistoryFilter {
     /// Fetch offset for paging (newest first). Nil/0 = no offset.
     var offset: Int?
 
-    init(startDate: Date? = nil, endDate: Date? = nil, keyword: String? = nil, limit: Int? = nil, offset: Int? = nil) {
+    /// Maximum records per person (applied via predicate). Nil = no per-person cap.
+    var maxRecordsPerPerson: Int?
+
+    init(startDate: Date? = nil,
+         endDate: Date? = nil,
+         keyword: String? = nil,
+         limit: Int? = nil,
+         offset: Int? = nil,
+         maxRecordsPerPerson: Int? = nil) {
         self.startDate = startDate
         self.endDate = endDate
         self.keyword = keyword
         self.limit = limit
         self.offset = offset
+        self.maxRecordsPerPerson = maxRecordsPerPerson
     }
 
     var normalizedKeyword: String? {
@@ -258,6 +267,11 @@ final class CheckInRepository: CheckInHistoryRepositorying {
             let s = NSPredicate(format: "symptoms CONTAINS[cd] %@", keyword)
             let c = NSPredicate(format: "concerns CONTAINS[cd] %@", keyword)
             predicates.append(NSCompoundPredicate(orPredicateWithSubpredicates: [s, c]))
+        }
+
+        if let maxPerPerson = filter.maxRecordsPerPerson, maxPerPerson > 0 {
+            // Keep only the latest N per person by counting newer records for that person.
+            predicates.append(NSPredicate(format: "SUBQUERY(person.checkInRecords, $r, $r.createdAt > createdAt).@count < %d", maxPerPerson))
         }
 
         guard !predicates.isEmpty else { return nil }
