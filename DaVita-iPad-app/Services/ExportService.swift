@@ -53,70 +53,8 @@ final class ExportService: ExportServicing {
         let records = try repo.fetchVisits(filter: filter)
         guard !records.isEmpty else { throw ExportError.noRecords }
 
-        var lines: [String] = []
-        lines.reserveCapacity(records.count + 1)
-
-        lines.append([
-            "person_name",
-            "person_id",
-            "record_id",
-            "created_at",
-            "pain",
-            "energy_bucket",
-            "mood_bucket",
-            "energy_text",
-            "mood_text",
-            "symptoms",
-            "concerns",
-            "team_note"
-        ].joined(separator: ","))
-
-        for r in records {
-            let personName = r.person?.name ?? ""
-            let personId = r.person?.id?.uuidString ?? ""
-            let recordId = r.id?.uuidString ?? ""
-            let createdAt = r.createdAt.map { isoFormatter.string(from: $0) } ?? ""
-
-            let pain = String(r.painLevel)
-
-            let energyBucket = (r.value(forKey: "energyBucket") as? NSNumber)?.stringValue ?? ""
-            let moodBucket = (r.value(forKey: "moodBucket") as? NSNumber)?.stringValue ?? ""
-
-            let energyText = r.energyLevel ?? ""
-            let moodText = r.mood ?? ""
-
-            let symptoms = r.symptoms ?? ""
-            let concerns = r.concerns ?? ""
-            let teamNote = r.teamNote ?? ""
-
-            let row = [
-                csv(personName),
-                csv(personId),
-                csv(recordId),
-                csv(createdAt),
-                csv(pain),
-                csv(energyBucket),
-                csv(moodBucket),
-                csv(energyText),
-                csv(moodText),
-                csv(symptoms),
-                csv(concerns),
-                csv(teamNote)
-            ].joined(separator: ",")
-
-            lines.append(row)
-        }
-
-        let content = lines.joined(separator: "\r\n") + "\r\n"
-        let data = content.data(using: .utf8) ?? Data()
-
         let url = try makeExportURL(ext: "csv")
-        do {
-            try data.write(to: url, options: [.atomic])
-            return url
-        } catch {
-            throw ExportError.writeFailed
-        }
+        return try writeCSV(records: records, to: url)
     }
 
     // MARK: - PDF
@@ -263,5 +201,71 @@ final class ExportService: ExportServicing {
                 try? fm.removeItem(at: url)
             }
         }
+    }
+
+    private func writeCSV(records: [CheckInRecord], to url: URL) throws -> URL {
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        guard let handle = try? FileHandle(forWritingTo: url) else {
+            throw ExportError.writeFailed
+        }
+        defer { try? handle.close() }
+
+        let header = [
+            "person_name",
+            "person_id",
+            "record_id",
+            "created_at",
+            "pain",
+            "energy_bucket",
+            "mood_bucket",
+            "energy_text",
+            "mood_text",
+            "symptoms",
+            "concerns",
+            "team_note"
+        ].joined(separator: ",") + "\r\n"
+
+        guard let headerData = header.data(using: .utf8) else { throw ExportError.writeFailed }
+        try handle.write(contentsOf: headerData)
+
+        for r in records {
+            autoreleasepool {
+                let personName = r.person?.name ?? ""
+                let personId = r.person?.id?.uuidString ?? ""
+                let recordId = r.id?.uuidString ?? ""
+                let createdAt = r.createdAt.map { isoFormatter.string(from: $0) } ?? ""
+
+                let pain = String(r.painLevel)
+                let energyBucket = (r.value(forKey: "energyBucket") as? NSNumber)?.stringValue ?? ""
+                let moodBucket = (r.value(forKey: "moodBucket") as? NSNumber)?.stringValue ?? ""
+
+                let energyText = r.energyLevel ?? ""
+                let moodText = r.mood ?? ""
+                let symptoms = r.symptoms ?? ""
+                let concerns = r.concerns ?? ""
+                let teamNote = r.teamNote ?? ""
+
+                let row = [
+                    csv(personName),
+                    csv(personId),
+                    csv(recordId),
+                    csv(createdAt),
+                    csv(pain),
+                    csv(energyBucket),
+                    csv(moodBucket),
+                    csv(energyText),
+                    csv(moodText),
+                    csv(symptoms),
+                    csv(concerns),
+                    csv(teamNote)
+                ].joined(separator: ",") + "\r\n"
+
+                if let data = row.data(using: .utf8) {
+                    try? handle.write(contentsOf: data)
+                }
+            }
+        }
+
+        return url
     }
 }
