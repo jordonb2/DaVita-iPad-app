@@ -44,6 +44,7 @@
 		F7C0AAB42F0001030056439C /* CheckInAnalyticsLoggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AAB32F0001030056439C /* CheckInAnalyticsLoggerTests.swift */; };
 		F7C0AAB62F0001040056439C /* InputSanitizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AAB52F0001040056439C /* InputSanitizerTests.swift */; };
 		F7C0AAC22F0002010056439C /* ExtendedFlowsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AAC12F0002010056439C /* ExtendedFlowsUITests.swift */; };
+		F7C0AAC42F0003010056439C /* TestUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AAC32F0003010056439C /* TestUtilities.swift */; };
 		F76E48012EC000010056439C /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48002EC000010056439C /* AppDependencies.swift */; };
 		F76E48112EC000020056439C /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48102EC000020056439C /* AppError.swift */; };
 		F76E4A012EC200000056439C /* InputSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4A002EC200000056439C /* InputSanitizer.swift */; };
@@ -98,6 +99,7 @@
 		F7C0AAB32F0001030056439C /* CheckInAnalyticsLoggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsLoggerTests.swift; sourceTree = "<group>"; };
 		F7C0AAB52F0001040056439C /* InputSanitizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSanitizerTests.swift; sourceTree = "<group>"; };
 		F7C0AAC12F0002010056439C /* ExtendedFlowsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedFlowsUITests.swift; sourceTree = "<group>"; };
+		F7C0AAC32F0003010056439C /* TestUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtilities.swift; sourceTree = "<group>"; };
 		F76E48002EC000010056439C /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		F76E48102EC000020056439C /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
 		F76E4A002EC200000056439C /* InputSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSanitizer.swift; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 				F7C0AAB12F0001020056439C /* ExportServiceTests.swift */,
 				F7C0AAB32F0001030056439C /* CheckInAnalyticsLoggerTests.swift */,
 				F7C0AAB52F0001040056439C /* InputSanitizerTests.swift */,
+				F7C0AAC32F0003010056439C /* TestUtilities.swift */,
 			);
 			path = "DaVita-iPad-appTests";
 			sourceTree = "<group>";
@@ -465,6 +468,7 @@
 				F7C0AAB22F0001020056439C /* ExportServiceTests.swift in Sources */,
 				F7C0AAB42F0001030056439C /* CheckInAnalyticsLoggerTests.swift in Sources */,
 				F7C0AAB62F0001040056439C /* InputSanitizerTests.swift in Sources */,
+				F7C0AAC42F0003010056439C /* TestUtilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
