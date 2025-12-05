@@ -1,27 +1,12 @@
 import UIKit
 import CoreData
+import Foundation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
     private var coordinator: AppCoordinator?
     private var adminSession: AdminSessioning?
-
-    private enum PrivacyScreen {
-        static let userDefaultsKey = statingKey("privacyScreenEnabled")
-
-        /// Defaults to enabled if the key hasn't been set.
-        static var isEnabled: Bool {
-            if ProcessInfo.processInfo.arguments.contains("UI_TESTING") { return false }
-            if UserDefaults.standard.object(forKey: userDefaultsKey) == nil { return true }
-            return UserDefaults.standard.bool(forKey: userDefaultsKey)
-        }
-
-        /// Namespaced key helper to avoid collisions.
-        private static func statingKey(_ key: String) -> String {
-            "DaVita.\(key)"
-        }
-    }
 
     private var privacyOverlayView: UIView?
 
@@ -84,7 +69,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // MARK: - Privacy screen
 
     private func showPrivacyOverlayIfNeeded() {
-        guard PrivacyScreen.isEnabled else { return }
+        guard AdminSettings.privacyScreenEnabled else { return }
         guard privacyOverlayView == nil else { return }
         guard let window else { return }
 

@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 /// Owns app start and wiring root navigation controller into routing.
 final class AppCoordinator {
@@ -17,7 +18,8 @@ final class AppCoordinator {
                 adminSession: dependencies.adminSession,
                 summaryProvider: dependencies.makeAnalyticsSummaryProvider(),
                 exportService: dependencies.makeExportService(),
-                historyViewControllerFactory: { makeHistoryVC(nil) }
+                historyViewControllerFactory: { makeHistoryVC(nil) },
+                defaultExportScope: AnalyticsViewController.ExportScope(rawValue: AdminSettings.defaultExportScopeRaw) ?? .all
             )
         }
 

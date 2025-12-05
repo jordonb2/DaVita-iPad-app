@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 final class AnalyticsViewController: ScrolledStackViewController {
 
@@ -9,7 +10,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private let exportService: ExportServicing
     private let historyViewControllerFactory: () -> CheckInHistoryViewController
 
-    private enum ExportScope: Int, CaseIterable {
+    enum ExportScope: Int, CaseIterable {
         case all
         case last30
         case last90
@@ -57,11 +58,13 @@ final class AnalyticsViewController: ScrolledStackViewController {
     init(adminSession: AdminSessioning,
          summaryProvider: CheckInAnalyticsSummaryProviding,
          exportService: ExportServicing,
-         historyViewControllerFactory: @escaping () -> CheckInHistoryViewController) {
+         historyViewControllerFactory: @escaping () -> CheckInHistoryViewController,
+         defaultExportScope: ExportScope = .all) {
         self.adminSession = adminSession
         self.summaryProvider = summaryProvider
         self.exportService = exportService
         self.historyViewControllerFactory = historyViewControllerFactory
+        self.exportScope = defaultExportScope
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -78,6 +81,11 @@ final class AnalyticsViewController: ScrolledStackViewController {
         logout.accessibilityLabel = "Log out"
         logout.accessibilityHint = "Logs out of the admin session."
         navigationItem.leftBarButtonItem = logout
+
+        let settings = UIBarButtonItem(title: "Settings", style: .plain, target: self, action: #selector(settingsTapped))
+        settings.accessibilityLabel = "Admin settings"
+        settings.accessibilityHint = "Configure privacy, exports, and auto-logout."
+        navigationItem.rightBarButtonItem = settings
 
         isModalInPresentation = true
         presentationController?.delegate = self
@@ -225,6 +233,11 @@ final class AnalyticsViewController: ScrolledStackViewController {
         presentLogoutConfirmation()
     }
 
+    @objc private func settingsTapped() {
+        let settingsVC = AdminSettingsViewController(adminSession: adminSession)
+        navigationController?.pushViewController(settingsVC, animated: true)
+    }
+
 
 
     @objc private func exportCSVTapped(_ sender: UIButton) {
@@ -283,6 +296,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     @objc private func exportScopeChanged(_ sender: UISegmentedControl) {
         guard let scope = ExportScope(rawValue: sender.selectedSegmentIndex) else { return }
         exportScope = scope
+        AdminSettings.defaultExportScopeRaw = sender.selectedSegmentIndex
     }
 
     deinit {

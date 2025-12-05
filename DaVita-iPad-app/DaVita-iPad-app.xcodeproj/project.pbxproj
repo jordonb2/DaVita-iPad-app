@@ -12,6 +12,7 @@
 		F76E42AB2E919D1A0056439C /* AddEditPersonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */; };
 		F76E42C12E91A4F70056439C /* LandingHeroHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */; };
 		F76E42D22E93C0010056439C /* CheckInJourneyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */; };
+		F7C0AD110000000000000001 /* AdminSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C0AD100000000000000001 /* AdminSettingsViewController.swift */; };
 		F76E42D42E93C0010056439C /* PersonCheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42D32E93C0010056439C /* PersonCheckInData.swift */; };
 		F76E42E22E93C9010056439C /* CheckInAnalyticsLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */; };
 		F76E42E42E93C9010056439C /* TextCategorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E42E32E93C9010056439C /* TextCategorizer.swift */; };
@@ -64,6 +65,7 @@
 		F76E42AA2E919D1A0056439C /* AddEditPersonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditPersonViewController.swift; sourceTree = "<group>"; };
 		F76E42C02E91A4F70056439C /* LandingHeroHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingHeroHeaderView.swift; sourceTree = "<group>"; };
 		F76E42D12E93C0010056439C /* CheckInJourneyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInJourneyViewController.swift; sourceTree = "<group>"; };
+		F7C0AD100000000000000001 /* AdminSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminSettingsViewController.swift; sourceTree = "<group>"; };
 		F76E42D32E93C0010056439C /* PersonCheckInData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonCheckInData.swift; sourceTree = "<group>"; };
 		F76E42E12E93C9010056439C /* CheckInAnalyticsLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInAnalyticsLogger.swift; sourceTree = "<group>"; };
 		F76E42E32E93C9010056439C /* TextCategorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCategorizer.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				F76E43002E95A0010056439C /* CheckInHistoryViewController.swift */,
 				F76E43312E9800020056439C /* PersonDetailViewController.swift */,
 				F76E45022EA200020056439C /* PersonTrendsViewController.swift */,
+				F7C0AD100000000000000001 /* AdminSettingsViewController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -436,6 +439,7 @@
 				F76E42E82E93C950056439C /* CheckInAnalyticsSummaryProvider.swift in Sources */,
 				F76E42F22E93D200056439C /* AdminSession.swift in Sources */,
 				F76E42F42E93D200056439C /* AnalyticsViewController.swift in Sources */,
+				F7C0AD110000000000000001 /* AdminSettingsViewController.swift in Sources */,
 				F76E43012E95A0010056439C /* CheckInHistoryViewController.swift in Sources */,
 				F76E43452EA1C0A10056439C /* CheckInService.swift in Sources */,
 				F76E45012EA200010056439C /* CheckInTrendsProvider.swift in Sources */,
