@@ -61,16 +61,16 @@ enum AppError: Error {
             switch v {
             case .emptyName:
                 return UserFacingMessage(
-                    title: "Missing name",
-                    message: "Please enter a name before saving.",
+                    title: L10n.string("error.missing_name.title"),
+                    message: L10n.string("error.missing_name.message"),
                     style: .toast
                 )
             }
 
         case .authRequired:
             return UserFacingMessage(
-                title: "Admin required",
-                message: "Please log in as admin to continue.",
+                title: L10n.string("error.auth_required.title"),
+                message: L10n.string("error.auth_required.message"),
                 style: .alert,
                 actionTitle: "Log in"
             )
@@ -82,22 +82,22 @@ enum AppError: Error {
                     return offlineMessage(style: .toast)
                 }
                 return UserFacingMessage(
-                    title: "Couldn't load people",
+                    title: L10n.string("error.load_people.title"),
                     message: "Check your connection, then retry.",
                     style: .toast,
                     actionTitle: "Retry"
                 )
             case .savePerson:
                 return UserFacingMessage(
-                    title: "Couldn't save",
-                    message: "Please try again.",
+                    title: L10n.string("error.save_person.title"),
+                    message: L10n.string("error.generic.try_again"),
                     style: .alert,
                     actionTitle: "Retry"
                 )
             case .deletePerson:
                 return UserFacingMessage(
-                    title: "Couldn't delete",
-                    message: "Please try again.",
+                    title: L10n.string("error.delete_person.title"),
+                    message: L10n.string("error.generic.try_again"),
                     style: .alert,
                     actionTitle: "Retry"
                 )
@@ -107,7 +107,7 @@ enum AppError: Error {
                     return offlineMessage(style: .toast)
                 }
                 return UserFacingMessage(
-                    title: "Couldn't load history",
+                    title: L10n.string("error.load_history.title"),
                     message: "Check your connection, then retry.",
                     style: .toast,
                     actionTitle: "Retry"
@@ -117,7 +117,7 @@ enum AppError: Error {
                     return offlineMessage(style: .toast)
                 }
                 return UserFacingMessage(
-                    title: "Couldn't load trends",
+                    title: L10n.string("error.load_trends.title"),
                     message: "Check your connection, then retry.",
                     style: .toast,
                     actionTitle: "Retry"
@@ -127,7 +127,7 @@ enum AppError: Error {
                     return offlineMessage(style: .toast)
                 }
                 return UserFacingMessage(
-                    title: "Couldn't load analytics",
+                    title: L10n.string("error.load_analytics.title"),
                     message: "Check your connection, then retry.",
                     style: .toast,
                     actionTitle: "Retry"
@@ -138,22 +138,22 @@ enum AppError: Error {
                     switch exportError {
                     case .noRecords:
                         return UserFacingMessage(
-                            title: "Nothing to export",
-                            message: "No records found.",
+                            title: L10n.string("error.nothing_to_export.title"),
+                            message: L10n.string("error.nothing_to_export.message"),
                             style: .alert
                         )
                     case .writeFailed:
                         return UserFacingMessage(
-                            title: "Export failed",
-                            message: "Could not generate the export file.",
+                            title: L10n.string("error.export_failed.title"),
+                            message: L10n.string("error.generic.try_again"),
                             style: .alert,
                             actionTitle: "Retry"
                         )
                     }
                 }
                 return UserFacingMessage(
-                    title: "Export failed",
-                    message: "Could not generate the export file.",
+                    title: L10n.string("error.export_failed.title"),
+                    message: L10n.string("error.generic.try_again"),
                     style: .alert,
                     actionTitle: "Retry"
                 )
@@ -164,8 +164,8 @@ enum AppError: Error {
                 return offlineMessage(style: .alert)
             }
             return UserFacingMessage(
-                title: "Something went wrong",
-                message: "Please try again.",
+                title: L10n.string("error.unknown.title"),
+                message: L10n.string("error.generic.try_again"),
                 style: .alert,
                 actionTitle: "Retry"
             )
@@ -193,3 +193,4 @@ private extension AppError {
         )
     }
 }
+

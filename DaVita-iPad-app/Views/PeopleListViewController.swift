@@ -146,12 +146,13 @@ import UIKit
                 )
             )
 
-        case .error:
+        case .error(let error):
+            let ui = error.userFacing
             tableViewRef.setBackgroundState(
                 .error(
-                    title: "Couldn't load people",
-                    message: "Please try again.",
-                    actionTitle: "Retry",
+                    title: ui.title,
+                    message: ui.message,
+                    actionTitle: ui.actionTitle ?? "Retry",
                     onAction: { [weak self] in self?.viewModel.refresh() }
                 )
             )

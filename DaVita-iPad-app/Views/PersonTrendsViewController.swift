@@ -12,7 +12,7 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         case loading
         case empty
         case loaded(CheckInTrendsProvider.PersonTrends)
-        case error(title: String, message: String)
+        case error(AppError)
     }
 
     private var state: ViewState = .loading
@@ -46,8 +46,9 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             trends = try trendsProvider.computeTrends(for: person, windowDays: windowDays, maxRecords: 250)
         } catch {
             AppLog.persistence.error("Failed to compute trends: \(error, privacy: .private)")
-            present(appError: AppError(operation: .loadTrends, underlying: error))
-            state = .error(title: "Couldn't load trends", message: "Please try again.")
+            let appError = AppError(operation: .loadTrends, underlying: error)
+            present(appError: appError)
+            state = .error(appError)
             render()
             return
         }
@@ -75,12 +76,13 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             )
             return
 
-        case .error(let title, let message):
+        case .error(let appError):
+            let ui = appError.userFacing
             contentStackView.addArrangedSubview(
                 StateView(model: .error(
-                    title: title,
-                    message: message,
-                    actionTitle: "Retry",
+                    title: ui.title,
+                    message: ui.message,
+                    actionTitle: ui.actionTitle ?? "Retry",
                     onAction: { [weak self] in self?.reloadTrends() }
                 ))
             )

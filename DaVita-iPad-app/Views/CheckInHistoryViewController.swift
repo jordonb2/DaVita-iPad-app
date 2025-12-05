@@ -102,11 +102,20 @@ final class CheckInHistoryViewController: StandardTableViewController, NSFetched
             tableView.reloadData()
         } catch {
             AppLog.persistence.error("History FRC setup error: \(error, privacy: .private)")
-            present(appError: AppError(operation: .loadHistory, underlying: error))
+            let appError = AppError(operation: .loadHistory, underlying: error)
+            present(appError: appError)
             frc = nil
-            tableView.setBackgroundState(.error(title: "Couldn't load history", message: "Please try again." , actionTitle: "Retry") { [weak self] in
-                self?.configureFRC()
-            })
+            let ui = appError.userFacing
+            tableView.setBackgroundState(
+                .error(
+                    title: ui.title,
+                    message: ui.message,
+                    actionTitle: ui.actionTitle ?? "Retry",
+                    onAction: { [weak self] in
+                        self?.configureFRC()
+                    }
+                )
+            )
             tableView.reloadData()
         }
     }

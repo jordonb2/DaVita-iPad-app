@@ -40,7 +40,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
         case loading
         case empty
         case loaded(CheckInAnalyticsSummaryProvider.Summary)
-        case error(title: String, message: String)
+        case error(AppError)
     }
 
     private var state: ViewState = .loading
@@ -95,8 +95,9 @@ final class AnalyticsViewController: ScrolledStackViewController {
             summary = try summaryProvider.makeSummary(since: nil)
         } catch {
             AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .private)")
-            present(appError: AppError(operation: .loadAnalytics, underlying: error))
-            state = .error(title: "Couldn't load analytics", message: "Please try again.")
+            let appError = AppError(operation: .loadAnalytics, underlying: error)
+            present(appError: appError)
+            state = .error(appError)
             render()
             return
         }
@@ -129,12 +130,13 @@ final class AnalyticsViewController: ScrolledStackViewController {
             )
             return
 
-        case .error(let title, let message):
+        case .error(let appError):
+            let ui = appError.userFacing
             contentStackView.addArrangedSubview(
                 StateView(model: .error(
-                    title: title,
-                    message: message,
-                    actionTitle: "Retry",
+                    title: ui.title,
+                    message: ui.message,
+                    actionTitle: ui.actionTitle ?? "Retry",
                     onAction: { [weak self] in self?.reloadSummary() }
                 ))
             )
