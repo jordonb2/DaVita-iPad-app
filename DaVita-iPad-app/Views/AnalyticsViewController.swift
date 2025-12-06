@@ -9,6 +9,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private let summaryProvider: CheckInAnalyticsSummaryProviding
     private let exportService: ExportServicing
     private let historyViewControllerFactory: () -> CheckInHistoryViewController
+    private let summaryQueue = DispatchQueue(label: "com.davita.analytics.summary", qos: .userInitiated)
 
     enum ExportScope: Int, CaseIterable {
         case all
@@ -97,26 +98,38 @@ final class AnalyticsViewController: ScrolledStackViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(adminDidAutoLogout), name: .adminSessionDidAutoLogout, object: nil)
     }
 
-    private func loadSummaryAndRender() {
-        let summary: CheckInAnalyticsSummaryProvider.Summary
-        do {
-            summary = try summaryProvider.makeSummary(since: nil)
-        } catch {
-            AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .private)")
-            let appError = AppError(operation: .loadAnalytics, underlying: error)
-            present(appError: appError)
-            state = .error(appError)
-            render()
-            return
+    private func reloadSummary() {
+        state = .loading
+        DispatchQueue.main.async { [weak self] in
+            self?.render()
         }
 
-        let total = summary.totalPresented + summary.totalSubmitted + summary.totalSkipped + summary.totalDismissed
-        state = (total == 0) ? .empty : .loaded(summary)
-        render()
-    }
+        summaryQueue.async { [weak self] in
+            guard let self else { return }
 
-    private func reloadSummary() {
-        loadSummaryAndRender()
+            let result: Result<CheckInAnalyticsSummaryProvider.Summary, Error>
+            do {
+                let summary = try self.summaryProvider.makeSummary(since: nil)
+                result = .success(summary)
+            } catch {
+                result = .failure(error)
+            }
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                switch result {
+                case .success(let summary):
+                    let total = summary.totalPresented + summary.totalSubmitted + summary.totalSkipped + summary.totalDismissed
+                    self.state = (total == 0) ? .empty : .loaded(summary)
+                case .failure(let error):
+                    AppLog.analytics.error("Failed to load analytics summary: \(error, privacy: .private)")
+                    let appError = AppError(operation: .loadAnalytics, underlying: error)
+                    self.present(appError: appError)
+                    self.state = .error(appError)
+                }
+                self.render()
+            }
+        }
     }
 
     private func render() {

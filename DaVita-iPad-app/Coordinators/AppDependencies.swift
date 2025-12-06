@@ -75,6 +75,7 @@ struct AppDependencies {
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
         let personService: PersonServicing = PersonService(coreDataStack: coreDataStack)
+        let analyticsSummaryOptions = CheckInAnalyticsSummaryProvider.Options.dashboardDefault()
 
         self.coreDataStack = coreDataStack
         self.adminSession = adminSession
@@ -84,9 +85,8 @@ struct AppDependencies {
 
         self.peopleRepo = peopleRepo
         self.personService = personService
-
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
-        self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(context: coreDataStack.viewContext) }
+        self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }
     }
 

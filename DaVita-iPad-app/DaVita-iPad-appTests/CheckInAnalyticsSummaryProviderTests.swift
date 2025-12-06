@@ -86,5 +86,44 @@ final class CheckInAnalyticsSummaryProviderTests: XCTestCase {
         XCTAssertTrue(summary.submissionsByDaypart.isEmpty)
         XCTAssertEqual(summary.averageCompletionSeconds, 5)
     }
+
+    func testSampleLimitUsesNewestEventsOnly() throws {
+        let stack = TestCoreDataStack()
+        let ctx = stack.viewContext
+        let provider = CheckInAnalyticsSummaryProvider(coreDataStack: stack)
+
+        try ctx.performAndWaitThrowing {
+            for i in 0..<5 {
+                let event = CheckInAnalyticsEvent(context: ctx)
+                event.id = UUID()
+                event.createdAt = Date().addingTimeInterval(TimeInterval(-i * 60))
+                event.eventTypeEnum = .submitted
+                event.durationSeconds = Double(i)
+            }
+            try ctx.save()
+        }
+
+        let summary = try provider.makeSummary(since: nil, sampleLimit: 2)
+        XCTAssertEqual(summary.totalSubmitted, 2)
+        XCTAssertEqual(summary.totalPresented, 2)
+    }
+
+    func testInvalidEventTypesAreIgnored() throws {
+        let stack = TestCoreDataStack()
+        let ctx = stack.viewContext
+        let provider = CheckInAnalyticsSummaryProvider(context: ctx)
+
+        try ctx.performAndWaitThrowing {
+            let event = CheckInAnalyticsEvent(context: ctx)
+            event.id = UUID()
+            event.createdAt = Date()
+            event.eventType = "legacy_invalid"
+            try ctx.save()
+        }
+
+        let summary = try provider.makeSummary(since: nil)
+        XCTAssertEqual(summary.totalSubmitted, 0)
+        XCTAssertEqual(summary.totalPresented, 0)
+    }
 }
 
