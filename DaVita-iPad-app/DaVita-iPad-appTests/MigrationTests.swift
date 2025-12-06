@@ -95,6 +95,38 @@ final class MigrationTests: XCTestCase {
         XCTAssertEqual(desc?.shouldMigrateStoreAutomatically, true)
         XCTAssertEqual(desc?.shouldInferMappingModelAutomatically, true)
     }
+
+    func testPersonLowercasedNameAttributeIndexed() throws {
+        guard let model = NSManagedObjectModel.mergedModel(from: [Bundle(for: CoreDataStack.self)]) else {
+            XCTFail("Failed to load current model")
+            return
+        }
+        let person = try XCTUnwrap(model.entitiesByName["Person"])
+        let attr = try XCTUnwrap(person.attributesByName["nameLowercased"])
+        XCTAssertEqual(attr.attributeType, .stringAttributeType)
+        XCTAssertTrue(attr.isIndexed)
+    }
+
+    func testDataIntegrityBackfillsLowercasedNames() throws {
+        let stack = TestCoreDataStack()
+        let ctx = stack.viewContext
+        let service = DataIntegrityService(coreDataStack: stack)
+
+        let person = try ctx.performAndWaitThrowing { () -> Person in
+            let p = Person(context: ctx)
+            p.id = UUID()
+            p.createdAt = Date()
+            p.name = "MiXeD Name"
+            p.nameLowercasedValue = nil
+            try ctx.save()
+            return p
+        }
+
+        try service.runSynchronously(on: ctx)
+
+        let refreshed = try XCTUnwrap(ctx.existingObject(with: person.objectID) as? Person)
+        XCTAssertEqual(refreshed.nameLowercasedValue, "mixed name")
+    }
 }
 
 

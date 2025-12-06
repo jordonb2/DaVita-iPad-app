@@ -14,6 +14,7 @@ final class ExportServiceTests: XCTestCase {
         person.id = UUID()
         person.createdAt = Date()
         person.name = "Charlie"
+        person.nameLowercasedValue = Person.normalizedLowercasedName(from: person.name)
 
         let now = Date()
         let includeDate = now

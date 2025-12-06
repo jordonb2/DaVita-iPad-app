@@ -21,8 +21,8 @@ final class PersonRepository: PersonRepositorying {
     func makePeopleFRC(delegate: NSFetchedResultsControllerDelegate?) -> NSFetchedResultsController<Person> {
         let fetch: NSFetchRequest<Person> = Person.fetchRequest()
         fetch.sortDescriptors = [
-            NSSortDescriptor(key: "createdAt", ascending: false),
-            NSSortDescriptor(key: "name", ascending: true)
+            NSSortDescriptor(key: "nameLowercased", ascending: true),
+            NSSortDescriptor(key: "createdAt", ascending: false)
         ]
         // Stream results in batches to keep memory stable for large datasets.
         fetch.fetchBatchSize = 50
@@ -48,6 +48,7 @@ final class PersonRepository: PersonRepositorying {
         p.id = id
         p.createdAt = createdAt
         p.name = name
+        p.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
         p.genderEnum = gender
         p.dob = dob
 #if DEBUG

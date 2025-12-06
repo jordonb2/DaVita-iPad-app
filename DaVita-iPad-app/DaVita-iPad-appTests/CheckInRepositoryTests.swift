@@ -13,6 +13,7 @@ final class CheckInRepositoryTests: XCTestCase {
         person.id = UUID()
         person.createdAt = Date()
         person.name = "Alice"
+        person.nameLowercasedValue = Person.normalizedLowercasedName(from: person.name)
 
         let now = Date()
         let older = now.addingTimeInterval(-7 * 24 * 60 * 60)
@@ -44,6 +45,7 @@ final class CheckInRepositoryTests: XCTestCase {
         person.id = UUID()
         person.createdAt = Date()
         person.name = "Bob"
+        person.nameLowercasedValue = Person.normalizedLowercasedName(from: person.name)
 
         let now = Date()
         let r1 = repo.createRecord(createdAt: now, for: person, data: PersonCheckInData(painLevel: 1, energyBucket: .okay, moodBucket: .neutral, symptoms: nil, concerns: nil, teamNote: nil))
@@ -70,6 +72,7 @@ final class CheckInRepositoryTests: XCTestCase {
         person.id = UUID()
         person.createdAt = Date()
         person.name = "PerPerson"
+        person.nameLowercasedValue = Person.normalizedLowercasedName(from: person.name)
 
         let now = Date()
         var createdIds: [UUID] = []
@@ -94,3 +97,29 @@ final class CheckInRepositoryTests: XCTestCase {
     }
 }
 
+
+final class PersonRepositoryTests: XCTestCase {
+
+    func testPeopleFRCUsesDerivedSortAndBatching() throws {
+        let stack = TestCoreDataStack()
+        let repo = PersonRepository(context: stack.viewContext)
+
+        let frc = repo.makePeopleFRC(delegate: nil)
+        let fetch = frc.fetchRequest
+
+        let sorts = fetch.sortDescriptors ?? []
+        XCTAssertEqual(sorts.first?.key, "nameLowercased")
+        XCTAssertEqual(sorts.first?.ascending, true)
+        XCTAssertEqual(sorts.dropFirst().first?.key, "createdAt")
+        XCTAssertEqual(sorts.dropFirst().first?.ascending, false)
+        XCTAssertEqual(fetch.fetchBatchSize, 50)
+    }
+
+    func testCreatePersonSetsLowercasedSortKey() throws {
+        let stack = TestCoreDataStack()
+        let repo = PersonRepository(context: stack.viewContext)
+
+        let person = repo.createPerson(name: "  Alice Smith  ", gender: nil, dob: nil)
+        XCTAssertEqual(person.nameLowercasedValue, "alice smith")
+    }
+}

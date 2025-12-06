@@ -7,6 +7,18 @@ extension Person {
         let accessibilityLabel: String
     }
 
+    /// Lowercased, sanitized name used for indexed sorting.
+    var nameLowercasedValue: String? {
+        get { value(forKey: "nameLowercased") as? String }
+        set { setValue(newValue, forKey: "nameLowercased") }
+    }
+
+    /// Normalizes the given raw name to a lowercased, single-line token for sorting.
+    static func normalizedLowercasedName(from raw: String?) -> String? {
+        guard let sanitized = InputSanitizer.personName(raw) else { return nil }
+        return sanitized.lowercased()
+    }
+
     /// Cached DOB+Age display strings for list rendering.
     ///
     /// Cache key includes:

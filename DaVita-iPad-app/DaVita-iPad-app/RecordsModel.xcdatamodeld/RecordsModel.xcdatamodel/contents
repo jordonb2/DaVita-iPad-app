@@ -6,6 +6,7 @@
         <attribute name="gender" optional="YES" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
+        <attribute name="nameLowercased" optional="YES" attributeType="String" indexed="YES"/>
         <attribute name="checkInPain" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="checkInEnergy" optional="YES" attributeType="String"/>
         <attribute name="checkInEnergyBucket" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>

@@ -16,7 +16,9 @@ enum TestUtilities {
         createdAt: Date = Date()
     ) -> Person {
         let repo = PersonRepository(context: context)
-        return repo.createPerson(id: id, createdAt: createdAt, name: name, gender: gender, dob: dob)
+        let person = repo.createPerson(id: id, createdAt: createdAt, name: name, gender: gender, dob: dob)
+        person.nameLowercasedValue = Person.normalizedLowercasedName(from: person.name)
+        return person
     }
 
     /// Creates a check-in record for a person in the provided context.

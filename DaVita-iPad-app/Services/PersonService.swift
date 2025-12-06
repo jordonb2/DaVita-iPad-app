@@ -39,6 +39,7 @@ final class PersonService: PersonServicing {
             guard let person = try ctx.existingObject(with: personID) as? Person else { return }
 
             person.name = name
+            person.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
             person.genderEnum = gender
             person.dob = dob
 

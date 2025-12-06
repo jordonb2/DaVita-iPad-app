@@ -21,20 +21,38 @@ final class DataIntegrityService {
         ctx.perform { [weak self] in
             guard let self else { return }
             do {
-                try self.repairMissingRequiredFields(in: ctx)
-                try self.reconcileDenormalizedLatestCheckInFields(in: ctx)
-                try self.logDuplicateIDsIfAny(in: ctx)
-
-                if ctx.hasChanges {
-                    try ctx.save()
-                }
+                try self.process(in: ctx)
             } catch {
                 AppLog.persistence.error("Data integrity check failed: \(error, privacy: .private)")
             }
         }
     }
 
+    /// Synchronous runner for tests or foreground diagnostics.
+    func runSynchronously(on context: NSManagedObjectContext) throws {
+        var thrown: Error?
+        context.performAndWait {
+            do {
+                try self.process(in: context)
+            } catch {
+                thrown = error
+            }
+        }
+        if let thrown { throw thrown }
+    }
+
     // MARK: - Repairs
+
+    private func process(in ctx: NSManagedObjectContext) throws {
+        try repairMissingRequiredFields(in: ctx)
+        try repairPersonDerivedNameLowercased(in: ctx)
+        try reconcileDenormalizedLatestCheckInFields(in: ctx)
+        try logDuplicateIDsIfAny(in: ctx)
+
+        if ctx.hasChanges {
+            try ctx.save()
+        }
+    }
 
     private func repairMissingRequiredFields(in ctx: NSManagedObjectContext) throws {
         try repair(entityName: "Person", in: ctx)
@@ -68,6 +86,26 @@ final class DataIntegrityService {
         }
 
         AppLog.persistence.warning("Repaired missing required fields for \(objects.count, privacy: .public) \(entityName, privacy: .public) object(s)")
+    }
+
+    private func repairPersonDerivedNameLowercased(in ctx: NSManagedObjectContext) throws {
+        let req: NSFetchRequest<Person> = Person.fetchRequest()
+        req.fetchBatchSize = 200
+        let people = try ctx.fetch(req)
+        guard !people.isEmpty else { return }
+
+        var updated = 0
+        for person in people {
+            let normalized = Person.normalizedLowercasedName(from: person.name)
+            if person.nameLowercasedValue != normalized {
+                person.nameLowercasedValue = normalized
+                updated += 1
+            }
+        }
+
+        if updated > 0 {
+            AppLog.persistence.warning("Repaired lowercased name sort key for \(updated, privacy: .public) person(s)")
+        }
     }
 
     // MARK: - Denormalized "latest" reconciliation
