@@ -67,7 +67,7 @@ struct AppDependencies {
         )
         let coreDataStack: CoreDataStacking = CoreDataStack()
         let adminSession: AdminSessioning = AdminSession(defaultTimeoutSeconds: resolvedTimeout)
-        let adminAuthenticator: AdminAuthenticating = AdminAuthenticator()
+        let adminAuthenticator: AdminAuthenticating = AdminAuthenticator(credentialsProvider: DefaultAdminCredentialsProvider())
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
 
         // Fire-and-forget integrity repair (background context).

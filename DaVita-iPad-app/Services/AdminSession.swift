@@ -32,6 +32,19 @@ struct AdminCredentials {
     )
 }
 
+protocol AdminCredentialsProviding {
+    func loadCredentials() -> AdminCredentials
+}
+
+struct DefaultAdminCredentialsProvider: AdminCredentialsProviding {
+    func loadCredentials() -> AdminCredentials {
+        if let stored = AdminCredentialStore.load() {
+            return AdminCredentials(usernameHashHex: stored.usernameHashHex, passwordHashHex: stored.passwordHashHex)
+        }
+        return .default
+    }
+}
+
 struct AdminAuthRateLimit {
     let maxAttempts: Int
     let window: TimeInterval
@@ -58,7 +71,7 @@ final class AdminAuthenticator: AdminAuthenticating {
         var lockoutUntil: TimeInterval?
     }
 
-    private let credentials: AdminCredentials
+    private let credentialsProvider: AdminCredentialsProviding
     private let defaults: UserDefaults
     private let now: () -> Date
     private let rateLimit: AdminAuthRateLimit
@@ -67,12 +80,12 @@ final class AdminAuthenticator: AdminAuthenticating {
     private let failedAttemptsKey = "AdminAuthenticator.failedAttempts"
     private let lockoutUntilKey = "AdminAuthenticator.lockoutUntil"
 
-    init(credentials: AdminCredentials = .default,
+    init(credentialsProvider: AdminCredentialsProviding = DefaultAdminCredentialsProvider(),
          userDefaults: UserDefaults = .standard,
          now: @escaping () -> Date = { Date() },
          rateLimit: AdminAuthRateLimit = .default,
          lockoutPolicy: AdminAuthLockoutPolicy = .default) {
-        self.credentials = credentials
+        self.credentialsProvider = credentialsProvider
         self.defaults = userDefaults
         self.now = now
         self.rateLimit = rateLimit
@@ -111,10 +124,11 @@ final class AdminAuthenticator: AdminAuthenticating {
             return .locked(remaining: remaining)
         }
 
-        let attemptsWithinRateWindow = failures(within: rateLimit.window, from: state, now: currentDate)
-        if attemptsWithinRateWindow.count >= rateLimit.maxAttempts {
-            let retryAfter = rateLimitRetryAfterSeconds(failures: attemptsWithinRateWindow, now: currentDate, window: rateLimit.window)
+        let attemptsWithinRateWindow = failures(within: self.rateLimit.window, from: state, now: currentDate)
+        if attemptsWithinRateWindow.count >= self.rateLimit.maxAttempts {
+            let retryAfter = rateLimitRetryAfterSeconds(failures: attemptsWithinRateWindow, now: currentDate, window: self.rateLimit.window)
             save(state)
+            AppLog.analytics.warning("admin_auth result=rate_limited retry_after=\(retryAfter, privacy: .public)")
             return .rateLimited(retryAfter: retryAfter)
         }
 
@@ -124,27 +138,32 @@ final class AdminAuthenticator: AdminAuthenticating {
         let usernameHash = sha256(normalizedUsername)
         let passwordHash = sha256(normalizedPassword)
 
+        let credentials = credentialsProvider.loadCredentials()
+
         if timingSafeEquals(usernameHash, credentials.usernameHash) &&
             timingSafeEquals(passwordHash, credentials.passwordHash) {
             state.failedAttempts = []
             state.lockoutUntil = nil
             save(state)
+            AppLog.analytics.info("admin_auth result=success")
             return .success
         }
 
         state.failedAttempts.append(currentDate.timeIntervalSince1970)
         state.failedAttempts = pruneAttempts(state.failedAttempts, now: currentDate)
 
-        let failuresInLockoutWindow = failures(within: lockoutPolicy.window, from: state, now: currentDate)
-        if failuresInLockoutWindow.count >= lockoutPolicy.maxFailures {
-            let until = currentDate.addingTimeInterval(lockoutPolicy.duration).timeIntervalSince1970
+        let failuresInLockoutWindow = failures(within: self.lockoutPolicy.window, from: state, now: currentDate)
+        if failuresInLockoutWindow.count >= self.lockoutPolicy.maxFailures {
+            let until = currentDate.addingTimeInterval(self.lockoutPolicy.duration).timeIntervalSince1970
             state.lockoutUntil = until
             save(state)
-            return .locked(remaining: lockoutPolicy.duration)
+            AppLog.analytics.warning("admin_auth result=locked duration=\(self.lockoutPolicy.duration, privacy: .public)")
+            return .locked(remaining: self.lockoutPolicy.duration)
         }
 
-        let attemptsRemaining = max(lockoutPolicy.maxFailures - failuresInLockoutWindow.count, 0)
+        let attemptsRemaining = max(self.lockoutPolicy.maxFailures - failuresInLockoutWindow.count, 0)
         save(state)
+        AppLog.analytics.warning("admin_auth result=invalid attempts_remaining=\(attemptsRemaining, privacy: .public)")
         return .invalid(attemptsRemaining: attemptsRemaining)
     }
 
