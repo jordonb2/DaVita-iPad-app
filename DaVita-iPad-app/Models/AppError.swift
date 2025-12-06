@@ -142,7 +142,14 @@ enum AppError: Error {
                             message: "No records found.",
                             style: .alert
                         )
-                    case .writeFailed:
+                    case .tooLarge:
+                        return UserFacingMessage(
+                            title: "Export too large",
+                            message: "Try a smaller date range and export again.",
+                            style: .alert,
+                            actionTitle: "Retry"
+                        )
+                    case .writeFailed, .chunkingFailed:
                         return UserFacingMessage(
                             title: "Export failed",
                             message: "Could not generate the export file.",

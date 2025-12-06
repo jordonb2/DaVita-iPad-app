@@ -12,6 +12,15 @@ final class ExportService: ExportServicing {
     enum ExportError: Error {
         case noRecords
         case writeFailed
+        case tooLarge
+        case chunkingFailed
+    }
+
+    private enum Limits {
+        /// Hard cap for any single export (approx bytes on disk).
+        static let maxExportBytes: Int64 = 15 * 1024 * 1024 // 15 MB
+        /// PDF safety cap (records).
+        static let maxPdfRecords: Int = 5_000
     }
 
     private let context: NSManagedObjectContext
@@ -53,8 +62,16 @@ final class ExportService: ExportServicing {
         let records = try repo.fetchVisits(filter: filter)
         guard !records.isEmpty else { throw ExportError.noRecords }
 
+        // Estimate size up front to enforce cap.
+        let estimatedBytes = estimateCsvBytes(recordCount: records.count)
+        if estimatedBytes > Limits.maxExportBytes {
+            throw ExportError.tooLarge
+        }
+
         let url = try makeExportURL(ext: "csv")
-        return try writeCSV(records: records, to: url)
+        let written = try writeCSV(records: records, to: url)
+        try applyFileProtection(at: written)
+        return written
     }
 
     // MARK: - PDF
@@ -64,6 +81,9 @@ final class ExportService: ExportServicing {
         let repo = CheckInRepository(context: context)
         let records = try repo.fetchVisits(filter: filter)
         guard !records.isEmpty else { throw ExportError.noRecords }
+        if records.count > Limits.maxPdfRecords {
+            throw ExportError.tooLarge
+        }
 
         let url = try makeExportURL(ext: "pdf")
 
@@ -128,6 +148,7 @@ final class ExportService: ExportServicing {
                     y += 14
                 }
             })
+            try applyFileProtection(at: url)
             return url
         } catch {
             throw ExportError.writeFailed
@@ -185,6 +206,7 @@ final class ExportService: ExportServicing {
 
     private func prepareExportDirectory() throws {
         try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
+        try applyFileProtection(at: exportDirectory)
         cleanupOldExports()
     }
 
@@ -228,6 +250,7 @@ final class ExportService: ExportServicing {
         guard let headerData = header.data(using: .utf8) else { throw ExportError.writeFailed }
         try handle.write(contentsOf: headerData)
 
+        var bytesWritten: Int64 = Int64(headerData.count)
         for r in records {
             autoreleasepool {
                 let personName = r.person?.name ?? ""
@@ -262,10 +285,32 @@ final class ExportService: ExportServicing {
 
                 if let data = row.data(using: .utf8) {
                     try? handle.write(contentsOf: data)
+                    bytesWritten += Int64(data.count)
                 }
             }
+            if bytesWritten > Limits.maxExportBytes {
+                throw ExportError.tooLarge
+            }
         }
-
         return url
+    }
+
+    private func applyFileProtection(at url: URL) throws {
+        // On iOS 17+, fileProtection is get-only; use setAttributes instead.
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+                                              ofItemAtPath: url.path)
+
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+
+        var mutableURL = url
+        try mutableURL.setResourceValues(values)
+    }
+
+    private func estimateCsvBytes(recordCount: Int) -> Int64 {
+        // Rough estimate: header + ~200 bytes per record to decide on chunking.
+        let header = 22 * 12 // columns + commas
+        let perRecord = 200
+        return Int64(header + perRecord * recordCount)
     }
 }

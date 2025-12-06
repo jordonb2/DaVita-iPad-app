@@ -138,7 +138,9 @@ enum AppError: Error {
                     switch exportError {
                     case .noRecords:
                         return UserFacingMessage(title: L10n.string("error.nothing_to_export.title"), message: L10n.string("error.nothing_to_export.message"), style: .alert)
-                    case .writeFailed:
+                    case .tooLarge:
+                        return UserFacingMessage(title: "Export too large", message: "Try a smaller date range and export again.", style: .alert, actionTitle: "Retry")
+                    case .writeFailed, .chunkingFailed:
                         return UserFacingMessage(
                             title: L10n.string("error.export_failed.title"),
                             message: L10n.string("error.generic.try_again"),

@@ -270,6 +270,9 @@ final class AnalyticsViewController: ScrolledStackViewController {
             }
 
             let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+            activity.completionWithItemsHandler = { _, _, _, _ in
+                try? FileManager.default.removeItem(at: url)
+            }
             if let popover = activity.popoverPresentationController {
                 popover.sourceView = sourceView
                 popover.sourceRect = sourceView.bounds
