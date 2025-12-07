@@ -37,9 +37,9 @@ enum ValidationRules {
 
     enum CheckIn {
         // Keep these intentionally conservative; tune based on real-world usage.
-        static let maxSymptomsChars: Int = 1000
-        static let maxConcernsChars: Int = 1000
-        static let maxTeamNoteChars: Int = 1000
+        static let maxSymptomsChars: Int = 600
+        static let maxConcernsChars: Int = 600
+        static let maxTeamNoteChars: Int = 600
 
         static let painMin: Int16 = 0
         static let painMax: Int16 = 10
@@ -52,6 +52,14 @@ enum ValidationRules {
     enum CoreData {
         /// Identity fields that must always be present on persisted entities.
         static let requiredIdentityKeys: [String] = ["id", "createdAt"]
+    }
+
+    // MARK: - Contact fields
+
+    enum Contact {
+        static let emailMaxChars: Int = 254 // RFC guideline upper bound
+        static let urlMaxChars: Int = 2048  // conservative URL length cap
+        static let phoneMaxChars: Int = 32
     }
 }
 

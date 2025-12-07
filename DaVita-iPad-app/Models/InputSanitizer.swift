@@ -18,6 +18,41 @@ enum InputSanitizer {
         sanitizeSingleLine(raw, max: ValidationRules.Gender.maxChars, collapseWhitespace: true)
     }
 
+    // MARK: - Contact
+
+    static func email(_ raw: String?) -> String? {
+        let sanitized = sanitizeSingleLine(raw, max: ValidationRules.Contact.emailMaxChars, collapseWhitespace: true)
+        guard let sanitized else { return nil }
+        // Very lightweight check: must contain single "@", non-empty local/domain.
+        let parts = sanitized.split(separator: "@")
+        guard parts.count == 2, !parts[0].isEmpty, !parts[1].isEmpty else { return nil }
+        return sanitized.lowercased()
+    }
+
+    static func url(_ raw: String?) -> String? {
+        let sanitized = sanitizeSingleLine(raw, max: ValidationRules.Contact.urlMaxChars, collapseWhitespace: false)
+        guard let sanitized else { return nil }
+        // Basic normalization: prepend https if missing scheme.
+        if sanitized.contains("://") {
+            return sanitized
+        }
+        return "https://\(sanitized)"
+    }
+
+    static func phone(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        // Keep digits and leading plus; strip other characters.
+        var filtered = raw.filter { $0.isNumber || $0 == "+" }
+        if filtered.hasPrefix("+") {
+            // Keep only first plus.
+            filtered = "+" + filtered.dropFirst().filter { $0.isNumber }
+        }
+        if filtered.count > ValidationRules.Contact.phoneMaxChars {
+            filtered = String(filtered.prefix(ValidationRules.Contact.phoneMaxChars))
+        }
+        return filtered.isEmpty ? nil : filtered
+    }
+
     // MARK: - Keywords
 
     static func searchKeyword(_ raw: String?) -> String? {
