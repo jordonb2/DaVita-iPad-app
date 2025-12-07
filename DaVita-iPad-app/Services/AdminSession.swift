@@ -272,6 +272,10 @@ final class AdminSession: AdminSessioning {
     private var lastActivityDate: Date = Date()
     private var inactivityTimer: Timer?
 
+    deinit {
+        stopInactivityTimer()
+    }
+
     func configureAutoLogout(inactivityTimeoutSeconds: TimeInterval = AdminSession.defaultInactivityTimeoutSeconds) {
         self.inactivityTimeoutSeconds = max(AdminSession.minimumInactivityTimeoutSeconds, inactivityTimeoutSeconds)
         if isLoggedIn {

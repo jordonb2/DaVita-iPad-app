@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 
+@MainActor
 final class PeopleListViewModel: NSObject {
     /// Push-driven change notification for the owning view/controller.
     var onPeopleChanged: (([Person]) -> Void)?

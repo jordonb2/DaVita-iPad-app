@@ -2,6 +2,7 @@ import UIKit
 import Foundation
 
 /// Owns app start and wiring root navigation controller into routing.
+@MainActor
 final class AppCoordinator {
     private let window: UIWindow
     let dependencies: AppDependencies
