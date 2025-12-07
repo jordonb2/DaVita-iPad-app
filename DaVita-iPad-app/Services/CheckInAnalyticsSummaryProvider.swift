@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import OSLog
 
 protocol CheckInAnalyticsSummaryProviding {
     func makeSummary(since startDate: Date?, sampleLimit: Int?) throws -> CheckInAnalyticsSummaryProvider.Summary
@@ -135,8 +136,22 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
     // MARK: - Aggregates
 
     private func computeSummary(in context: NSManagedObjectContext, startDate: Date?, sampleLimit: Int?) throws -> Summary {
+        let signpostID: OSSignpostID
+        let signpostState: OSSignpostIntervalState?
+        if #available(iOS 15.0, *) {
+            signpostID = AppLog.signposter.makeSignpostID()
+            let sampleText = sampleLimit.map { "sample=\($0)" } ?? "sample=none"
+            signpostState = AppLog.signposter.beginInterval("Analytics Summary", id: signpostID, "\(sampleText)")
+        } else {
+            signpostID = .invalid
+            signpostState = nil
+        }
+
         let scope = try makeScope(in: context, startDate: startDate, sampleLimit: sampleLimit)
         guard scope.hasResults else {
+            if #available(iOS 15.0, *), let state = signpostState {
+                AppLog.signposter.endInterval("Analytics Summary", state, "result=empty")
+            }
             return .empty
         }
 
@@ -167,7 +182,7 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
         let highPainRate = submittedCount == 0 ? 0 : Double(highPainSubmitted) / Double(submittedCount)
         let lowEnergyRate = submittedCount == 0 ? 0 : Double(lowEnergySubmitted) / Double(submittedCount)
 
-        return Summary(
+        let result = Summary(
             totalPresented: presentedCount,
             totalSubmitted: submittedCount,
             totalSkipped: skippedCount,
@@ -183,6 +198,11 @@ final class CheckInAnalyticsSummaryProvider: CheckInAnalyticsSummaryProviding {
             concernCategoryCounts: categoryCounts.concernCounts,
             submissionsByDaypart: submissionsByDaypart
         )
+
+        if #available(iOS 15.0, *), let state = signpostState {
+            AppLog.signposter.endInterval("Analytics Summary", state, "submitted=\(submittedCount)")
+        }
+        return result
     }
 
     private func makeScope(in context: NSManagedObjectContext, startDate: Date?, sampleLimit: Int?) throws -> FetchScope {

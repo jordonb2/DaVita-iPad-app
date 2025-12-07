@@ -1,6 +1,7 @@
 import Foundation
 import CoreData
 import UIKit
+import OSLog
 
 /// Local-only exports (no network).
 protocol ExportServicing {
@@ -59,8 +60,24 @@ final class ExportService: ExportServicing {
     /// - Note: Intended for admin-only local export + share sheet.
     func exportCheckInsCSV(filter: CheckInHistoryFilter = CheckInHistoryFilter()) throws -> URL {
         let repo = CheckInRepository(context: context)
+
+        let signpostID: OSSignpostID
+        let signpostState: OSSignpostIntervalState?
+        if #available(iOS 15.0, *) {
+            signpostID = AppLog.signposter.makeSignpostID()
+            signpostState = AppLog.signposter.beginInterval("Export CSV", id: signpostID, "filter=\(self.exportFilterSummary(filter))")
+        } else {
+            signpostID = .invalid
+            signpostState = nil
+        }
+
         let records = try repo.fetchVisits(filter: filter)
-        guard !records.isEmpty else { throw ExportError.noRecords }
+        guard !records.isEmpty else {
+            if #available(iOS 15.0, *), let state = signpostState {
+                AppLog.signposter.endInterval("Export CSV", state, "result=empty")
+            }
+            throw ExportError.noRecords
+        }
 
         // Estimate size up front to enforce cap.
         let estimatedBytes = estimateCsvBytes(recordCount: records.count)
@@ -71,6 +88,9 @@ final class ExportService: ExportServicing {
         let url = try makeExportURL(ext: "csv")
         let written = try writeCSV(records: records, to: url)
         try applyFileProtection(at: written)
+        if #available(iOS 15.0, *), let state = signpostState {
+            AppLog.signposter.endInterval("Export CSV", state, "records=\(records.count)")
+        }
         return written
     }
 
@@ -79,8 +99,24 @@ final class ExportService: ExportServicing {
     /// Exports a simple PDF report of check-in records and returns a file URL.
     func exportCheckInsPDF(filter: CheckInHistoryFilter = CheckInHistoryFilter()) throws -> URL {
         let repo = CheckInRepository(context: context)
+
+        let signpostID: OSSignpostID
+        let signpostState: OSSignpostIntervalState?
+        if #available(iOS 15.0, *) {
+            signpostID = AppLog.signposter.makeSignpostID()
+            signpostState = AppLog.signposter.beginInterval("Export PDF", id: signpostID, "filter=\(self.exportFilterSummary(filter))")
+        } else {
+            signpostID = .invalid
+            signpostState = nil
+        }
+
         let records = try repo.fetchVisits(filter: filter)
-        guard !records.isEmpty else { throw ExportError.noRecords }
+        guard !records.isEmpty else {
+            if #available(iOS 15.0, *), let state = signpostState {
+                AppLog.signposter.endInterval("Export PDF", state, "result=empty")
+            }
+            throw ExportError.noRecords
+        }
         if records.count > Limits.maxPdfRecords {
             throw ExportError.tooLarge
         }
@@ -149,8 +185,14 @@ final class ExportService: ExportServicing {
                 }
             })
             try applyFileProtection(at: url)
+            if #available(iOS 15.0, *), let state = signpostState {
+                AppLog.signposter.endInterval("Export PDF", state, "records=\(records.count)")
+            }
             return url
         } catch {
+            if #available(iOS 15.0, *), let state = signpostState {
+                AppLog.signposter.endInterval("Export PDF", state, "result=error")
+            }
             throw ExportError.writeFailed
         }
     }
@@ -312,5 +354,25 @@ final class ExportService: ExportServicing {
         let header = 22 * 12 // columns + commas
         let perRecord = 200
         return Int64(header + perRecord * recordCount)
+    }
+
+    private func exportFilterSummary(_ filter: CheckInHistoryFilter) -> String {
+        var parts: [String] = []
+        if let start = filter.startDate {
+            parts.append("start=\(start.timeIntervalSince1970)")
+        }
+        if let end = filter.endDate {
+            parts.append("end=\(end.timeIntervalSince1970)")
+        }
+        if let keyword = filter.keyword {
+            parts.append("kw=\(AppLog.Redact.public(keyword, max: 16))")
+        }
+        if let limit = filter.limit {
+            parts.append("limit=\(limit)")
+        }
+        if let maxPerPerson = filter.maxRecordsPerPerson {
+            parts.append("perPerson=\(maxPerPerson)")
+        }
+        return parts.isEmpty ? "none" : parts.joined(separator: ";")
     }
 }
