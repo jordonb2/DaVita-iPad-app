@@ -66,6 +66,8 @@
 		F7D200230000000000000001 /* SmartRemindersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D200130000000000000001 /* SmartRemindersViewController.swift */; };
 		F7D300200000000000000001 /* SymptomGuidanceTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D300100000000000000001 /* SymptomGuidanceTip.swift */; };
 		F7D300210000000000000001 /* SymptomGuidanceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D300110000000000000001 /* SymptomGuidanceProvider.swift */; };
+		F7E400010000000000000001 /* EscalationRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E400000000000000000001 /* EscalationRuleEngine.swift */; };
+		F7E400030000000000000001 /* EscalationRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E400020000000000000001 /* EscalationRuleEngineTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -131,6 +133,8 @@
 		F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendSharingPreferencesStoreTests.swift; sourceTree = "<group>"; };
 		F7D300100000000000000001 /* SymptomGuidanceTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomGuidanceTip.swift; sourceTree = "<group>"; };
 		F7D300110000000000000001 /* SymptomGuidanceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomGuidanceProvider.swift; sourceTree = "<group>"; };
+		F7E400000000000000000001 /* EscalationRuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EscalationRuleEngine.swift; sourceTree = "<group>"; };
+		F7E400020000000000000001 /* EscalationRuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EscalationRuleEngineTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -267,6 +271,7 @@
 				F7D200110000000000000001 /* SmartReminderScheduler.swift */,
 				F7D200120000000000000001 /* SmartReminderManager.swift */,
 				F7D300110000000000000001 /* SymptomGuidanceProvider.swift */,
+				F7E400000000000000000001 /* EscalationRuleEngine.swift */,
 				F76E43102E95B100056439C /* PersonService.swift */,
 			);
 			path = Services;
@@ -305,6 +310,7 @@
 				F7C0AAB32F0001030056439C /* CheckInAnalyticsLoggerTests.swift */,
 				F7C0AAB52F0001040056439C /* InputSanitizerTests.swift */,
 				F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */,
+				F7E400020000000000000001 /* EscalationRuleEngineTests.swift */,
 				F7C0AAC32F0003010056439C /* TestUtilities.swift */,
 			);
 			path = "DaVita-iPad-appTests";
@@ -492,6 +498,7 @@
 				F7D200200000000000000001 /* SmartReminderSettings.swift in Sources */,
 				F7D200210000000000000001 /* SmartReminderScheduler.swift in Sources */,
 				F7D200220000000000000001 /* SmartReminderManager.swift in Sources */,
+				F7E400010000000000000001 /* EscalationRuleEngine.swift in Sources */,
 				F7D200230000000000000001 /* SmartRemindersViewController.swift in Sources */,
 				F7D300200000000000000001 /* SymptomGuidanceTip.swift in Sources */,
 				F7D300210000000000000001 /* SymptomGuidanceProvider.swift in Sources */,
@@ -512,6 +519,7 @@
 				F7C0AAB42F0001030056439C /* CheckInAnalyticsLoggerTests.swift in Sources */,
 				F7C0AAB62F0001040056439C /* InputSanitizerTests.swift in Sources */,
 				F7D100060000000000000001 /* TrendSharingPreferencesStoreTests.swift in Sources */,
+				F7E400030000000000000001 /* EscalationRuleEngineTests.swift in Sources */,
 				F7C0AAC42F0003010056439C /* TestUtilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

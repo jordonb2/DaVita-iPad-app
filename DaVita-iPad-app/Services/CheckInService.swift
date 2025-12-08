@@ -16,11 +16,14 @@ protocol CheckInServicing {
 final class CheckInService: CheckInServicing {
     private let coreDataStack: CoreDataStacking
     private let reminderHandler: SmartReminderHandling?
+    private let escalationHandler: EscalationHandling?
 
     init(coreDataStack: CoreDataStacking,
-         reminderHandler: SmartReminderHandling? = nil) {
+         reminderHandler: SmartReminderHandling? = nil,
+         escalationHandler: EscalationHandling? = nil) {
         self.coreDataStack = coreDataStack
         self.reminderHandler = reminderHandler
+        self.escalationHandler = escalationHandler
     }
 
     /// Writes a check-in by resolving `personID` into a background context, applying denormalized latest fields,
@@ -48,6 +51,7 @@ final class CheckInService: CheckInServicing {
         }
 
         reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: date)
+        escalationHandler?.handleCheckIn(personID: personID, data: sanitized, at: date)
     }
 
 

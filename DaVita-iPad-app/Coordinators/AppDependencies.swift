@@ -63,6 +63,7 @@ struct AppDependencies {
     let makeAnalyticsSummaryProvider: () -> CheckInAnalyticsSummaryProviding
     let makeExportService: () -> ExportServicing
     let symptomGuidanceProvider: SymptomGuidanceProviding
+    let escalationEngine: EscalationHandling
 
     init() {
         let resolvedTimeout = AppDependencies.resolveAdminInactivityTimeoutSeconds(
@@ -75,12 +76,13 @@ struct AppDependencies {
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
         let symptomGuidanceProvider: SymptomGuidanceProviding = SymptomGuidanceProvider()
         let smartReminderManager: SmartReminderManaging = SmartReminderManager()
+        let escalationEngine: EscalationHandling = EscalationRuleEngine(coreDataStack: coreDataStack)
 
         // Fire-and-forget integrity repair (background context).
         DataIntegrityService(coreDataStack: coreDataStack).runInBackground()
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
-        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager)
+        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager, escalationHandler: escalationEngine)
         let analyticsSummaryOptions = CheckInAnalyticsSummaryProvider.Options.dashboardDefault()
 
         self.coreDataStack = coreDataStack
@@ -93,6 +95,7 @@ struct AppDependencies {
         self.smartReminderManager = smartReminderManager
         self.personService = personService
         self.symptomGuidanceProvider = symptomGuidanceProvider
+        self.escalationEngine = escalationEngine
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }

@@ -12,51 +12,72 @@ protocol PersonServicing {
 final class PersonService: PersonServicing {
     private let coreDataStack: CoreDataStacking
     private let reminderHandler: SmartReminderHandling?
+    private let escalationHandler: EscalationHandling?
 
     init(coreDataStack: CoreDataStacking,
-         reminderHandler: SmartReminderHandling? = nil) {
+         reminderHandler: SmartReminderHandling? = nil,
+         escalationHandler: EscalationHandling? = nil) {
         self.coreDataStack = coreDataStack
         self.reminderHandler = reminderHandler
+        self.escalationHandler = escalationHandler
     }
 
     func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
         let name = InputSanitizer.personName(name) ?? ""
+        var personID: NSManagedObjectID?
+        var sanitizedCheckIn: PersonCheckInData?
+        let checkInDate = Date()
+
         try coreDataStack.performBackgroundTaskAndWait { ctx in
             let peopleRepo = PersonRepository(context: ctx)
             let person = peopleRepo.createPerson(name: name, gender: gender, dob: dob)
+            personID = person.objectID
 
             if let checkInData {
                 let sanitized = checkInData.sanitized()
+                sanitizedCheckIn = sanitized
                 applyLatestCheckInFields(to: person, data: sanitized)
-                _ = CheckInRepository(context: ctx).createRecord(createdAt: Date(), for: person, data: sanitized)
-                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: Date())
+                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: sanitized)
+                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: checkInDate)
             }
 
             try peopleRepo.save()
+        }
+
+        if let personID, let sanitizedCheckIn {
+            escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
         }
     }
 
     func updatePerson(personID: NSManagedObjectID, name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
         let name = InputSanitizer.personName(name) ?? ""
+        var sanitizedCheckIn: PersonCheckInData?
+        let checkInDate = Date()
+
         try coreDataStack.performBackgroundTaskAndWait { ctx in
             let peopleRepo = PersonRepository(context: ctx)
             guard let person = try ctx.existingObject(with: personID) as? Person else { return }
 
             person.name = name
             if person.entity.attributesByName["nameLowercased"] != nil {
-            person.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
+                person.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
             }
             person.genderEnum = gender
             person.dob = dob
 
             if let checkInData {
                 let sanitized = checkInData.sanitized()
+                sanitizedCheckIn = sanitized
                 applyLatestCheckInFields(to: person, data: sanitized)
-                _ = CheckInRepository(context: ctx).createRecord(createdAt: Date(), for: person, data: sanitized)
-                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: Date())
+                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: sanitized)
+                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: checkInDate)
             }
 
             try peopleRepo.save()
+        }
+
+        if let sanitizedCheckIn {
+            escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
         }
     }
 
