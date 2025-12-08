@@ -64,6 +64,8 @@
 		F7D200210000000000000001 /* SmartReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D200110000000000000001 /* SmartReminderScheduler.swift */; };
 		F7D200220000000000000001 /* SmartReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D200120000000000000001 /* SmartReminderManager.swift */; };
 		F7D200230000000000000001 /* SmartRemindersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D200130000000000000001 /* SmartRemindersViewController.swift */; };
+		F7D300200000000000000001 /* SymptomGuidanceTip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D300100000000000000001 /* SymptomGuidanceTip.swift */; };
+		F7D300210000000000000001 /* SymptomGuidanceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D300110000000000000001 /* SymptomGuidanceProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -127,6 +129,8 @@
 		F7D200120000000000000001 /* SmartReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartReminderManager.swift; sourceTree = "<group>"; };
 		F7D200130000000000000001 /* SmartRemindersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartRemindersViewController.swift; sourceTree = "<group>"; };
 		F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendSharingPreferencesStoreTests.swift; sourceTree = "<group>"; };
+		F7D300100000000000000001 /* SymptomGuidanceTip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomGuidanceTip.swift; sourceTree = "<group>"; };
+		F7D300110000000000000001 /* SymptomGuidanceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomGuidanceProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -241,6 +245,7 @@
 				F76E42E32E93C9010056439C /* TextCategorizer.swift */,
 				F76E42E52E93C9010056439C /* Daypart.swift */,
 				F7D200100000000000000001 /* SmartReminderSettings.swift */,
+				F7D300100000000000000001 /* SymptomGuidanceTip.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,6 +266,7 @@
 				F7D100030000000000000001 /* TrendSummaryPDFGenerator.swift */,
 				F7D200110000000000000001 /* SmartReminderScheduler.swift */,
 				F7D200120000000000000001 /* SmartReminderManager.swift */,
+				F7D300110000000000000001 /* SymptomGuidanceProvider.swift */,
 				F76E43102E95B100056439C /* PersonService.swift */,
 			);
 			path = Services;
@@ -487,6 +493,8 @@
 				F7D200210000000000000001 /* SmartReminderScheduler.swift in Sources */,
 				F7D200220000000000000001 /* SmartReminderManager.swift in Sources */,
 				F7D200230000000000000001 /* SmartRemindersViewController.swift in Sources */,
+				F7D300200000000000000001 /* SymptomGuidanceTip.swift in Sources */,
+				F7D300210000000000000001 /* SymptomGuidanceProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,6 +6,7 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     var onSkip: (() -> Void)?
 
     private let analyticsLogger: CheckInAnalyticsLogging
+    private let guidanceProvider: SymptomGuidanceProviding?
     private var surveyStartDate: Date?
     private var hasInteractedWithPain = false
     private var hasInteractedWithEnergy = false
@@ -15,8 +16,10 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private var hasInteractedWithTeamNote = false
     private var lastInteractedStep: CheckInAnalyticsStep?
 
-    init(analyticsLogger: CheckInAnalyticsLogging) {
+    init(analyticsLogger: CheckInAnalyticsLogging,
+         guidanceProvider: SymptomGuidanceProviding? = nil) {
         self.analyticsLogger = analyticsLogger
+        self.guidanceProvider = guidanceProvider
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -306,7 +309,9 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         let durationSeconds = surveyDurationSeconds ?? 0
         analyticsLogger.logSubmitted(checkInData: data, durationSeconds: durationSeconds)
 
-        onComplete?(data)
+        presentGuidanceIfNeeded(for: data) { [weak self] in
+            self?.onComplete?(data)
+        }
     }
 
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
@@ -317,5 +322,34 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
     private var surveyDurationSeconds: Double? {
         guard let surveyStartDate else { return nil }
         return Date().timeIntervalSince(surveyStartDate)
+    }
+
+    private func presentGuidanceIfNeeded(for data: PersonCheckInData, completion: @escaping () -> Void) {
+        guard let guidanceProvider else {
+            completion()
+            return
+        }
+
+        let symptomCategories = TextCategorizer.categorizeSymptoms(from: data.symptoms)
+        let concernCategories = TextCategorizer.categorizeConcerns(from: data.concerns)
+        let tips = guidanceProvider.tips(forSymptoms: symptomCategories, concerns: concernCategories)
+
+        guard !tips.isEmpty else {
+            completion()
+            return
+        }
+
+        let message = tips.prefix(3)
+            .map { "• \($0.title)\n\($0.body)" }
+            .joined(separator: "\n\n")
+        let alert = UIAlertController(
+            title: "Self-care tips",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Got it", style: .default) { _ in
+            completion()
+        })
+        present(alert, animated: true)
     }
 }

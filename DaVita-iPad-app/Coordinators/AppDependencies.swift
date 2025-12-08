@@ -62,6 +62,7 @@ struct AppDependencies {
     let makeTrendsProvider: () -> CheckInTrendsProviding
     let makeAnalyticsSummaryProvider: () -> CheckInAnalyticsSummaryProviding
     let makeExportService: () -> ExportServicing
+    let symptomGuidanceProvider: SymptomGuidanceProviding
 
     init() {
         let resolvedTimeout = AppDependencies.resolveAdminInactivityTimeoutSeconds(
@@ -72,6 +73,7 @@ struct AppDependencies {
         let adminSession: AdminSessioning = AdminSession(defaultTimeoutSeconds: resolvedTimeout)
         let adminAuthenticator: AdminAuthenticating = AdminAuthenticator(credentialsProvider: DefaultAdminCredentialsProvider())
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
+        let symptomGuidanceProvider: SymptomGuidanceProviding = SymptomGuidanceProvider()
         let smartReminderManager: SmartReminderManaging = SmartReminderManager()
 
         // Fire-and-forget integrity repair (background context).
@@ -90,6 +92,7 @@ struct AppDependencies {
         self.peopleRepo = peopleRepo
         self.smartReminderManager = smartReminderManager
         self.personService = personService
+        self.symptomGuidanceProvider = symptomGuidanceProvider
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }

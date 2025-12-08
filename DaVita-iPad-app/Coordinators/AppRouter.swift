@@ -26,6 +26,7 @@ final class AppRouter: AppRouting {
     private let adminSession: AdminSessioning
     private let adminAuthenticator: AdminAuthenticating
     private let analyticsLogger: CheckInAnalyticsLogging
+    private let guidanceProvider: SymptomGuidanceProviding?
     private let makeAnalyticsViewController: () -> AnalyticsViewController
     private let peopleFlowCoordinatorFactory: (AppRouting) -> PeopleFlowCoordinating
     private weak var presentedAdminNav: UINavigationController?
@@ -36,11 +37,13 @@ final class AppRouter: AppRouting {
     init(adminSession: AdminSessioning,
          adminAuthenticator: AdminAuthenticating,
          analyticsLogger: CheckInAnalyticsLogging,
+         guidanceProvider: SymptomGuidanceProviding?,
          makeAnalyticsViewController: @escaping () -> AnalyticsViewController,
          peopleFlowCoordinatorFactory: @escaping (AppRouting) -> PeopleFlowCoordinating) {
         self.adminSession = adminSession
         self.adminAuthenticator = adminAuthenticator
         self.analyticsLogger = analyticsLogger
+        self.guidanceProvider = guidanceProvider
         self.makeAnalyticsViewController = makeAnalyticsViewController
         self.peopleFlowCoordinatorFactory = peopleFlowCoordinatorFactory
 
@@ -140,7 +143,10 @@ final class AppRouter: AppRouting {
     func presentCheckIn(from presentingVC: UIViewController,
                         onComplete: @escaping (PersonCheckInData) -> Void,
                         onSkip: @escaping () -> Void) {
-        let checkInVC = CheckInJourneyViewController(analyticsLogger: analyticsLogger)
+        let checkInVC = CheckInJourneyViewController(
+            analyticsLogger: analyticsLogger,
+            guidanceProvider: guidanceProvider
+        )
         // Ensure the check-in modal consistently dismisses before notifying the caller.
         checkInVC.onComplete = { [weak presentingVC] data in
             presentingVC?.dismiss(animated: true) {

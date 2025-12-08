@@ -42,6 +42,7 @@ final class AppCoordinator {
             adminSession: dependencies.adminSession,
             adminAuthenticator: dependencies.adminAuthenticator,
             analyticsLogger: dependencies.analyticsLogger,
+            guidanceProvider: dependencies.symptomGuidanceProvider,
             makeAnalyticsViewController: makeAnalyticsVC,
             peopleFlowCoordinatorFactory: peopleFlowFactory
         )
