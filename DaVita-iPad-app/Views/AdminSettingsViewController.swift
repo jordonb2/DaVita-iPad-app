@@ -6,17 +6,20 @@ final class AdminSettingsViewController: UITableViewController {
         case privacy
         case export
         case autoLogout
+        case reminders
 
         var title: String {
             switch self {
             case .privacy: return "Privacy"
             case .export: return "Export defaults"
             case .autoLogout: return "Auto-logout"
+            case .reminders: return "Smart reminders"
             }
         }
     }
 
     private let adminSession: AdminSessioning
+    private let reminderManager: SmartReminderManaging?
 
     private let exportOptions: [(title: String, raw: Int, seconds: TimeInterval?)] = [
         ("All history", 0, nil),
@@ -30,8 +33,10 @@ final class AdminSettingsViewController: UITableViewController {
         ("15 minutes", 15 * 60)
     ]
 
-    init(adminSession: AdminSessioning) {
+    init(adminSession: AdminSessioning,
+         reminderManager: SmartReminderManaging? = nil) {
         self.adminSession = adminSession
+        self.reminderManager = reminderManager
         super.init(style: .insetGrouped)
         title = "Admin Settings"
     }
@@ -55,6 +60,7 @@ final class AdminSettingsViewController: UITableViewController {
         case .privacy: return 1
         case .export: return 1
         case .autoLogout: return 1
+        case .reminders: return 1
         }
     }
 
@@ -104,9 +110,27 @@ final class AdminSettingsViewController: UITableViewController {
                 control.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
                 control.trailingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.trailingAnchor)
             ])
+
+        case .reminders:
+            cell.textLabel?.text = "Smart reminders"
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         }
 
         return cell
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        guard let section = Section(rawValue: indexPath.section) else { return }
+        switch section {
+        case .reminders:
+            guard let reminderManager else { return }
+            let vc = SmartRemindersViewController(manager: reminderManager)
+            navigationController?.pushViewController(vc, animated: true)
+        default:
+            break
+        }
     }
 
     @objc private func privacyToggled(_ sender: UISwitch) {

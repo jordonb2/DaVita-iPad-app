@@ -11,9 +11,12 @@ protocol PersonServicing {
 /// Business logic layer for people + visit history.
 final class PersonService: PersonServicing {
     private let coreDataStack: CoreDataStacking
+    private let reminderHandler: SmartReminderHandling?
 
-    init(coreDataStack: CoreDataStacking) {
+    init(coreDataStack: CoreDataStacking,
+         reminderHandler: SmartReminderHandling? = nil) {
         self.coreDataStack = coreDataStack
+        self.reminderHandler = reminderHandler
     }
 
     func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
@@ -26,6 +29,7 @@ final class PersonService: PersonServicing {
                 let sanitized = checkInData.sanitized()
                 applyLatestCheckInFields(to: person, data: sanitized)
                 _ = CheckInRepository(context: ctx).createRecord(createdAt: Date(), for: person, data: sanitized)
+                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: Date())
             }
 
             try peopleRepo.save()
@@ -40,7 +44,7 @@ final class PersonService: PersonServicing {
 
             person.name = name
             if person.entity.attributesByName["nameLowercased"] != nil {
-                person.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
+            person.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
             }
             person.genderEnum = gender
             person.dob = dob
@@ -49,6 +53,7 @@ final class PersonService: PersonServicing {
                 let sanitized = checkInData.sanitized()
                 applyLatestCheckInFields(to: person, data: sanitized)
                 _ = CheckInRepository(context: ctx).createRecord(createdAt: Date(), for: person, data: sanitized)
+                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: Date())
             }
 
             try peopleRepo.save()

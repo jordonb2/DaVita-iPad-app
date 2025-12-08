@@ -20,6 +20,7 @@ final class AppCoordinator {
                 summaryProvider: dependencies.makeAnalyticsSummaryProvider(),
                 exportService: dependencies.makeExportService(),
                 historyViewControllerFactory: { makeHistoryVC(nil) },
+                reminderManager: dependencies.smartReminderManager,
                 defaultExportScope: AnalyticsViewController.ExportScope(rawValue: AdminSettings.defaultExportScopeRaw) ?? .all
             )
         }

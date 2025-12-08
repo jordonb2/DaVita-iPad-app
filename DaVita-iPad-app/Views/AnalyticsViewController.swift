@@ -9,6 +9,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     private let summaryProvider: CheckInAnalyticsSummaryProviding
     private let exportService: ExportServicing
     private let historyViewControllerFactory: () -> CheckInHistoryViewController
+    private let reminderManager: SmartReminderManaging
     private let summaryQueue = DispatchQueue(label: "com.davita.analytics.summary", qos: .userInitiated)
 
     enum ExportScope: Int, CaseIterable {
@@ -60,11 +61,13 @@ final class AnalyticsViewController: ScrolledStackViewController {
          summaryProvider: CheckInAnalyticsSummaryProviding,
          exportService: ExportServicing,
          historyViewControllerFactory: @escaping () -> CheckInHistoryViewController,
+         reminderManager: SmartReminderManaging,
          defaultExportScope: ExportScope = .all) {
         self.adminSession = adminSession
         self.summaryProvider = summaryProvider
         self.exportService = exportService
         self.historyViewControllerFactory = historyViewControllerFactory
+        self.reminderManager = reminderManager
         self.exportScope = defaultExportScope
         super.init(nibName: nil, bundle: nil)
     }
@@ -247,7 +250,7 @@ final class AnalyticsViewController: ScrolledStackViewController {
     }
 
     @objc private func settingsTapped() {
-        let settingsVC = AdminSettingsViewController(adminSession: adminSession)
+        let settingsVC = AdminSettingsViewController(adminSession: adminSession, reminderManager: reminderManager)
         navigationController?.pushViewController(settingsVC, animated: true)
     }
 

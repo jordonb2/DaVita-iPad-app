@@ -15,9 +15,12 @@ protocol CheckInServicing {
 /// - creating a `CheckInRecord` on a background context (to keep UI smooth)
 final class CheckInService: CheckInServicing {
     private let coreDataStack: CoreDataStacking
+    private let reminderHandler: SmartReminderHandling?
 
-    init(coreDataStack: CoreDataStacking) {
+    init(coreDataStack: CoreDataStacking,
+         reminderHandler: SmartReminderHandling? = nil) {
         self.coreDataStack = coreDataStack
+        self.reminderHandler = reminderHandler
     }
 
     /// Writes a check-in by resolving `personID` into a background context, applying denormalized latest fields,
@@ -43,6 +46,8 @@ final class CheckInService: CheckInServicing {
                 try ctx.save()
             }
         }
+
+        reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: date)
     }
 
 

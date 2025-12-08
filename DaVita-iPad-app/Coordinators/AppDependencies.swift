@@ -55,6 +55,9 @@ struct AppDependencies {
     let peopleRepo: PersonRepositorying
     let personService: PersonServicing
 
+    // Reminders
+    let smartReminderManager: SmartReminderManaging
+
     // Providers / exports
     let makeTrendsProvider: () -> CheckInTrendsProviding
     let makeAnalyticsSummaryProvider: () -> CheckInAnalyticsSummaryProviding
@@ -69,12 +72,13 @@ struct AppDependencies {
         let adminSession: AdminSessioning = AdminSession(defaultTimeoutSeconds: resolvedTimeout)
         let adminAuthenticator: AdminAuthenticating = AdminAuthenticator(credentialsProvider: DefaultAdminCredentialsProvider())
         let analyticsLogger: CheckInAnalyticsLogging = CheckInAnalyticsLogger(coreDataStack: coreDataStack)
+        let smartReminderManager: SmartReminderManaging = SmartReminderManager()
 
         // Fire-and-forget integrity repair (background context).
         DataIntegrityService(coreDataStack: coreDataStack).runInBackground()
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
-        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack)
+        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager)
         let analyticsSummaryOptions = CheckInAnalyticsSummaryProvider.Options.dashboardDefault()
 
         self.coreDataStack = coreDataStack
@@ -84,6 +88,7 @@ struct AppDependencies {
         self.analyticsLogger = analyticsLogger
 
         self.peopleRepo = peopleRepo
+        self.smartReminderManager = smartReminderManager
         self.personService = personService
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
