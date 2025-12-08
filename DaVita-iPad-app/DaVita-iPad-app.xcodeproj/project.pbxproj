@@ -57,6 +57,9 @@
 		F76E4C032EC300010056439C /* Person+Derived.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E4C022EC300010056439C /* Person+Derived.swift */; };
 		F76E48212EC000030056439C /* DataIntegrityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E48202EC000030056439C /* DataIntegrityService.swift */; };
 		F76E49012EC100000056439C /* MigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76E49002EC100000056439C /* MigrationTests.swift */; };
+		F7D100020000000000000001 /* TrendSharingPreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D100010000000000000001 /* TrendSharingPreferencesStore.swift */; };
+		F7D100040000000000000001 /* TrendSummaryPDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D100030000000000000001 /* TrendSummaryPDFGenerator.swift */; };
+		F7D100060000000000000001 /* TrendSharingPreferencesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -113,6 +116,9 @@
 		F76E4C002EC300000056439C /* DateDerived.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateDerived.swift; sourceTree = "<group>"; };
 		F76E4C022EC300010056439C /* Person+Derived.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Person+Derived.swift"; sourceTree = "<group>"; };
 		F76E48202EC000030056439C /* DataIntegrityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataIntegrityService.swift; sourceTree = "<group>"; };
+		F7D100010000000000000001 /* TrendSharingPreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendSharingPreferencesStore.swift; sourceTree = "<group>"; };
+		F7D100030000000000000001 /* TrendSummaryPDFGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendSummaryPDFGenerator.swift; sourceTree = "<group>"; };
+		F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendSharingPreferencesStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -241,6 +247,8 @@
 				F76E43442EA1C0A10056439C /* CheckInService.swift */,
 				F76E45002EA200010056439C /* CheckInTrendsProvider.swift */,
 				F76E46002EA210010056439C /* ExportService.swift */,
+				F7D100010000000000000001 /* TrendSharingPreferencesStore.swift */,
+				F7D100030000000000000001 /* TrendSummaryPDFGenerator.swift */,
 				F76E43102E95B100056439C /* PersonService.swift */,
 			);
 			path = Services;
@@ -278,6 +286,7 @@
 				F7C0AAB12F0001020056439C /* ExportServiceTests.swift */,
 				F7C0AAB32F0001030056439C /* CheckInAnalyticsLoggerTests.swift */,
 				F7C0AAB52F0001040056439C /* InputSanitizerTests.swift */,
+				F7D100050000000000000001 /* TrendSharingPreferencesStoreTests.swift */,
 				F7C0AAC32F0003010056439C /* TestUtilities.swift */,
 			);
 			path = "DaVita-iPad-appTests";
@@ -448,6 +457,8 @@
 				F76E43452EA1C0A10056439C /* CheckInService.swift in Sources */,
 				F76E45012EA200010056439C /* CheckInTrendsProvider.swift in Sources */,
 				F76E46012EA210010056439C /* ExportService.swift in Sources */,
+				F7D100020000000000000001 /* TrendSharingPreferencesStore.swift in Sources */,
+				F7D100040000000000000001 /* TrendSummaryPDFGenerator.swift in Sources */,
 				F76E46032EA210020056439C /* AppLog.swift in Sources */,
 				F76E48212EC000030056439C /* DataIntegrityService.swift in Sources */,
 				F76E43112E95B100056439C /* PersonService.swift in Sources */,
@@ -476,6 +487,7 @@
 				F7C0AAB22F0001020056439C /* ExportServiceTests.swift in Sources */,
 				F7C0AAB42F0001030056439C /* CheckInAnalyticsLoggerTests.swift in Sources */,
 				F7C0AAB62F0001040056439C /* InputSanitizerTests.swift in Sources */,
+				F7D100060000000000000001 /* TrendSharingPreferencesStoreTests.swift in Sources */,
 				F7C0AAC42F0003010056439C /* TestUtilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

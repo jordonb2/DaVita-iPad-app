@@ -1,4 +1,5 @@
 import UIKit
+import MessageUI
 
 /// Per-person trends computed from check-in history.
 final class PersonTrendsViewController: ScrolledStackViewController {
@@ -16,13 +17,69 @@ final class PersonTrendsViewController: ScrolledStackViewController {
     }
 
     private var state: ViewState = .loading
+    private let sharingStore: TrendSharingPreferencesStoring
+    private let pdfGenerator: TrendSummaryPDFGenerating
+    private var sharingPreferences: TrendSharingPreferences
+    private var currentTrends: CheckInTrendsProvider.PersonTrends?
+    private var pendingShareURL: URL?
+    private var hasPromptedThisSession = false
+
+    private lazy var statusDateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        df.timeStyle = .none
+        return df
+    }()
+
+    private lazy var shareToggle: UISwitch = {
+        let toggle = UISwitch()
+        toggle.addTarget(self, action: #selector(sharingToggleChanged(_:)), for: .valueChanged)
+        toggle.accessibilityLabel = "Enable monthly summary"
+        return toggle
+    }()
+
+    private lazy var recipientsField: UITextField = {
+        let field = UITextField()
+        field.placeholder = "Emails (comma separated)"
+        field.autocapitalizationType = .none
+        field.autocorrectionType = .no
+        field.keyboardType = .emailAddress
+        field.borderStyle = .roundedRect
+        field.delegate = self
+        return field
+    }()
+
+    private lazy var shareStatusLabel: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.textColor = UIFactory.Theme.Color.textSecondary
+        label.font = UIFactory.Theme.Font.preferred(.footnote)
+        label.adjustsFontForContentSizeCategory = true
+        return label
+    }()
+
+    private lazy var shareNowButton: UIButton = {
+        let button = UIFactory.roundedActionButton(title: "Send summary now")
+        button.addTarget(self, action: #selector(shareNowTapped(_:)), for: .touchUpInside)
+        button.accessibilityLabel = "Send monthly summary now"
+        return button
+    }()
 
     init(person: Person,
          windowDays: Int = 30,
-         trendsProvider: CheckInTrendsProviding) {
+         trendsProvider: CheckInTrendsProviding,
+         sharingStore: TrendSharingPreferencesStoring = TrendSharingPreferencesStore(),
+         pdfGenerator: TrendSummaryPDFGenerating = TrendSummaryPDFGenerator()) {
         self.person = person
         self.windowDays = windowDays
         self.trendsProvider = trendsProvider
+        self.sharingStore = sharingStore
+        self.pdfGenerator = pdfGenerator
+        if let id = person.id {
+            self.sharingPreferences = sharingStore.load(personID: id)
+        } else {
+            self.sharingPreferences = TrendSharingPreferences()
+        }
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -34,6 +91,11 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         super.viewDidLoad()
         title = "Trends"
         view.backgroundColor = UIFactory.Theme.Color.surface
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(shareNowFromNav))
+
+        shareToggle.isOn = sharingPreferences.isEnabled
+        recipientsField.text = sharingPreferences.recipients.joined(separator: ", ")
+        updateSharingUI()
 
         state = .loading
         render()
@@ -49,12 +111,15 @@ final class PersonTrendsViewController: ScrolledStackViewController {
             let appError = AppError(operation: .loadTrends, underlying: error)
             present(appError: appError)
             state = .error(appError)
+            currentTrends = nil
             render()
             return
         }
 
+        currentTrends = trends
         state = (trends.totalRecordsInWindow == 0) ? .empty : .loaded(trends)
         render()
+        maybePromptMonthlyShare()
     }
 
     private func render() {
@@ -105,6 +170,9 @@ final class PersonTrendsViewController: ScrolledStackViewController {
 
         contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Symptoms over time", textStyle: .title2))
         contentStackView.addArrangedSubview(symptomsCard(trends: trends))
+
+        contentStackView.addArrangedSubview(UIFactory.sectionHeader(text: "Share monthly summary", textStyle: .title2))
+        contentStackView.addArrangedSubview(sharingCard(trends: trends))
     }
 
     private func painCard(series: [CheckInTrendsProvider.Point]) -> UIView {
@@ -201,7 +269,171 @@ final class PersonTrendsViewController: ScrolledStackViewController {
         return UIFactory.card(stack)
     }
 
-    
+    private func sharingCard(trends: CheckInTrendsProvider.PersonTrends) -> UIView {
+        let stack = UIFactory.verticalStack(spacing: UIFactory.Theme.Spacing.m)
+
+        let blurb = UILabel()
+        blurb.numberOfLines = 0
+        blurb.textColor = UIFactory.Theme.Color.textSecondary
+        blurb.font = UIFactory.Theme.Font.preferred(.subheadline)
+        blurb.adjustsFontForContentSizeCategory = true
+        blurb.text = "Email a monthly PDF of pain, mood, and top symptom trends. Nothing is sent unless you opt in and press send."
+        stack.addArrangedSubview(blurb)
+
+        let toggleRow = UIStackView()
+        toggleRow.axis = .horizontal
+        toggleRow.alignment = .center
+        toggleRow.spacing = UIFactory.Theme.Spacing.m
+
+        let toggleLabel = UILabel()
+        toggleLabel.text = "Monthly summary"
+        toggleLabel.font = UIFactory.Theme.Font.preferred(.body)
+        toggleLabel.adjustsFontForContentSizeCategory = true
+        toggleRow.addArrangedSubview(toggleLabel)
+        toggleRow.addArrangedSubview(shareToggle)
+        stack.addArrangedSubview(toggleRow)
+
+        let recipientLabel = UILabel()
+        recipientLabel.text = "Share with (emails)"
+        recipientLabel.font = UIFactory.Theme.Font.preferred(.body)
+        recipientLabel.adjustsFontForContentSizeCategory = true
+
+        let recipientStack = UIFactory.verticalStack(spacing: UIFactory.Theme.Spacing.s)
+        recipientStack.addArrangedSubview(recipientLabel)
+        recipientStack.addArrangedSubview(recipientsField)
+        stack.addArrangedSubview(recipientStack)
+
+        stack.addArrangedSubview(shareStatusLabel)
+        stack.addArrangedSubview(shareNowButton)
+
+        return UIFactory.card(stack)
+    }
+
+    @objc private func sharingToggleChanged(_ sender: UISwitch) {
+        sharingPreferences.isEnabled = sender.isOn
+        savePreferences()
+        updateSharingUI()
+    }
+
+    @objc private func shareNowTapped(_ sender: UIButton) {
+        guard let trends = currentTrends else {
+            present(appError: .operation(.shareSummary, underlying: nil))
+            return
+        }
+        if sharingPreferences.recipients.isEmpty {
+            showToast(message: "Add at least one email to share.")
+            return
+        }
+        shareSummary(using: trends)
+    }
+
+    @objc private func shareNowFromNav() {
+        shareNowTapped(shareNowButton)
+    }
+
+    private func shareSummary(using trends: CheckInTrendsProvider.PersonTrends) {
+        do {
+            let url = try pdfGenerator.makePDF(person: person, trends: trends, windowDays: windowDays)
+            pendingShareURL = url
+            presentShareController(for: url, trends: trends)
+        } catch {
+            present(appError: AppError(operation: .shareSummary, underlying: error))
+        }
+    }
+
+    private func presentShareController(for url: URL, trends: CheckInTrendsProvider.PersonTrends) {
+        let subjectName = person.name?.isEmpty == false ? person.name! : "Patient"
+        let windowText = "\(statusDateFormatter.string(from: trends.windowStart)) – \(statusDateFormatter.string(from: trends.windowEnd))"
+        let body = """
+        Attached is the last \(windowDays)-day mood, pain, and symptom summary for \(subjectName).
+        Window: \(windowText)
+        """
+
+        if MFMailComposeViewController.canSendMail() {
+            let mail = MFMailComposeViewController()
+            mail.mailComposeDelegate = self
+            mail.setSubject("Monthly summary – \(subjectName)")
+            mail.setToRecipients(sharingPreferences.recipients)
+            mail.setMessageBody(body, isHTML: false)
+            if let data = try? Data(contentsOf: url) {
+                mail.addAttachmentData(data, mimeType: "application/pdf", fileName: url.lastPathComponent)
+            }
+            present(mail, animated: true)
+            return
+        }
+
+        let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        activity.completionWithItemsHandler = { [weak self] _, completed, _, _ in
+            self?.handleShareCompletion(completed: completed)
+        }
+        if let popover = activity.popoverPresentationController {
+            popover.sourceView = shareNowButton
+            popover.sourceRect = shareNowButton.bounds
+        }
+        present(activity, animated: true)
+    }
+
+    private func handleShareCompletion(completed: Bool) {
+        if completed {
+            sharingPreferences.lastSentAt = Date()
+            savePreferences()
+            updateSharingUI()
+        }
+        cleanupPendingShareURL()
+    }
+
+    private func cleanupPendingShareURL() {
+        if let url = pendingShareURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        pendingShareURL = nil
+    }
+
+    private func savePreferences() {
+        guard let id = person.id else { return }
+        sharingStore.save(sharingPreferences, for: id)
+    }
+
+    private func updateSharingUI(now: Date = Date()) {
+        shareToggle.isOn = sharingPreferences.isEnabled
+        recipientsField.text = sharingPreferences.recipients.joined(separator: ", ")
+
+        let nextDate = sharingStore.nextSendDate(for: sharingPreferences, now: now)
+        if !sharingPreferences.isEnabled {
+            shareStatusLabel.text = "Opt in to send a monthly PDF to saved email recipients."
+        } else if sharingPreferences.recipients.isEmpty {
+            shareStatusLabel.text = "Add at least one email to send the monthly summary."
+        } else if let nextDate {
+            let readyText = now >= nextDate ? "Ready to send now." : "Next send after \(statusDateFormatter.string(from: nextDate))."
+            shareStatusLabel.text = readyText
+        } else {
+            shareStatusLabel.text = "Ready to send."
+        }
+
+        shareNowButton.isEnabled = sharingPreferences.isEnabled && !sharingPreferences.recipients.isEmpty
+        shareNowButton.alpha = shareNowButton.isEnabled ? 1 : 0.5
+    }
+
+    private func maybePromptMonthlyShare(now: Date = Date()) {
+        guard !hasPromptedThisSession,
+              let trends = currentTrends,
+              sharingPreferences.isEnabled,
+              !sharingPreferences.recipients.isEmpty,
+              sharingStore.isDueForSend(sharingPreferences, now: now) else { return }
+
+        hasPromptedThisSession = true
+        let alert = AlertFactory.confirmAlert(
+            title: "Send monthly summary?",
+            message: "Share the latest \(windowDays)-day PDF with your saved contacts.",
+            confirmTitle: "Send",
+            cancelTitle: "Not now",
+            isDestructive: false
+        ) { [weak self] in
+            guard let self else { return }
+            self.shareSummary(using: trends)
+        }
+        present(alert, animated: true)
+    }
 
     private func painTrendAccessibility(series: [CheckInTrendsProvider.Point]) -> String {
         guard let first = series.first, let last = series.last else { return "No data" }
@@ -335,5 +567,34 @@ private final class DistributionRow: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// MARK: - Delegates
+
+extension PersonTrendsViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        let normalized = sharingStore.normalizeRecipients(from: textField.text)
+        sharingPreferences.recipients = normalized
+        updateSharingUI()
+        savePreferences()
+    }
+}
+
+extension PersonTrendsViewController: MFMailComposeViewControllerDelegate {
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true) { [weak self] in
+            guard let self else { return }
+            let completed = (result == .sent || result == .saved)
+            self.handleShareCompletion(completed: completed)
+            if let error {
+                self.present(appError: AppError(operation: .shareSummary, underlying: error))
+            }
+        }
     }
 }

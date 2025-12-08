@@ -21,7 +21,8 @@ final class PersonRepository: PersonRepositorying {
     func makePeopleFRC(delegate: NSFetchedResultsControllerDelegate?) -> NSFetchedResultsController<Person> {
         let fetch: NSFetchRequest<Person> = Person.fetchRequest()
         fetch.sortDescriptors = [
-            NSSortDescriptor(key: "nameLowercased", ascending: true),
+            // Use `name` directly to avoid crashes if a legacy model lacks `nameLowercased`.
+            NSSortDescriptor(key: "name", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))),
             NSSortDescriptor(key: "createdAt", ascending: false)
         ]
         // Stream results in batches to keep memory stable for large datasets.
@@ -48,7 +49,10 @@ final class PersonRepository: PersonRepositorying {
         p.id = id
         p.createdAt = createdAt
         p.name = name
-        p.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
+        // Legacy-safe: only persists lowercased name when the model supports it.
+        if p.entity.attributesByName["nameLowercased"] != nil {
+            p.nameLowercasedValue = Person.normalizedLowercasedName(from: name)
+        }
         p.genderEnum = gender
         p.dob = dob
 #if DEBUG

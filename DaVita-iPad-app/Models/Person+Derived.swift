@@ -9,8 +9,14 @@ extension Person {
 
     /// Lowercased, sanitized name used for indexed sorting.
     var nameLowercasedValue: String? {
-        get { value(forKey: "nameLowercased") as? String }
-        set { setValue(newValue, forKey: "nameLowercased") }
+        get {
+            guard entity.attributesByName["nameLowercased"] != nil else { return nil }
+            return value(forKey: "nameLowercased") as? String
+        }
+        set {
+            guard entity.attributesByName["nameLowercased"] != nil else { return }
+            setValue(newValue, forKey: "nameLowercased")
+        }
     }
 
     /// Normalizes the given raw name to a lowercased, single-line token for sorting.

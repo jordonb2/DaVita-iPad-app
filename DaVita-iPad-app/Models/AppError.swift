@@ -32,6 +32,7 @@ enum AppError: Error {
 
         case exportCSV
         case exportPDF
+        case shareSummary
     }
 
     enum Validation {
@@ -161,6 +162,21 @@ enum AppError: Error {
                 return UserFacingMessage(
                     title: "Export failed",
                     message: "Could not generate the export file.",
+                    style: .alert,
+                    actionTitle: "Retry"
+                )
+
+            case .shareSummary:
+                if let shareError = underlying as? TrendSummaryPDFGeneratorError, shareError == .noData {
+                    return UserFacingMessage(
+                        title: "Nothing to share",
+                        message: "No check-ins were found in the selected window.",
+                        style: .alert
+                    )
+                }
+                return UserFacingMessage(
+                    title: "Couldn't share summary",
+                    message: "Please try again.",
                     style: .alert,
                     actionTitle: "Retry"
                 )

@@ -97,9 +97,11 @@ final class DataIntegrityService {
         var updated = 0
         for person in people {
             let normalized = Person.normalizedLowercasedName(from: person.name)
-            if person.nameLowercasedValue != normalized {
-                person.nameLowercasedValue = normalized
-                updated += 1
+            if person.entity.attributesByName["nameLowercased"] != nil {
+                if person.nameLowercasedValue != normalized {
+                    person.nameLowercasedValue = normalized
+                    updated += 1
+                }
             }
         }
 
