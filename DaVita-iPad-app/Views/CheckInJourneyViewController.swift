@@ -47,8 +47,15 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
         navigationItem.leftBarButtonItem?.accessibilityIdentifier = "checkIn.cancel"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Submit", style: .done, target: self, action: #selector(submitTapped))
-        navigationItem.rightBarButtonItem?.accessibilityIdentifier = "checkIn.submit"
+
+        let safety = UIBarButtonItem(title: "Need help now?", style: .plain, target: self, action: #selector(safetyTapped))
+        safety.accessibilityIdentifier = "checkIn.safety"
+        safety.accessibilityHint = "Opens an emergency action plan and contact options."
+
+        let submit = UIBarButtonItem(title: "Submit", style: .done, target: self, action: #selector(submitTapped))
+        submit.accessibilityIdentifier = "checkIn.submit"
+
+        navigationItem.rightBarButtonItems = [submit, safety]
 
         buildContent()
         configureSurveyControls()
@@ -284,6 +291,25 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         guard let r = Range(range, in: current) else { return true }
         let next = current.replacingCharacters(in: r, with: text)
         return next.count <= maxChars
+    }
+
+    @objc private func safetyTapped() {
+        let message = """
+If this is a medical emergency, call 911 immediately.
+
+Action plan:
+• Pause and take slow breaths.
+• Sit or lie down safely.
+• Contact your care team as soon as possible.
+"""
+        let alert = UIAlertController(title: "Need help now?", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Call 911", style: .destructive) { _ in
+            if let url = URL(string: "tel://911"), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        })
+        alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: nil))
+        present(alert, animated: true)
     }
 
     @objc private func cancelTapped() {
