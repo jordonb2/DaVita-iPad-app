@@ -61,6 +61,10 @@ struct PersonCheckInData {
     var symptoms: String?
     var concerns: String?
     var teamNote: String?
+    /// Optional context: recent medications that could affect symptoms.
+    var medicationsNote: String?
+    /// Optional context: events or circumstances that could affect symptoms.
+    var contextNote: String?
 
     /// Backwards-compatible computed strings for display / legacy storage.
     var energyLevelText: String? { energyBucket?.displayText }
@@ -82,6 +86,8 @@ extension PersonCheckInData {
         copy.symptoms = InputSanitizer.note(copy.symptoms, max: ValidationRules.CheckIn.maxSymptomsChars)
         copy.concerns = InputSanitizer.note(copy.concerns, max: ValidationRules.CheckIn.maxConcernsChars)
         copy.teamNote = InputSanitizer.note(copy.teamNote, max: ValidationRules.CheckIn.maxTeamNoteChars)
+        copy.medicationsNote = InputSanitizer.note(copy.medicationsNote, max: ValidationRules.CheckIn.maxTeamNoteChars)
+        copy.contextNote = InputSanitizer.note(copy.contextNote, max: ValidationRules.CheckIn.maxTeamNoteChars)
 
         return copy
     }
@@ -92,7 +98,31 @@ extension PersonCheckInData {
         return s.painLevel != painLevel ||
             s.symptoms != symptoms ||
             s.concerns != concerns ||
-            s.teamNote != teamNote
+            s.teamNote != teamNote ||
+            s.medicationsNote != medicationsNote ||
+            s.contextNote != contextNote
     }
 }
 
+
+extension PersonCheckInData {
+    /// Merges optional medication/context notes into the persisted team note for storage.
+    /// This keeps schema changes minimal while preserving the added context.
+    func mergedForPersistence() -> PersonCheckInData {
+        var copy = self
+        var lines: [String] = []
+        if let team = teamNote?.trimmingCharacters(in: .whitespacesAndNewlines), !team.isEmpty {
+            lines.append(team)
+        }
+        if let meds = medicationsNote?.trimmingCharacters(in: .whitespacesAndNewlines), !meds.isEmpty {
+            lines.append("Meds: \(meds)")
+        }
+        if let ctx = contextNote?.trimmingCharacters(in: .whitespacesAndNewlines), !ctx.isEmpty {
+            lines.append("Context: \(ctx)")
+        }
+        copy.teamNote = lines.isEmpty ? nil : lines.joined(separator: "\n\n")
+        copy.medicationsNote = nil
+        copy.contextNote = nil
+        return copy
+    }
+}

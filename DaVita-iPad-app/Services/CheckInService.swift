@@ -38,6 +38,7 @@ final class CheckInService: CheckInServicing {
         if data.needsSanitization() {
             AppLog.persistence.warning("Sanitized check-in input before write")
         }
+        let merged = sanitized.mergedForPersistence()
 
         try coreDataStack.performBackgroundTaskAndWait { ctx in
             guard let person = try ctx.existingObject(with: personID) as? Person else {
@@ -45,8 +46,8 @@ final class CheckInService: CheckInServicing {
                 return
             }
 
-            applyLatestCheckInFields(to: person, data: sanitized)
-            _ = CheckInRepository(context: ctx).createRecord(createdAt: date, for: person, data: sanitized)
+            applyLatestCheckInFields(to: person, data: merged)
+            _ = CheckInRepository(context: ctx).createRecord(createdAt: date, for: person, data: merged)
 
             if ctx.hasChanges {
                 try ctx.save()
@@ -55,6 +56,7 @@ final class CheckInService: CheckInServicing {
 
         reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: date)
         escalationHandler?.handleCheckIn(personID: personID, data: sanitized, at: date)
+        syncHandler?.enqueueForSync(personID: personID, createdAt: date, data: merged)
         syncHandler?.enqueueForSync(personID: personID, createdAt: date, data: sanitized)
     }
 

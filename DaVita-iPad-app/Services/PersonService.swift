@@ -38,10 +38,11 @@ final class PersonService: PersonServicing {
 
             if let checkInData {
                 let sanitized = checkInData.sanitized()
-                sanitizedCheckIn = sanitized
-                applyLatestCheckInFields(to: person, data: sanitized)
-                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: sanitized)
-                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: checkInDate)
+                let merged = sanitized.mergedForPersistence()
+                sanitizedCheckIn = merged
+                applyLatestCheckInFields(to: person, data: merged)
+                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: merged)
+                reminderHandler?.handleCheckIn(painLevel: merged.painLevel, at: checkInDate)
             }
 
             try peopleRepo.save()
@@ -71,10 +72,11 @@ final class PersonService: PersonServicing {
 
             if let checkInData {
                 let sanitized = checkInData.sanitized()
-                sanitizedCheckIn = sanitized
-                applyLatestCheckInFields(to: person, data: sanitized)
-                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: sanitized)
-                reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: checkInDate)
+                let merged = sanitized.mergedForPersistence()
+                sanitizedCheckIn = merged
+                applyLatestCheckInFields(to: person, data: merged)
+                _ = CheckInRepository(context: ctx).createRecord(createdAt: checkInDate, for: person, data: merged)
+                reminderHandler?.handleCheckIn(painLevel: merged.painLevel, at: checkInDate)
             }
 
             try peopleRepo.save()

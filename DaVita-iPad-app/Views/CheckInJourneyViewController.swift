@@ -38,6 +38,8 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
 
     private let symptomsTextView = UITextView()
     private let concernsTextView = UITextView()
+    private let medsTextView = UITextView()
+    private let contextTextView = UITextView()
     private let teamNoteTextView = UITextView()
 
     override func viewDidLoad() {
@@ -84,6 +86,8 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         contentStackView.addArrangedSubview(makeMoodSection())
         contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Symptoms", textView: symptomsTextView, placeholder: "Any symptoms today?") )
         contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Concerns", textView: concernsTextView, placeholder: "Any concerns you want to share?") )
+        contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Recent meds (optional)", textView: medsTextView, placeholder: "List medications that could affect symptoms") )
+        contentStackView.addArrangedSubview(UIFactory.textEntrySection(title: "Context / events (optional)", textView: contextTextView, placeholder: "Travel, dialysis changes, life events") )
 
         let teamNoteHeader = UIFactory.sectionHeader(text: "Anything you want the team to know?")
         teamNoteHeader.accessibilityTraits.insert(.header)
@@ -125,6 +129,18 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
         UIFactory.styleTextViewForForm(symptomsTextView)
         symptomsTextView.delegate = self
         symptomsTextView.accessibilityIdentifier = "checkIn.symptoms"
+
+        UIFactory.styleTextViewForForm(concernsTextView)
+        concernsTextView.delegate = self
+        concernsTextView.accessibilityIdentifier = "checkIn.concerns"
+
+        UIFactory.styleTextViewForForm(medsTextView)
+        medsTextView.delegate = self
+        medsTextView.accessibilityIdentifier = "checkIn.meds"
+
+        UIFactory.styleTextViewForForm(contextTextView)
+        contextTextView.delegate = self
+        contextTextView.accessibilityIdentifier = "checkIn.context"
         UIFactory.styleTextViewForForm(concernsTextView)
         concernsTextView.delegate = self
         concernsTextView.accessibilityIdentifier = "checkIn.concerns"
@@ -283,6 +299,8 @@ final class CheckInJourneyViewController: ScrolledStackViewController, UITextVie
             if textView === symptomsTextView { return ValidationRules.CheckIn.maxSymptomsChars }
             if textView === concernsTextView { return ValidationRules.CheckIn.maxConcernsChars }
             if textView === teamNoteTextView { return ValidationRules.CheckIn.maxTeamNoteChars }
+            if textView === medsTextView { return ValidationRules.CheckIn.maxTeamNoteChars }
+            if textView === contextTextView { return ValidationRules.CheckIn.maxTeamNoteChars }
             return nil
         }()
         guard let maxChars else { return true }
@@ -329,7 +347,9 @@ Action plan:
             moodBucket: moodBucket,
             symptoms: symptomsTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
             concerns: concernsTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-            teamNote: teamNoteTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)
+            teamNote: teamNoteTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+            medicationsNote: medsTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+            contextNote: contextTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines)
         )
 
         let durationSeconds = surveyDurationSeconds ?? 0
