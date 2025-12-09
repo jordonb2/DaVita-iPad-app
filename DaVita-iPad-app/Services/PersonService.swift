@@ -13,13 +13,16 @@ final class PersonService: PersonServicing {
     private let coreDataStack: CoreDataStacking
     private let reminderHandler: SmartReminderHandling?
     private let escalationHandler: EscalationHandling?
+    private let syncHandler: CheckInSyncHandling?
 
     init(coreDataStack: CoreDataStacking,
          reminderHandler: SmartReminderHandling? = nil,
-         escalationHandler: EscalationHandling? = nil) {
+         escalationHandler: EscalationHandling? = nil,
+         syncHandler: CheckInSyncHandling? = nil) {
         self.coreDataStack = coreDataStack
         self.reminderHandler = reminderHandler
         self.escalationHandler = escalationHandler
+        self.syncHandler = syncHandler
     }
 
     func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
@@ -46,6 +49,7 @@ final class PersonService: PersonServicing {
 
         if let personID, let sanitizedCheckIn {
             escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
+            syncHandler?.enqueueForSync(personID: personID, createdAt: checkInDate, data: sanitizedCheckIn)
         }
     }
 
@@ -78,6 +82,7 @@ final class PersonService: PersonServicing {
 
         if let sanitizedCheckIn {
             escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
+            syncHandler?.enqueueForSync(personID: personID, createdAt: checkInDate, data: sanitizedCheckIn)
         }
     }
 

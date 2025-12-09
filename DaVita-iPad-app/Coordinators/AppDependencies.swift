@@ -64,6 +64,7 @@ struct AppDependencies {
     let makeExportService: () -> ExportServicing
     let symptomGuidanceProvider: SymptomGuidanceProviding
     let escalationEngine: EscalationHandling
+    let checkInSyncManager: CheckInSyncHandling
 
     init() {
         let resolvedTimeout = AppDependencies.resolveAdminInactivityTimeoutSeconds(
@@ -78,11 +79,16 @@ struct AppDependencies {
         let smartReminderManager: SmartReminderManaging = SmartReminderManager()
         let escalationEngine: EscalationHandling = EscalationRuleEngine(coreDataStack: coreDataStack)
 
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
+        let syncStoreURL = appSupport.appendingPathComponent("checkin_sync_queue.json")
+        let syncQueue = CheckInSyncQueue(storeURL: syncStoreURL)
+        let checkInSyncManager: CheckInSyncHandling = CheckInSyncManager(queue: syncQueue)
+
         // Fire-and-forget integrity repair (background context).
         DataIntegrityService(coreDataStack: coreDataStack).runInBackground()
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
-        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager, escalationHandler: escalationEngine)
+        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager, escalationHandler: escalationEngine, syncHandler: checkInSyncManager)
         let analyticsSummaryOptions = CheckInAnalyticsSummaryProvider.Options.dashboardDefault()
 
         self.coreDataStack = coreDataStack
@@ -96,6 +102,7 @@ struct AppDependencies {
         self.personService = personService
         self.symptomGuidanceProvider = symptomGuidanceProvider
         self.escalationEngine = escalationEngine
+        self.checkInSyncManager = checkInSyncManager
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }

@@ -17,13 +17,16 @@ final class CheckInService: CheckInServicing {
     private let coreDataStack: CoreDataStacking
     private let reminderHandler: SmartReminderHandling?
     private let escalationHandler: EscalationHandling?
+    private let syncHandler: CheckInSyncHandling?
 
     init(coreDataStack: CoreDataStacking,
          reminderHandler: SmartReminderHandling? = nil,
-         escalationHandler: EscalationHandling? = nil) {
+         escalationHandler: EscalationHandling? = nil,
+         syncHandler: CheckInSyncHandling? = nil) {
         self.coreDataStack = coreDataStack
         self.reminderHandler = reminderHandler
         self.escalationHandler = escalationHandler
+        self.syncHandler = syncHandler
     }
 
     /// Writes a check-in by resolving `personID` into a background context, applying denormalized latest fields,
@@ -52,6 +55,7 @@ final class CheckInService: CheckInServicing {
 
         reminderHandler?.handleCheckIn(painLevel: sanitized.painLevel, at: date)
         escalationHandler?.handleCheckIn(personID: personID, data: sanitized, at: date)
+        syncHandler?.enqueueForSync(personID: personID, createdAt: date, data: sanitized)
     }
 
 
