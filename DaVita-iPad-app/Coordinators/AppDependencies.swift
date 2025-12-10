@@ -65,6 +65,7 @@ struct AppDependencies {
     let symptomGuidanceProvider: SymptomGuidanceProviding
     let escalationEngine: EscalationHandling
     let checkInSyncManager: CheckInSyncHandling
+    let adminAlertsDigestManager: AdminAlertsDigestManaging
 
     init() {
         let resolvedTimeout = AppDependencies.resolveAdminInactivityTimeoutSeconds(
@@ -78,6 +79,7 @@ struct AppDependencies {
         let symptomGuidanceProvider: SymptomGuidanceProviding = SymptomGuidanceProvider()
         let smartReminderManager: SmartReminderManaging = SmartReminderManager()
         let escalationEngine: EscalationHandling = EscalationRuleEngine(coreDataStack: coreDataStack)
+        let adminAlertsDigestManager: AdminAlertsDigestManaging = AdminAlertsDigestManager(coreDataStack: coreDataStack)
 
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
         let syncStoreURL = appSupport.appendingPathComponent("checkin_sync_queue.json")
@@ -88,7 +90,7 @@ struct AppDependencies {
         DataIntegrityService(coreDataStack: coreDataStack).runInBackground()
 
         let peopleRepo: PersonRepositorying = PersonRepository(context: coreDataStack.viewContext)
-        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager, escalationHandler: escalationEngine, syncHandler: checkInSyncManager)
+        let personService: PersonServicing = PersonService(coreDataStack: coreDataStack, reminderHandler: smartReminderManager, escalationHandler: escalationEngine, syncHandler: checkInSyncManager, digestHandler: adminAlertsDigestManager)
         let analyticsSummaryOptions = CheckInAnalyticsSummaryProvider.Options.dashboardDefault()
 
         self.coreDataStack = coreDataStack
@@ -103,6 +105,7 @@ struct AppDependencies {
         self.symptomGuidanceProvider = symptomGuidanceProvider
         self.escalationEngine = escalationEngine
         self.checkInSyncManager = checkInSyncManager
+        self.adminAlertsDigestManager = adminAlertsDigestManager
         self.makeTrendsProvider = { CheckInTrendsProvider(context: coreDataStack.viewContext) }
         self.makeAnalyticsSummaryProvider = { CheckInAnalyticsSummaryProvider(coreDataStack: coreDataStack, options: analyticsSummaryOptions) }
         self.makeExportService = { ExportService(context: coreDataStack.viewContext) }

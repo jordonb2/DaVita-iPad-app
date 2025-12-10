@@ -69,6 +69,9 @@
 		F7E400030000000000000001 /* EscalationRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E400020000000000000001 /* EscalationRuleEngineTests.swift */; };
 		F7E500010000000000000001 /* CheckInSyncQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E500000000000000000001 /* CheckInSyncQueue.swift */; };
 		F7E500030000000000000001 /* CheckInSyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E500020000000000000001 /* CheckInSyncManager.swift */; };
+		F7E700110000000000000001 /* AdminDigestSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E700100000000000000001 /* AdminDigestSettings.swift */; };
+		F7E700130000000000000001 /* AdminAlertsDigestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E700120000000000000001 /* AdminAlertsDigestManager.swift */; };
+		F7E700150000000000000001 /* AdminDigestSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E700140000000000000001 /* AdminDigestSettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -138,6 +141,9 @@
 		F7E400020000000000000001 /* EscalationRuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EscalationRuleEngineTests.swift; sourceTree = "<group>"; };
 		F7E500000000000000000001 /* CheckInSyncQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInSyncQueue.swift; sourceTree = "<group>"; };
 		F7E500020000000000000001 /* CheckInSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInSyncManager.swift; sourceTree = "<group>"; };
+		F7E700100000000000000001 /* AdminDigestSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminDigestSettings.swift; sourceTree = "<group>"; };
+		F7E700120000000000000001 /* AdminAlertsDigestManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAlertsDigestManager.swift; sourceTree = "<group>"; };
+		F7E700140000000000000001 /* AdminDigestSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminDigestSettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -224,6 +230,7 @@
 				F76E43312E9800020056439C /* PersonDetailViewController.swift */,
 				F76E45022EA200020056439C /* PersonTrendsViewController.swift */,
 				F7C0AD100000000000000001 /* AdminSettingsViewController.swift */,
+				F7E700140000000000000001 /* AdminDigestSettingsViewController.swift */,
 				F7D200130000000000000001 /* SmartRemindersViewController.swift */,
 			);
 			path = Views;
@@ -252,6 +259,7 @@
 				F76E42E32E93C9010056439C /* TextCategorizer.swift */,
 				F76E42E52E93C9010056439C /* Daypart.swift */,
 				F7D200100000000000000001 /* SmartReminderSettings.swift */,
+				F7E700100000000000000001 /* AdminDigestSettings.swift */,
 				F7D300100000000000000001 /* SymptomGuidanceTip.swift */,
 			);
 			path = Models;
@@ -278,6 +286,7 @@
 				F7E500000000000000000001 /* CheckInSyncQueue.swift */,
 				F7E500020000000000000001 /* CheckInSyncManager.swift */,
 				F76E43102E95B100056439C /* PersonService.swift */,
+				F7E700120000000000000001 /* AdminAlertsDigestManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -503,6 +512,9 @@
 				F7D200200000000000000001 /* SmartReminderSettings.swift in Sources */,
 				F7D200210000000000000001 /* SmartReminderScheduler.swift in Sources */,
 				F7D200220000000000000001 /* SmartReminderManager.swift in Sources */,
+				F7E700130000000000000001 /* AdminAlertsDigestManager.swift in Sources */,
+				F7E700110000000000000001 /* AdminDigestSettings.swift in Sources */,
+				F7E700150000000000000001 /* AdminDigestSettingsViewController.swift in Sources */,
 				F7E400010000000000000001 /* EscalationRuleEngine.swift in Sources */,
 				F7E500010000000000000001 /* CheckInSyncQueue.swift in Sources */,
 				F7E500030000000000000001 /* CheckInSyncManager.swift in Sources */,

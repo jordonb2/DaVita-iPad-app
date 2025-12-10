@@ -14,15 +14,18 @@ final class PersonService: PersonServicing {
     private let reminderHandler: SmartReminderHandling?
     private let escalationHandler: EscalationHandling?
     private let syncHandler: CheckInSyncHandling?
+    private let digestHandler: AdminAlertsDigestHandling?
 
     init(coreDataStack: CoreDataStacking,
          reminderHandler: SmartReminderHandling? = nil,
          escalationHandler: EscalationHandling? = nil,
-         syncHandler: CheckInSyncHandling? = nil) {
+         syncHandler: CheckInSyncHandling? = nil,
+         digestHandler: AdminAlertsDigestHandling? = nil) {
         self.coreDataStack = coreDataStack
         self.reminderHandler = reminderHandler
         self.escalationHandler = escalationHandler
         self.syncHandler = syncHandler
+        self.digestHandler = digestHandler
     }
 
     func addPerson(name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
@@ -52,6 +55,7 @@ final class PersonService: PersonServicing {
             escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
             syncHandler?.enqueueForSync(personID: personID, createdAt: checkInDate, data: sanitizedCheckIn)
         }
+        digestHandler?.refreshDigestSchedule(reason: "person_added")
     }
 
     func updatePerson(personID: NSManagedObjectID, name: String, gender: Gender?, dob: Date?, checkInData: PersonCheckInData?) throws {
@@ -86,6 +90,7 @@ final class PersonService: PersonServicing {
             escalationHandler?.handleCheckIn(personID: personID, data: sanitizedCheckIn, at: checkInDate)
             syncHandler?.enqueueForSync(personID: personID, createdAt: checkInDate, data: sanitizedCheckIn)
         }
+        digestHandler?.refreshDigestSchedule(reason: "person_updated")
     }
 
     func deletePerson(personID: NSManagedObjectID) throws {
@@ -96,6 +101,7 @@ final class PersonService: PersonServicing {
             }
             try peopleRepo.save()
         }
+        digestHandler?.refreshDigestSchedule(reason: "person_deleted")
     }
 }
 

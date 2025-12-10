@@ -7,6 +7,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var coordinator: AppCoordinator?
     private var adminSession: AdminSessioning?
+    private var adminAlertsDigestManager: AdminAlertsDigestManaging?
 
     private var privacyOverlayView: UIView?
 
@@ -27,6 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let coordinator = AppCoordinator(window: window)
         self.coordinator = coordinator
         self.adminSession = coordinator.dependencies.adminSession
+        self.adminAlertsDigestManager = coordinator.dependencies.adminAlertsDigestManager
 
         // Install global touch recognizer to record admin activity without interfering with UI.
         window.addGestureRecognizer(inactivityRecognizer)
@@ -42,6 +44,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         hidePrivacyOverlay()
         adminSession?.handleAppDidBecomeActive()
+        adminAlertsDigestManager?.refreshDigestSchedule(reason: "scene_active")
     }
 
     func sceneWillResignActive(_ scene: UIScene) {

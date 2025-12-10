@@ -1,12 +1,13 @@
 import UIKit
 
-/// Admin-only settings surface for privacy screen, export defaults, and auto-logout timeout.
+/// Admin-only settings surface for privacy screen, export defaults, auto-logout timeout, and alert digests.
 final class AdminSettingsViewController: UITableViewController {
     private enum Section: Int, CaseIterable {
         case privacy
         case export
         case autoLogout
         case reminders
+        case digests
 
         var title: String {
             switch self {
@@ -14,12 +15,14 @@ final class AdminSettingsViewController: UITableViewController {
             case .export: return "Export defaults"
             case .autoLogout: return "Auto-logout"
             case .reminders: return "Smart reminders"
+            case .digests: return "Admin alerts"
             }
         }
     }
 
     private let adminSession: AdminSessioning
     private let reminderManager: SmartReminderManaging?
+    private let digestManager: AdminAlertsDigestManaging?
 
     private let exportOptions: [(title: String, raw: Int, seconds: TimeInterval?)] = [
         ("All history", 0, nil),
@@ -34,9 +37,11 @@ final class AdminSettingsViewController: UITableViewController {
     ]
 
     init(adminSession: AdminSessioning,
-         reminderManager: SmartReminderManaging? = nil) {
+         reminderManager: SmartReminderManaging? = nil,
+         digestManager: AdminAlertsDigestManaging? = nil) {
         self.adminSession = adminSession
         self.reminderManager = reminderManager
+        self.digestManager = digestManager
         super.init(style: .insetGrouped)
         title = "Admin Settings"
     }
@@ -61,6 +66,7 @@ final class AdminSettingsViewController: UITableViewController {
         case .export: return 1
         case .autoLogout: return 1
         case .reminders: return 1
+        case .digests: return 1
         }
     }
 
@@ -115,6 +121,11 @@ final class AdminSettingsViewController: UITableViewController {
             cell.textLabel?.text = "Smart reminders"
             cell.accessoryType = .disclosureIndicator
             cell.selectionStyle = .default
+
+        case .digests:
+            cell.textLabel?.text = "Alerts digest"
+            cell.accessoryType = .disclosureIndicator
+            cell.selectionStyle = .default
         }
 
         return cell
@@ -127,6 +138,10 @@ final class AdminSettingsViewController: UITableViewController {
         case .reminders:
             guard let reminderManager else { return }
             let vc = SmartRemindersViewController(manager: reminderManager)
+            navigationController?.pushViewController(vc, animated: true)
+        case .digests:
+            guard let digestManager else { return }
+            let vc = AdminDigestSettingsViewController(manager: digestManager)
             navigationController?.pushViewController(vc, animated: true)
         default:
             break
