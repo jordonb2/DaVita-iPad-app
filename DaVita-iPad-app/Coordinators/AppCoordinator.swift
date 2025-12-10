@@ -10,8 +10,14 @@ final class AppCoordinator {
     private lazy var router: AppRouting = {
         // Screen factories built here (composition root).
         let makeHistoryVC: (Person?) -> CheckInHistoryViewController = { [dependencies] person in
-            let repo: CheckInHistoryRepositorying = CheckInRepository(context: dependencies.coreDataStack.viewContext)
+            let repo: CheckInRepository = CheckInRepository(context: dependencies.coreDataStack.viewContext)
             return CheckInHistoryViewController(person: person, checkInRepo: repo)
+        }
+
+        let makeTimelineVC: (Person) -> PatientTimelineViewController = { [dependencies] person in
+            let repo: CheckInRepository = CheckInRepository(context: dependencies.coreDataStack.viewContext)
+            let escalationStore: EscalationStateStoring = EscalationStateStore()
+            return PatientTimelineViewController(person: person, checkInRepo: repo, escalationStore: escalationStore)
         }
 
         let makeAnalyticsVC: () -> AnalyticsViewController = { [dependencies] in
@@ -29,6 +35,7 @@ final class AppCoordinator {
             PeopleFlowCoordinator(
                 router: router,
                 makeHistoryViewController: { person in makeHistoryVC(person) },
+                makeTimelineViewController: { person in makeTimelineVC(person) },
                 makeTrendsViewController: { person in
                     PersonTrendsViewController(
                         person: person,

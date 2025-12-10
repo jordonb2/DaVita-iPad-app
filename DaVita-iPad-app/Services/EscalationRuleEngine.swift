@@ -18,7 +18,7 @@ protocol EscalationStateStoring {
 /// Evaluates pain/mood thresholds and trend deterioration, then notifies admins.
 final class EscalationRuleEngine: EscalationHandling {
 
-    enum ReasonKind: String {
+    enum ReasonKind: String, CaseIterable {
         case highPain
         case lowMood
         case rapidPain

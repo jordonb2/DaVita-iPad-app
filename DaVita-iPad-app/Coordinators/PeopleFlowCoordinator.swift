@@ -6,6 +6,7 @@ protocol PeopleFlowCoordinating: AnyObject {
                           from presentingVC: UIViewController,
                           onUpdate: @escaping (Person, String, Date, Gender?, PersonCheckInData) -> Void)
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController)
+    func showPersonTimeline(_ person: Person, from presentingVC: UIViewController)
     func showPersonTrends(_ person: Person, from presentingVC: UIViewController)
 }
 
@@ -13,13 +14,16 @@ protocol PeopleFlowCoordinating: AnyObject {
 final class PeopleFlowCoordinator: PeopleFlowCoordinating {
     private weak var router: AppRouting?
     private let makeHistoryViewController: (Person) -> CheckInHistoryViewController
+    private let makeTimelineViewController: (Person) -> PatientTimelineViewController
     private let makeTrendsViewController: (Person) -> PersonTrendsViewController
 
     init(router: AppRouting,
          makeHistoryViewController: @escaping (Person) -> CheckInHistoryViewController,
+         makeTimelineViewController: @escaping (Person) -> PatientTimelineViewController,
          makeTrendsViewController: @escaping (Person) -> PersonTrendsViewController) {
         self.router = router
         self.makeHistoryViewController = makeHistoryViewController
+        self.makeTimelineViewController = makeTimelineViewController
         self.makeTrendsViewController = makeTrendsViewController
     }
 
@@ -45,6 +49,11 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
             self.showPersonHistory(person, from: presentingVC)
         }
 
+        detailVC.onTimelineTapped = { [weak self, weak presentingVC] person in
+            guard let self, let presentingVC else { return }
+            self.showPersonTimeline(person, from: presentingVC)
+        }
+
         detailVC.onTrendsTapped = { [weak self, weak presentingVC] person in
             guard let self, let presentingVC else { return }
             self.showPersonTrends(person, from: presentingVC)
@@ -56,6 +65,12 @@ final class PeopleFlowCoordinator: PeopleFlowCoordinating {
     func showPersonHistory(_ person: Person, from presentingVC: UIViewController) {
         guard let nav = navigationController(from: presentingVC) else { return }
         let vc = makeHistoryViewController(person)
+        nav.pushViewController(vc, animated: true)
+    }
+
+    func showPersonTimeline(_ person: Person, from presentingVC: UIViewController) {
+        guard let nav = navigationController(from: presentingVC) else { return }
+        let vc = makeTimelineViewController(person)
         nav.pushViewController(vc, animated: true)
     }
 
